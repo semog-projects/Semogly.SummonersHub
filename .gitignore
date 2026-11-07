@@ -426,3 +426,6 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+# Exports reais do SW Exporter contêm chaves de sessão: nunca versionar
+exports/

@@ -1,0 +1,9 @@
+root = true
+
+# Migrations do EF Core são geradas automaticamente: os analisadores não devem atuar nelas
+[**/Migrations/*.cs]
+generated_code = true
+
+# Testes usam o padrão Metodo_DeveFazerAlgo: sublinhados no nome são intencionais
+[tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none

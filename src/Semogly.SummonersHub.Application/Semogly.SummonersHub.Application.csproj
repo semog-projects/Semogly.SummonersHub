@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Camada de aplicação: casos de uso (handlers de comandos e consultas) e abstrações de infraestrutura. -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Semogly.SummonersHub.Domain\Semogly.SummonersHub.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
