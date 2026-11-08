@@ -5,6 +5,7 @@ using Semogly.SummonersHub.Application.Accounts.CheckPveTeams;
 using Semogly.SummonersHub.Application.Accounts.CompareSnapshots;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
+using Semogly.SummonersHub.Application.Accounts.GetCraftSuggestions;
 using Semogly.SummonersHub.Application.Accounts.GetInventoryStats;
 using Semogly.SummonersHub.Application.Accounts.GetMonsterDetail;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
@@ -74,6 +75,10 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}/pve-teams", CheckPveTeams)
             .WithName("CheckPveTeams")
             .WithSummary("Times de referência por dungeon: quais monstros a conta tem e se atingem os atributos mínimos");
+
+        api.MapGet("/accounts/{wizardId:long}/craft-suggestions", GetCraftSuggestions)
+            .WithName("GetCraftSuggestions")
+            .WithSummary("Onde aplicar cada grind e gem do inventário, pelo ganho de eficiência (?equippedOnly=false inclui o inventário)");
 
         // POST porque os critérios vão no corpo; não altera dados
         api.MapPost("/accounts/{wizardId:long}/monsters/{monsterId:long}/optimize", OptimizeRunes)
@@ -170,6 +175,16 @@ internal static class AccountsEndpoints
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new CheckPveTeamsQuery(wizardId), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<IReadOnlyList<CraftSuggestionGroup>>, ProblemHttpResult>> GetCraftSuggestions(
+        long wizardId,
+        IQueryHandler<GetCraftSuggestionsQuery, IReadOnlyList<CraftSuggestionGroup>> handler,
+        CancellationToken cancellationToken,
+        bool equippedOnly = true)
+    {
+        var result = await handler.HandleAsync(new GetCraftSuggestionsQuery(wizardId, equippedOnly), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 

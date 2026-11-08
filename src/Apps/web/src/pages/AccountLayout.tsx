@@ -32,6 +32,9 @@ export function AccountLayout() {
         <NavLink to={`/contas/${wizardId}/inventario`} className={tabClass}>
           Inventário
         </NavLink>
+        <NavLink to={`/contas/${wizardId}/gems-grinds`} className={tabClass}>
+          Gems e grinds
+        </NavLink>
         <NavLink to={`/contas/${wizardId}/times`} className={tabClass}>
           Times PvE
         </NavLink>

@@ -23,6 +23,15 @@ public class MonsterStatsCalculatorTests
     }
 
     [Fact]
+    public void EffectiveHp_ShouldWeightHpByDefense()
+    {
+        var stats = MonsterStatsCalculator.Calculate(Lapis, [], []);
+
+        // 9885 × (1140 + 3,5 × 582) ÷ 1000 = 31.404,6 → 31.405
+        Assert.Equal(31405, stats.Total.EffectiveHp);
+    }
+
+    [Fact]
     public void ShouldSumMainInnateSubstatsAndGrinds()
     {
         Rune[] runes =

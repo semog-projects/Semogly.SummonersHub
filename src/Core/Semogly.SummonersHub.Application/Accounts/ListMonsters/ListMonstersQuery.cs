@@ -25,7 +25,8 @@ public sealed record MonsterListItem(
     StatValues Total,
     IReadOnlyList<RuneSet> ActiveSets,
     int Runes,
-    int Artifacts);
+    int Artifacts,
+    decimal? AverageRuneEfficiency);
 
 internal sealed class ListMonstersQueryHandler(
     IAccountSnapshotRepository repository,
@@ -60,7 +61,8 @@ internal sealed class ListMonstersQueryHandler(
                     stats.Total,
                     stats.ActiveSets,
                     equipment.RunesOf(monster.GameId).Count(),
-                    equipment.ArtifactsOf(monster.GameId).Count());
+                    equipment.ArtifactsOf(monster.GameId).Count(),
+                    equipment.AverageRuneEfficiencyOf(monster.GameId));
             })
             .OrderByDescending(m => m.Stars)
             .ThenByDescending(m => m.Level)

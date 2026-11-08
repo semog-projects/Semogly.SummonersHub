@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMonsterDefinitions } from '@/features/game-data/useMonsterDefinitions'
-import { formatNumber } from '@/lib/format'
+import { formatNumber, formatPercent } from '@/lib/format'
 import {
   ARCHETYPE_NAME_LABELS,
   ARTIFACT_MAIN_STAT_LABELS,
@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
 import type { ArtifactDetail, MonsterDetail } from '../types'
+import { efficiencyClass } from '../runes/efficiency'
 import { RuneCard } from '../runes/RuneCard'
 import { MonsterIcon } from './MonsterIcon'
 import { STAT_COLUMNS } from './statColumns'
@@ -36,6 +37,14 @@ export function MonsterDetailView({ monster }: { monster: MonsterDetail }) {
             {monster.level}
             {monster.awakenLevel !== null && ` · ${AWAKEN_LABELS[monster.awakenLevel]}`}
           </p>
+          {monster.averageRuneEfficiency !== null && (
+            <p className="text-xs text-muted-foreground">
+              Eficiência média das runas:{' '}
+              <span className={cn('font-medium', efficiencyClass(monster.averageRuneEfficiency))}>
+                {formatPercent(monster.averageRuneEfficiency)}
+              </span>
+            </p>
+          )}
           {monster.skills.length > 0 && (
             <p className="text-xs text-muted-foreground">
               Níveis das skills: {monster.skills.map((skill) => skill.level).join(' · ')}

@@ -5,7 +5,7 @@ import { afterEach, vi } from 'vitest'
 import type { PveTeamCheck } from '@/features/accounts/types'
 import { PveTeamsPage } from './PveTeamsPage'
 
-const total = { hp: 10000, attack: 800, defense: 600, speed: 150, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 30 }
+const total = { hp: 10000, attack: 800, defense: 600, speed: 150, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 30, effectiveHp: 30000 }
 
 const teams: PveTeamCheck[] = [
   {

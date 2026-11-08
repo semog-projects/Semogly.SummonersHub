@@ -63,6 +63,8 @@ export interface StatValues {
   criticalDamage: number
   resistance: number
   accuracy: number
+  /** HP × (1140 + 3,5 × DEF) ÷ 1000, calculado pela API. */
+  effectiveHp: number
 }
 
 /** GET /api/accounts/{wizardId}/monsters */
@@ -79,6 +81,8 @@ export interface MonsterListItem {
   activeSets: string[]
   runes: number
   artifacts: number
+  /** Eficiência média das runas equipadas, ou nulo sem runas. */
+  averageRuneEfficiency: number | null
 }
 
 /** Atributo com o código numérico do jogo (mesma tabela de rótulos do import). */
@@ -290,6 +294,31 @@ export interface PveTeamCheck {
   readySlots: number
   isReady: boolean
   slots: PveSlotCheck[]
+}
+
+export interface CraftSuggestionItem {
+  rune: RuneDetail
+  equippedOn: EquippedMonster | null
+  /** Sub que recebe o grind ou é trocada pela gem (código do atributo). */
+  targetStat: number
+  currentValue: number
+  minValue: number
+  maxValue: number
+  /** Pontos de eficiência no pior e no melhor sorteio (o pior pode ser negativo na gem). */
+  minEfficiencyGain: number
+  maxEfficiencyGain: number
+}
+
+/** GET /api/accounts/{wizardId}/craft-suggestions */
+export interface CraftSuggestionGroup {
+  type: CraftItemStats['type']
+  set: string
+  stat: number
+  rarity: number
+  amount: number
+  /** Nulo nos itens ancient (faixa desconhecida). */
+  range: { min: number; max: number } | null
+  suggestions: CraftSuggestionItem[]
 }
 
 /** Atributo usado como foco ou mínimo no otimizador (mesmo enum dos times PvE). */
