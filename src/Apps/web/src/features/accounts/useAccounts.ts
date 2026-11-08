@@ -3,6 +3,7 @@ import { getJson } from '@/lib/api'
 import type {
   AccountOverview,
   AccountSummary,
+  CraftSuggestionGroup,
   ArtifactListItem,
   InventoryStats,
   MonsterDetail,
@@ -90,6 +91,16 @@ export function usePveTeams(wizardId: number) {
   return useQuery({
     queryKey: ['accounts', wizardId, 'pve-teams'],
     queryFn: ({ signal }) => getJson<PveTeamCheck[]>(`/accounts/${wizardId}/pve-teams`, signal),
+    enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
+  })
+}
+
+/** Onde aplicar cada gem e grind; por padrão só em runas equipadas. */
+export function useCraftSuggestions(wizardId: number, includeInventory: boolean) {
+  return useQuery({
+    queryKey: ['accounts', wizardId, 'craft-suggestions', includeInventory],
+    queryFn: ({ signal }) =>
+      getJson<CraftSuggestionGroup[]>(`/accounts/${wizardId}/craft-suggestions?equippedOnly=${!includeInventory}`, signal),
     enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
   })
 }

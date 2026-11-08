@@ -22,6 +22,7 @@ public class AuthTests(ApiFixture fixture)
     [InlineData("/api/accounts/1/artifacts")]
     [InlineData("/api/accounts/1/snapshots")]
     [InlineData("/api/accounts/1/pve-teams")]
+    [InlineData("/api/accounts/1/craft-suggestions")]
     [InlineData("/api/accounts/1/snapshots/compare?from=1&to=2")]
     public async Task AccountEndpoints_ShouldRequireLogin(string url)
     {
@@ -118,6 +119,7 @@ public class AuthTests(ApiFixture fixture)
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/artifacts", Ct)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/snapshots", Ct)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/pve-teams", Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/craft-suggestions", Ct)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/snapshots/compare?from=1&to=2", Ct)).StatusCode);
         Assert.Empty((await intruder.GetFromJsonAsync<List<AccountSummaryResponse>>("/api/accounts", Ct))!);
 
