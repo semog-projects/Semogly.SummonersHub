@@ -13,6 +13,7 @@ using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
+using Semogly.SummonersHub.Application.Accounts.OptimizeRunes;
 using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
 
 namespace Semogly.SummonersHub.Api.Endpoints;
@@ -78,6 +79,11 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}/craft-suggestions", GetCraftSuggestions)
             .WithName("GetCraftSuggestions")
             .WithSummary("Onde aplicar cada grind e gem do inventário, pelo ganho de eficiência (?equippedOnly=false inclui o inventário)");
+
+        // POST porque os critérios vão no corpo; não altera dados
+        api.MapPost("/accounts/{wizardId:long}/monsters/{monsterId:long}/optimize", OptimizeRunes)
+            .WithName("OptimizeRunes")
+            .WithSummary("Melhores builds de runas para o monstro (sets, principais, foco e mínimos), comparadas com a atual");
 
         return app;
     }
@@ -179,6 +185,17 @@ internal static class AccountsEndpoints
         bool equippedOnly = true)
     {
         var result = await handler.HandleAsync(new GetCraftSuggestionsQuery(wizardId, equippedOnly), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<OptimizeRunesResponse>, ProblemHttpResult>> OptimizeRunes(
+        long wizardId,
+        long monsterId,
+        OptimizeRunesRequest request,
+        IQueryHandler<OptimizeRunesQuery, OptimizeRunesResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new OptimizeRunesQuery(wizardId, monsterId, request), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 

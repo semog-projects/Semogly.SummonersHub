@@ -17,6 +17,7 @@ import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
 import { MonsterListPage } from '@/pages/MonsterListPage'
 import { PveTeamsPage } from '@/pages/PveTeamsPage'
 import { RuneListPage } from '@/pages/RuneListPage'
+import { RuneOptimizerPage } from '@/pages/RuneOptimizerPage'
 
 export function App() {
   return (
@@ -40,6 +41,7 @@ export function App() {
             <Route index element={<AccountOverviewPage />} />
             <Route path="monstros" element={<MonsterListPage />} />
             <Route path="monstros/:monsterId" element={<MonsterDetailPage />} />
+            <Route path="monstros/:monsterId/otimizar" element={<RuneOptimizerPage />} />
             <Route path="runas" element={<RuneListPage />} />
             <Route path="artefatos" element={<ArtifactListPage />} />
             <Route path="inventario" element={<InventoryPage />} />

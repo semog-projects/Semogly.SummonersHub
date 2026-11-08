@@ -12,6 +12,7 @@ using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
+using Semogly.SummonersHub.Application.Accounts.OptimizeRunes;
 using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
 using Semogly.SummonersHub.Domain.GameData;
@@ -37,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<CompareSnapshotsQuery, SnapshotComparisonResponse>, CompareSnapshotsQueryHandler>();
         services.AddScoped<IQueryHandler<CheckPveTeamsQuery, IReadOnlyList<PveTeamCheck>>, CheckPveTeamsQueryHandler>();
         services.AddScoped<IQueryHandler<GetCraftSuggestionsQuery, IReadOnlyList<CraftSuggestionGroup>>, GetCraftSuggestionsQueryHandler>();
+        services.AddScoped<IQueryHandler<OptimizeRunesQuery, OptimizeRunesResponse>, OptimizeRunesQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse>, GetMonsterDetailQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonstersQuery, IReadOnlyList<MonsterDefinition>>, GetMonstersQueryHandler>();
 
