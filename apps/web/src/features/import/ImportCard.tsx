@@ -1,14 +1,16 @@
 import { useId, useState, type DragEvent } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { ExportParseError, MAX_EXPORT_SIZE_BYTES, parseExportText, SENSITIVE_FIELDS } from './parseExport'
 import type { AccountImport } from './types'
+import { useImportAccount } from './useImportAccount'
 
 type ImportState =
   | { status: 'idle' }
   | { status: 'reading' }
-  | { status: 'ready'; fileName: string; data: AccountImport }
+  | { status: 'ready'; fileName: string; data: AccountImport; readAt: number }
   | { status: 'error'; message: string }
 
 export function ImportCard() {
@@ -28,7 +30,7 @@ export function ImportCard() {
     try {
       // Todo o processamento acontece no navegador: o arquivo original nunca é enviado
       const data = parseExportText(await file.text())
-      setState({ status: 'ready', fileName: file.name, data })
+      setState({ status: 'ready', fileName: file.name, data, readAt: Date.now() })
     } catch (error) {
       const message = error instanceof ExportParseError ? error.message : 'Não foi possível ler o arquivo.'
       setState({ status: 'error', message })
@@ -87,13 +89,17 @@ export function ImportCard() {
           </p>
         )}
 
-        {state.status === 'ready' && <ImportSummary fileName={state.fileName} data={state.data} />}
+        {state.status === 'ready' && (
+          // key: cada arquivo lido começa sem o resultado do envio anterior
+          <ImportSummary key={state.readAt} fileName={state.fileName} data={state.data} />
+        )}
       </CardContent>
     </Card>
   )
 }
 
 function ImportSummary({ fileName, data }: { fileName: string; data: AccountImport }) {
+  const importAccount = useImportAccount()
   const equippedRunes = data.runes.filter((rune) => rune.equippedMonsterId !== null).length
 
   const items = [
@@ -126,9 +132,28 @@ function ImportSummary({ fileName, data }: { fileName: string; data: AccountImpo
       </dl>
 
       <p className="text-xs text-muted-foreground">
-        Removidos: {SENSITIVE_FIELDS.join(', ')} e todos os demais campos que o painel não usa. O envio para a API chega
-        na próxima etapa.
+        Removidos: {SENSITIVE_FIELDS.join(', ')} e todos os demais campos que o painel não usa.
       </p>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Button onClick={() => importAccount.mutate(data)} disabled={importAccount.isPending || importAccount.isSuccess}>
+          {importAccount.isPending ? 'Enviando…' : 'Enviar'}
+        </Button>
+
+        {importAccount.isSuccess && (
+          <p role="status" className="text-sm">
+            {importAccount.data.created
+              ? `Conta importada (versão ${importAccount.data.version}).`
+              : `Nada mudou desde a versão ${importAccount.data.version}: nenhum import novo foi criado.`}
+          </p>
+        )}
+
+        {importAccount.isError && (
+          <p role="alert" className="text-sm text-destructive">
+            Não foi possível enviar: {importAccount.error.message}
+          </p>
+        )}
+      </div>
     </section>
   )
 }

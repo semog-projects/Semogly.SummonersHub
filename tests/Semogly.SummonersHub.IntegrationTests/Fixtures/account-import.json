@@ -1,0 +1,921 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-11-07T23:25:13.000Z",
+  "wizard": {
+    "id": 12345678,
+    "name": "TestWizard",
+    "level": 50,
+    "serverId": 4
+  },
+  "monsters": [
+    {
+      "id": 33165492671,
+      "masterId": 19811,
+      "level": 40,
+      "stars": 6,
+      "attribute": 1,
+      "baseStats": {
+        "hp": 9885,
+        "attack": 736,
+        "defense": 582,
+        "speed": 95,
+        "resistance": 15,
+        "accuracy": 0,
+        "criticalRate": 15,
+        "criticalDamage": 50
+      },
+      "skills": [
+        {
+          "id": 10616,
+          "level": 5
+        },
+        {
+          "id": 10606,
+          "level": 5
+        },
+        {
+          "id": 10611,
+          "level": 5
+        }
+      ],
+      "isHomunculus": false,
+      "createdAt": "2025-05-29T11:46:51"
+    },
+    {
+      "id": 37220294772,
+      "masterId": 21911,
+      "level": 35,
+      "stars": 5,
+      "attribute": 1,
+      "baseStats": {
+        "hp": 6780,
+        "attack": 573,
+        "defense": 428,
+        "speed": 103,
+        "resistance": 15,
+        "accuracy": 0,
+        "criticalRate": 15,
+        "criticalDamage": 50
+      },
+      "skills": [
+        {
+          "id": 12601,
+          "level": 6
+        },
+        {
+          "id": 12606,
+          "level": 3
+        },
+        {
+          "id": 12611,
+          "level": 4
+        }
+      ],
+      "isHomunculus": false,
+      "createdAt": "2026-06-11T13:11:46"
+    }
+  ],
+  "runes": [
+    {
+      "id": 76405251851,
+      "slot": 1,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 17,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 3,
+      "mainStat": {
+        "type": 3,
+        "value": 160
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 10,
+          "value": 14,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 9,
+          "value": 12,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 11,
+          "value": 8,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 12,
+          "value": 7,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 76405251854,
+      "slot": 2,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 17,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 3,
+      "mainStat": {
+        "type": 4,
+        "value": 63
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 9,
+          "value": 16,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 2,
+          "value": 7,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 12,
+          "value": 8,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 1,
+          "value": 282,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 76405251855,
+      "slot": 3,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 11,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 3,
+      "mainStat": {
+        "type": 5,
+        "value": 160
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 9,
+          "value": 11,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 10,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 1,
+          "value": 282,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 11,
+          "value": 8,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 76405251856,
+      "slot": 4,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 11,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 3,
+      "mainStat": {
+        "type": 10,
+        "value": 80
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 8,
+          "value": 15,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 12,
+          "value": 7,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 4,
+          "value": 7,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 3,
+          "value": 17,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 76119969008,
+      "slot": 5,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 11,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 4,
+      "mainStat": {
+        "type": 1,
+        "value": 2448
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 12,
+          "value": 14,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 10,
+          "value": 5,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 16,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 9,
+          "value": 5,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 76116670624,
+      "slot": 6,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 11,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 4,
+      "mainStat": {
+        "type": 4,
+        "value": 63
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 8,
+          "value": 15,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 10,
+          "value": 11,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 2,
+          "value": 7,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 12,
+          "value": 8,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 76116690815,
+      "slot": 1,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 4,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 4,
+      "mainStat": {
+        "type": 3,
+        "value": 160
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 10,
+          "value": 10,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 2,
+          "value": 15,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 9,
+          "value": 10,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 11,
+          "value": 7,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 37220294772
+    },
+    {
+      "id": 76824941371,
+      "slot": 2,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 19,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 5,
+      "mainStat": {
+        "type": 4,
+        "value": 63
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 6,
+          "value": 18,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 1,
+          "value": 307,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 11,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 3,
+          "value": 33,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 37220294772
+    },
+    {
+      "id": 76796358463,
+      "slot": 3,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 10,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 5,
+      "mainStat": {
+        "type": 5,
+        "value": 160
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 10,
+          "value": 12,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 6,
+          "value": 13,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 15,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 2,
+          "value": 8,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 37220294772
+    },
+    {
+      "id": 76116696954,
+      "slot": 4,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 10,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 3,
+      "mainStat": {
+        "type": 10,
+        "value": 80
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 8,
+          "value": 11,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 2,
+          "value": 15,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 11,
+          "value": 7,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 3,
+          "value": 17,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 37220294772
+    },
+    {
+      "id": 76876079854,
+      "slot": 5,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 19,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 5,
+      "mainStat": {
+        "type": 1,
+        "value": 2448
+      },
+      "innateStat": {
+        "type": 4,
+        "value": 6
+      },
+      "substats": [
+        {
+          "type": 11,
+          "value": 21,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 3,
+          "value": 20,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 9,
+          "value": 10,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 12,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 37220294772
+    },
+    {
+      "id": 76116705862,
+      "slot": 6,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 11,
+      "level": 15,
+      "rarity": 5,
+      "originalRarity": 3,
+      "mainStat": {
+        "type": 4,
+        "value": 63
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 8,
+          "value": 11,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 2,
+          "value": 11,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 3,
+          "value": 16,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 6,
+          "value": 8,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": 37220294772
+    },
+    {
+      "id": 76922693351,
+      "slot": 1,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 1,
+      "level": 0,
+      "rarity": 5,
+      "originalRarity": 5,
+      "mainStat": {
+        "type": 3,
+        "value": 22
+      },
+      "innateStat": {
+        "type": 12,
+        "value": 6
+      },
+      "substats": [
+        {
+          "type": 10,
+          "value": 5,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 4,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 1,
+          "value": 236,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 11,
+          "value": 6,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": null
+    },
+    {
+      "id": 76923331133,
+      "slot": 1,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 1,
+      "level": 12,
+      "rarity": 5,
+      "originalRarity": 5,
+      "mainStat": {
+        "type": 3,
+        "value": 118
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 8,
+          "value": 4,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 2,
+          "value": 14,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 4,
+          "value": 22,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 10,
+          "value": 11,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": null
+    },
+    {
+      "id": 77089547898,
+      "slot": 1,
+      "stars": 6,
+      "isAncient": false,
+      "setId": 1,
+      "level": 12,
+      "rarity": 5,
+      "originalRarity": 4,
+      "mainStat": {
+        "type": 3,
+        "value": 118
+      },
+      "innateStat": {
+        "type": 12,
+        "value": 5
+      },
+      "substats": [
+        {
+          "type": 9,
+          "value": 13,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 4,
+          "value": 15,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 6,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 1,
+          "value": 177,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": null
+    },
+    {
+      "id": 77050190637,
+      "slot": 3,
+      "stars": 6,
+      "isAncient": true,
+      "setId": 5,
+      "level": 0,
+      "rarity": 14,
+      "originalRarity": 4,
+      "mainStat": {
+        "type": 5,
+        "value": 22
+      },
+      "innateStat": null,
+      "substats": [
+        {
+          "type": 9,
+          "value": 6,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 10,
+          "value": 6,
+          "isGemmed": false,
+          "grindValue": 0
+        },
+        {
+          "type": 8,
+          "value": 6,
+          "isGemmed": false,
+          "grindValue": 0
+        }
+      ],
+      "equippedMonsterId": null
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 1174341733,
+      "type": 1,
+      "attribute": 1,
+      "archetype": 0,
+      "rarity": 5,
+      "originalRarity": 5,
+      "level": 15,
+      "mainStat": {
+        "type": 101,
+        "value": 100
+      },
+      "substats": [
+        {
+          "type": 221,
+          "value": 31,
+          "upgrades": 0
+        },
+        {
+          "type": 307,
+          "value": 10,
+          "upgrades": 1
+        },
+        {
+          "type": 222,
+          "value": 14,
+          "upgrades": 2
+        },
+        {
+          "type": 206,
+          "value": 9,
+          "upgrades": 1
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 1176211402,
+      "type": 2,
+      "attribute": 0,
+      "archetype": 1,
+      "rarity": 5,
+      "originalRarity": 4,
+      "level": 15,
+      "mainStat": {
+        "type": 102,
+        "value": 100
+      },
+      "substats": [
+        {
+          "type": 409,
+          "value": 16,
+          "upgrades": 2
+        },
+        {
+          "type": 221,
+          "value": 75,
+          "upgrades": 1
+        },
+        {
+          "type": 406,
+          "value": 4,
+          "upgrades": 0
+        },
+        {
+          "type": 408,
+          "value": 6,
+          "upgrades": 0
+        }
+      ],
+      "equippedMonsterId": 33165492671
+    },
+    {
+      "id": 1146719736,
+      "type": 2,
+      "attribute": 0,
+      "archetype": 2,
+      "rarity": 5,
+      "originalRarity": 3,
+      "level": 15,
+      "mainStat": {
+        "type": 101,
+        "value": 100
+      },
+      "substats": [
+        {
+          "type": 222,
+          "value": 13,
+          "upgrades": 2
+        },
+        {
+          "type": 407,
+          "value": 9,
+          "upgrades": 0
+        },
+        {
+          "type": 400,
+          "value": 4,
+          "upgrades": 0
+        },
+        {
+          "type": 410,
+          "value": 4,
+          "upgrades": 0
+        }
+      ],
+      "equippedMonsterId": null
+    },
+    {
+      "id": 1164104861,
+      "type": 1,
+      "attribute": 3,
+      "archetype": 0,
+      "rarity": 5,
+      "originalRarity": 4,
+      "level": 15,
+      "mainStat": {
+        "type": 102,
+        "value": 100
+      },
+      "substats": [
+        {
+          "type": 218,
+          "value": 0.6000000000000001,
+          "upgrades": 2
+        },
+        {
+          "type": 305,
+          "value": 12,
+          "upgrades": 1
+        },
+        {
+          "type": 303,
+          "value": 4,
+          "upgrades": 0
+        },
+        {
+          "type": 215,
+          "value": 8,
+          "upgrades": 0
+        }
+      ],
+      "equippedMonsterId": null
+    }
+  ],
+  "craftItems": [
+    {
+      "id": 1853174288,
+      "craftType": 1,
+      "craftTypeId": 150905,
+      "amount": 1
+    },
+    {
+      "id": 1853258844,
+      "craftType": 1,
+      "craftTypeId": 180804,
+      "amount": 1
+    },
+    {
+      "id": 1853274642,
+      "craftType": 1,
+      "craftTypeId": 191204,
+      "amount": 1
+    }
+  ]
+}

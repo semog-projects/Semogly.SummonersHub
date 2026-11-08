@@ -11,6 +11,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Semogly.SummonersHub.ArchitectureTests/Semogly.SummonersHub.ArchitectureTests.csproj" />
+    <Project Path="tests/Semogly.SummonersHub.IntegrationTests/Semogly.SummonersHub.IntegrationTests.csproj" />
     <Project Path="tests/Semogly.SummonersHub.UnitTests/Semogly.SummonersHub.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tools/">

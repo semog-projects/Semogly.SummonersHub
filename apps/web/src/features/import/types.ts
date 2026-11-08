@@ -30,6 +30,7 @@ export interface Monster {
   baseStats: BaseStats
   skills: MonsterSkill[]
   isHomunculus: boolean
+  /** Quando o monstro foi obtido (ISO sem fuso, horário do servidor do jogo). */
   createdAt: string | null
 }
 

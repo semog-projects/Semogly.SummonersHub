@@ -95,7 +95,8 @@ function toMonster(unit: RawObject): Monster {
     },
     skills: tuples(unit.skills).map(([id, level]) => ({ id: num(id), level: num(level) })),
     isHomunculus: num(unit.homunculus) === 1,
-    createdAt: typeof unit.create_time === 'string' ? unit.create_time : null,
+    // "2025-05-29 11:46:51" no horário do servidor do jogo: vira ISO sem fuso
+    createdAt: typeof unit.create_time === 'string' ? unit.create_time.replace(' ', 'T') : null,
   }
 }
 

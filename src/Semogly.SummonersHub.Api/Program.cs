@@ -4,6 +4,7 @@ using Semogly.SummonersHub.Api.Endpoints;
 using Semogly.SummonersHub.Api.ErrorHandling;
 using Semogly.SummonersHub.Application;
 using Semogly.SummonersHub.Infrastructure;
+using Semogly.SummonersHub.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,10 +32,15 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    await app.ApplyMigrationsAsync();
 }
 
 app.MapDefaultEndpoints();
 app.MapSystemEndpoints();
 app.MapGameDataEndpoints();
+app.MapAccountsEndpoints();
 
 await app.RunAsync();
+
+// Ponto de entrada para o WebApplicationFactory nos testes de integração
+public partial class Program;
