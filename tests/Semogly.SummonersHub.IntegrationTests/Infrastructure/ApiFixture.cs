@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +18,24 @@ public sealed class ApiFixture : IAsyncLifetime
 
     private WebApplicationFactory<Program> _factory = null!;
 
+    private static int _nextUser;
+
+    /// <summary>Cliente sem login (o cookie de autenticação fica guardado no próprio cliente).</summary>
     public HttpClient CreateClient() => _factory.CreateClient();
+
+    /// <summary>Cadastra um usuário novo e devolve um cliente já logado com o cookie dele.</summary>
+    public async Task<HttpClient> CreateAuthenticatedClientAsync(CancellationToken cancellationToken)
+    {
+        var client = CreateClient();
+        var credentials = new { email = $"user{Interlocked.Increment(ref _nextUser)}@test.local", password = TestPassword };
+
+        (await client.PostAsJsonAsync("/api/auth/register", credentials, cancellationToken)).EnsureSuccessStatusCode();
+        (await client.PostAsJsonAsync("/api/auth/login?useCookies=true", credentials, cancellationToken)).EnsureSuccessStatusCode();
+
+        return client;
+    }
+
+    public const string TestPassword = "Senha123forte";
 
     /// <summary>Escopo de DI para verificar diretamente o que foi gravado no banco.</summary>
     public AsyncServiceScope CreateScope() => _factory.Services.CreateAsyncScope();

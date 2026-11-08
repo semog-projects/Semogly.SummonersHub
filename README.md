@@ -46,6 +46,20 @@ dotnet run --project src/Aspire/Semogly.SummonersHub.AppHost
 O link do dashboard do Aspire aparece no terminal; por ele se acessam o front (`web`), a API (`api`,
 documentação em `/scalar`) e o pgAdmin. O front faz proxy de `/api` para a API, sem CORS.
 
+## Autenticação
+
+ASP.NET Core Identity com os endpoints prontos em `/api/auth` (`register`, `login`, `refresh`, `manage/info`...)
+e `POST /api/auth/logout`. O front faz login com `?useCookies=true`: a sessão fica em um cookie HttpOnly
+(`summonershub.auth`, SameSite=Lax), sem token acessível ao JavaScript. Outros clientes podem usar o bearer token
+do login sem cookie.
+
+- Endpoints de conta (`/api/imports`, `/api/accounts/**`) exigem login; `/api/info` e `/api/game-data` são públicos.
+- O primeiro usuário que importa um invocador vira o dono dele (`WizardAccount`). Outro usuário recebe 409 ao
+  importar e 404 ao consultar, para não revelar quais invocadores existem.
+- Um usuário pode ter vários invocadores: `GET /api/accounts` lista o último import de cada um.
+- As chaves de Data Protection (que assinam cookie e tokens) ficam no PostgreSQL, então a sessão sobrevive a
+  restarts e funciona com mais de uma instância.
+
 ## Import da conta
 
 O front lê o JSON do SW Exporter no navegador, remove os dados sensíveis e envia o resultado para

@@ -5,6 +5,7 @@ using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
 using Semogly.SummonersHub.Application.GameData;
 using Semogly.SummonersHub.Domain.Accounts;
 using Semogly.SummonersHub.Infrastructure.GameData;
+using Semogly.SummonersHub.Infrastructure.Identity;
 using Semogly.SummonersHub.Infrastructure.Persistence;
 
 namespace Semogly.SummonersHub.Infrastructure;
@@ -20,7 +21,10 @@ public static class DependencyInjection
         builder.AddNpgsqlDbContext<SummonersHubDbContext>(DatabaseConnectionName);
 
         builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<SummonersHubDbContext>());
+        builder.Services.AddIdentityServices();
+
         builder.Services.AddScoped<IAccountSnapshotRepository, AccountSnapshotRepository>();
+        builder.Services.AddScoped<IWizardAccountRepository, WizardAccountRepository>();
         builder.Services.AddScoped<IAccountReadService, AccountReadService>();
         builder.Services.AddSingleton<IMonsterCatalog, EmbeddedMonsterCatalog>();
 

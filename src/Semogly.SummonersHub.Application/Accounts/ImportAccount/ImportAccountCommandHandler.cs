@@ -10,6 +10,8 @@ namespace Semogly.SummonersHub.Application.Accounts.ImportAccount;
 
 internal sealed class ImportAccountCommandHandler(
     IAccountSnapshotRepository repository,
+    IWizardAccountRepository wizardAccounts,
+    IUserContext userContext,
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : ICommandHandler<ImportAccountCommand, ImportAccountResponse>
 {
@@ -20,12 +22,25 @@ internal sealed class ImportAccountCommandHandler(
             return error;
         }
 
+        // O primeiro usuário que importa o invocador vira o dono; os demais são recusados
+        var link = await wizardAccounts.FindByWizardIdAsync(command.Wizard.Id, cancellationToken);
+        if (link is null)
+        {
+            wizardAccounts.Add(WizardAccount.Link(command.Wizard.Id, userContext.UserId, timeProvider.GetUtcNow()));
+        }
+        else if (!link.IsOwnedBy(userContext.UserId))
+        {
+            return AccountErrors.LinkedToAnotherUser(command.Wizard.Id);
+        }
+
         var contentHash = ComputeContentHash(command);
 
         // Reenvio do mesmo conteúdo (mesmo export ou novo export sem mudanças): devolve a versão existente
         var existing = await repository.FindByContentHashAsync(command.Wizard.Id, contentHash, cancellationToken);
         if (existing is not null)
         {
+            // Grava o vínculo se o snapshot for anterior à autenticação (ainda sem dono)
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return ToResponse(existing, created: false);
         }
 

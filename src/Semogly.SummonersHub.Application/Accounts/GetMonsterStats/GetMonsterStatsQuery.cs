@@ -1,3 +1,4 @@
+using Semogly.SummonersHub.Application.Abstractions;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
 using Semogly.SummonersHub.Application.GameData;
 using Semogly.SummonersHub.Domain.Abstractions;
@@ -19,11 +20,19 @@ public sealed record MonsterStatsResponse(
     StatValues Total,
     IReadOnlyList<RuneSet> ActiveSets);
 
-internal sealed class GetMonsterStatsQueryHandler(IAccountSnapshotRepository repository, IMonsterCatalog catalog)
-    : IQueryHandler<GetMonsterStatsQuery, MonsterStatsResponse>
+internal sealed class GetMonsterStatsQueryHandler(
+    IAccountSnapshotRepository repository,
+    IWizardAccountRepository wizardAccounts,
+    IUserContext userContext,
+    IMonsterCatalog catalog) : IQueryHandler<GetMonsterStatsQuery, MonsterStatsResponse>
 {
     public async Task<Result<MonsterStatsResponse>> HandleAsync(GetMonsterStatsQuery query, CancellationToken cancellationToken)
     {
+        if (!await wizardAccounts.IsOwnedByAsync(query.WizardId, userContext.UserId, cancellationToken))
+        {
+            return AccountErrors.NotFound(query.WizardId);
+        }
+
         var snapshot = await repository.GetLatestAsync(query.WizardId, cancellationToken);
         if (snapshot is null)
         {
