@@ -20,6 +20,10 @@ public static class AccountErrors
         "Accounts.UnknownGameCodes",
         $"O export contém códigos do jogo ainda não suportados: {string.Join(", ", codes)}.");
 
+    public static Error MonsterNotFound(long monsterId) => Error.NotFound(
+        "Accounts.MonsterNotFound",
+        $"O monstro {monsterId} não está no último import do invocador.");
+
     public static Error NotFound(long wizardId) => Error.NotFound(
         "Accounts.NotFound",
         $"Nenhum import encontrado para o invocador {wizardId}.");
