@@ -20,6 +20,7 @@ export function useImportAccount() {
 
   return useMutation({
     mutationFn: (payload: AccountImport) => postJson<ImportAccountResult>('/imports', payload),
-    onSuccess: (result) => queryClient.invalidateQueries({ queryKey: ['accounts', result.wizardId] }),
+    // Atualiza a lista de contas e o painel do invocador importado
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),
   })
 }

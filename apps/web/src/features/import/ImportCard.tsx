@@ -1,4 +1,5 @@
 import { useId, useState, type DragEvent } from 'react'
+import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -144,7 +145,10 @@ function ImportSummary({ fileName, data }: { fileName: string; data: AccountImpo
           <p role="status" className="text-sm">
             {importAccount.data.created
               ? `Conta importada (versão ${importAccount.data.version}).`
-              : `Nada mudou desde a versão ${importAccount.data.version}: nenhum import novo foi criado.`}
+              : `Nada mudou desde a versão ${importAccount.data.version}: nenhum import novo foi criado.`}{' '}
+            <Link to={`/contas/${importAccount.data.wizardId}`} className="font-medium underline underline-offset-4">
+              Ver painel
+            </Link>
           </p>
         )}
 

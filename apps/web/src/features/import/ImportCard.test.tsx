@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { afterEach, vi } from 'vitest'
 import sampleText from './__fixtures__/export-sample.json?raw'
 import { ImportCard } from './ImportCard'
@@ -8,7 +9,9 @@ function renderCard() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <ImportCard />
+      <MemoryRouter>
+        <ImportCard />
+      </MemoryRouter>
     </QueryClientProvider>,
   )
 }
@@ -54,6 +57,7 @@ describe('ImportCard', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Enviar' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('Conta importada (versão 1).')
+    expect(screen.getByRole('link', { name: 'Ver painel' })).toHaveAttribute('href', '/contas/12345678')
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('/api/imports')
     expect(init.method).toBe('POST')

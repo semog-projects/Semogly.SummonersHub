@@ -162,3 +162,21 @@ export function decodeCraftTypeId(code: number): { setId: number; statType: numb
     rarity: rarity > 10 ? rarity - 10 : rarity,
   }
 }
+
+/** Elemento como a API devolve nas respostas (enum serializado pelo nome). */
+export type ElementName = 'Water' | 'Fire' | 'Wind' | 'Light' | 'Dark' | 'Pure'
+
+export const ELEMENT_NAME_LABELS: Record<ElementName, string> = {
+  Water: 'Água',
+  Fire: 'Fogo',
+  Wind: 'Vento',
+  Light: 'Luz',
+  Dark: 'Trevas',
+  Pure: 'Puro',
+}
+
+export const AWAKEN_LABELS: Record<number, string> = {
+  0: 'Não desperto',
+  1: 'Desperto',
+  2: '2º despertar',
+}

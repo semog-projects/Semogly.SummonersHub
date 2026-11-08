@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Semogly.SummonersHub.Api.ErrorHandling;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
 using Semogly.SummonersHub.Application.Accounts.GetMonsterStats;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
@@ -29,6 +30,10 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}", GetAccountSummary)
             .WithName("GetAccountSummary")
             .WithSummary("Resumo do último import do invocador");
+
+        api.MapGet("/accounts/{wizardId:long}/overview", GetAccountOverview)
+            .WithName("GetAccountOverview")
+            .WithSummary("Visão geral do último import: monstros por estrelas, elemento e despertar e ranking de velocidade");
 
         api.MapGet("/accounts/{wizardId:long}/monsters/{monsterId:long}/stats", GetMonsterStats)
             .WithName("GetMonsterStats")
@@ -69,6 +74,15 @@ internal static class AccountsEndpoints
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new GetMonsterStatsQuery(wizardId, monsterId), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<AccountOverviewResponse>, ProblemHttpResult>> GetAccountOverview(
+        long wizardId,
+        IQueryHandler<GetAccountOverviewQuery, AccountOverviewResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new GetAccountOverviewQuery(wizardId), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 
