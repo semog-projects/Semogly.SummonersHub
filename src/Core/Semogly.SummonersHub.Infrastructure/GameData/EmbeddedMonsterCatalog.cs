@@ -21,6 +21,8 @@ internal sealed class EmbeddedMonsterCatalog : IMonsterCatalog
 
     internal int Count => _monsters.Value.Count;
 
+    internal IEnumerable<MonsterDefinition> All() => _monsters.Value.Values;
+
     private static FrozenDictionary<int, MonsterDefinition> Load()
     {
         using var stream = typeof(EmbeddedMonsterCatalog).Assembly.GetManifestResourceStream(ResourceName)

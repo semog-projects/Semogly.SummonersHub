@@ -90,6 +90,15 @@ Sets, atributos de runa, efeitos de artefato e itens de craft são enums do dom�
 (`Domain/GameData`), com rótulos em pt-BR no front (`src/Apps/web/src/lib/game/labels.ts`).
 Os ícones dos monstros são servidos pelo SWARFARM.
 
+A eficiência de runa (`Domain/Accounts/RuneEfficiency.cs`) segue o modelo do SW Exporter. A razão soma o principal
+(valor em relação ao de uma 6★), as subs e a inata (valor com grind em relação ao máximo da sub em +15). A eficiência
+é essa razão dividida por 2,8, que é a razão de uma runa 6★ perfeita.
+
+Os times de referência da aba **Times PvE** ficam em
+`src/Core/Semogly.SummonersHub.Infrastructure/GameData/pve-teams.json`. Cada vaga indica o monstro (nome desperto e
+elemento, como no bestiário), o papel e os atributos totais mínimos. É um ponto de partida editável: revise depois
+dos patches. Um teste de unidade garante que todo monstro do arquivo existe no bestiário.
+
 ## Testes
 
 ```bash

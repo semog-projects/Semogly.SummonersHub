@@ -1,0 +1,57 @@
+[
+  {
+    "id": "gb-classic-f2p",
+    "dungeon": "GiantsKeep",
+    "name": "Clássico F2P",
+    "notes": "O Giant é de Fogo. Bernard abre o turno; os debuffers precisam acertar.",
+    "slots": [
+      { "monster": "Bernard", "element": "Wind", "role": "Barra de ataque e aumento de VEL", "min": { "speed": 180 } },
+      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": { "accuracy": 45 } },
+      { "monster": "Shannon", "element": "Wind", "role": "Quebra de ATK e lentidão", "min": { "accuracy": 45 } },
+      { "monster": "Veromos", "element": "Dark", "role": "Cleanse passivo e líder de HP", "min": {} },
+      { "monster": "Sigmarus", "element": "Water", "role": "Dano em área (vantagem sobre Fogo)", "min": {} }
+    ]
+  },
+  {
+    "id": "db-core-f2p",
+    "dungeon": "DragonsLair",
+    "name": "Núcleo F2P",
+    "notes": "Só o núcleo: complete com dano e cura. O Dragon tem mais RES, então a PRE pesa mais que no Giant.",
+    "slots": [
+      { "monster": "Bernard", "element": "Wind", "role": "Barra de ataque e aumento de VEL", "min": { "speed": 180 } },
+      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": { "accuracy": 55 } },
+      { "monster": "Veromos", "element": "Dark", "role": "Cleanse passivo e líder de HP", "min": {} }
+    ]
+  },
+  {
+    "id": "nb-core-f2p",
+    "dungeon": "Necropolis",
+    "name": "Núcleo F2P",
+    "notes": "Só o núcleo: complete com dano e cura. Tyron dá dano por debuffs e controla a barra.",
+    "slots": [
+      { "monster": "Bernard", "element": "Wind", "role": "Barra de ataque e aumento de VEL", "min": { "speed": 180 } },
+      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": { "accuracy": 55 } },
+      { "monster": "Veromos", "element": "Dark", "role": "Cleanse passivo e líder de HP", "min": {} },
+      { "monster": "Tyron", "element": "Water", "role": "Dano por debuffs e controle de barra", "min": { "accuracy": 55 } }
+    ]
+  },
+  {
+    "id": "sr-randy-verde",
+    "dungeon": "SpiritualRealm",
+    "name": "Randy + Verdehile",
+    "notes": "O boss é de Vento, então monstros de Fogo levam vantagem. Os dois dependem de crítico.",
+    "slots": [
+      { "monster": "Randy", "element": "Fire", "role": "Dano principal", "min": { "criticalRate": 85 } },
+      { "monster": "Verdehile", "element": "Fire", "role": "Barra de ataque aos aliados em crítico", "min": { "criticalRate": 85 } }
+    ]
+  },
+  {
+    "id": "pc-verde",
+    "dungeon": "PunishersCrypt",
+    "name": "Núcleo Verdehile",
+    "notes": "O Ancient Judge é o boss mais rápido do jogo; os cristais das ondas 1 e 3 precisam cair rápido.",
+    "slots": [
+      { "monster": "Verdehile", "element": "Fire", "role": "Barra de ataque aos aliados em crítico", "min": { "criticalRate": 85 } }
+    ]
+  }
+]

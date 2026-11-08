@@ -16,7 +16,7 @@ export function AccountLayout() {
     <div className="space-y-6">
       <AccountSwitcher />
 
-      <nav aria-label="Seções da conta" className="flex gap-6 border-b">
+      <nav aria-label="Seções da conta" className="flex gap-6 overflow-x-auto border-b whitespace-nowrap">
         <NavLink to={`/contas/${wizardId}`} end className={tabClass}>
           Visão geral
         </NavLink>
@@ -31,6 +31,9 @@ export function AccountLayout() {
         </NavLink>
         <NavLink to={`/contas/${wizardId}/inventario`} className={tabClass}>
           Inventário
+        </NavLink>
+        <NavLink to={`/contas/${wizardId}/times`} className={tabClass}>
+          Times PvE
         </NavLink>
         <NavLink to={`/contas/${wizardId}/historico`} className={tabClass}>
           Histórico
