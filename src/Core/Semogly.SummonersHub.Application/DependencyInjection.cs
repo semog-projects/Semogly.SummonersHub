@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.Accounts.CheckPveTeams;
 using Semogly.SummonersHub.Application.Accounts.CompareSnapshots;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<ListArtifactsQuery, IReadOnlyList<ArtifactListItem>>, ListArtifactsQueryHandler>();
         services.AddScoped<IQueryHandler<ListSnapshotsQuery, IReadOnlyList<AccountSummaryResponse>>, ListSnapshotsQueryHandler>();
         services.AddScoped<IQueryHandler<CompareSnapshotsQuery, SnapshotComparisonResponse>, CompareSnapshotsQueryHandler>();
+        services.AddScoped<IQueryHandler<CheckPveTeamsQuery, IReadOnlyList<PveTeamCheck>>, CheckPveTeamsQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse>, GetMonsterDetailQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonstersQuery, IReadOnlyList<MonsterDefinition>>, GetMonstersQueryHandler>();
 

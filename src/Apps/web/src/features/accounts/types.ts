@@ -256,3 +256,38 @@ export interface SnapshotComparison {
   averageRuneEfficiency: Change<number>
   topNewRunes: RuneDetail[]
 }
+
+export type DungeonName = 'GiantsKeep' | 'DragonsLair' | 'Necropolis' | 'SpiritualRealm' | 'PunishersCrypt'
+
+/** Atributo de requisito, como a API devolve (enum pelo nome). */
+export type PveStatName = 'Hp' | 'Attack' | 'Defense' | 'Speed' | 'CriticalRate' | 'CriticalDamage' | 'Resistance' | 'Accuracy'
+
+export interface PveSlotCheck {
+  monsterName: string
+  element: ElementName
+  role: string
+  requirements: Array<{ stat: PveStatName; min: number }>
+  status: 'Missing' | 'BelowRequirements' | 'Ready'
+  /** Melhor candidato da conta para a vaga. */
+  monster: {
+    monsterId: number
+    masterId: number
+    name: string | null
+    element: ElementName
+    stars: number
+    level: number
+    total: StatValues
+  } | null
+  unmet: Array<{ stat: PveStatName; required: number; current: number }>
+}
+
+/** GET /api/accounts/{wizardId}/pve-teams */
+export interface PveTeamCheck {
+  id: string
+  dungeon: DungeonName
+  name: string
+  notes: string | null
+  readySlots: number
+  isReady: boolean
+  slots: PveSlotCheck[]
+}

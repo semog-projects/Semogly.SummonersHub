@@ -14,6 +14,7 @@ import { InventoryPage } from '@/pages/InventoryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
 import { MonsterListPage } from '@/pages/MonsterListPage'
+import { PveTeamsPage } from '@/pages/PveTeamsPage'
 import { RuneListPage } from '@/pages/RuneListPage'
 
 export function App() {
@@ -42,6 +43,7 @@ export function App() {
             <Route path="artefatos" element={<ArtifactListPage />} />
             <Route path="inventario" element={<InventoryPage />} />
             <Route path="historico" element={<HistoryPage />} />
+            <Route path="times" element={<PveTeamsPage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />
         </Routes>

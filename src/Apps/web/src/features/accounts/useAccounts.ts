@@ -7,6 +7,7 @@ import type {
   InventoryStats,
   MonsterDetail,
   MonsterListItem,
+  PveTeamCheck,
   RuneListItem,
   SnapshotComparison,
 } from './types'
@@ -81,5 +82,14 @@ export function useSnapshotComparison(wizardId: number, from: number | null, to:
     queryKey: ['accounts', wizardId, 'snapshots', 'compare', from, to],
     queryFn: ({ signal }) => getJson<SnapshotComparison>(`/accounts/${wizardId}/snapshots/compare?from=${from}&to=${to}`, signal),
     enabled: Number.isSafeInteger(wizardId) && from !== null && to !== null && from !== to,
+  })
+}
+
+/** Times de referência das dungeons conferidos contra a conta. */
+export function usePveTeams(wizardId: number) {
+  return useQuery({
+    queryKey: ['accounts', wizardId, 'pve-teams'],
+    queryFn: ({ signal }) => getJson<PveTeamCheck[]>(`/accounts/${wizardId}/pve-teams`, signal),
+    enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
   })
 }

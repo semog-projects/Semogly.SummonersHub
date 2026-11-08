@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Semogly.SummonersHub.Api.ErrorHandling;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.Accounts.CheckPveTeams;
 using Semogly.SummonersHub.Application.Accounts.CompareSnapshots;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
@@ -68,6 +69,10 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}/snapshots/compare", CompareSnapshots)
             .WithName("CompareSnapshots")
             .WithSummary("O que mudou entre duas versões (?from=&to=): monstros, evolução, runas e artefatos");
+
+        api.MapGet("/accounts/{wizardId:long}/pve-teams", CheckPveTeams)
+            .WithName("CheckPveTeams")
+            .WithSummary("Times de referência por dungeon: quais monstros a conta tem e se atingem os atributos mínimos");
 
         return app;
     }
@@ -150,6 +155,15 @@ internal static class AccountsEndpoints
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new CompareSnapshotsQuery(wizardId, from, to), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<IReadOnlyList<PveTeamCheck>>, ProblemHttpResult>> CheckPveTeams(
+        long wizardId,
+        IQueryHandler<CheckPveTeamsQuery, IReadOnlyList<PveTeamCheck>> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new CheckPveTeamsQuery(wizardId), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 
