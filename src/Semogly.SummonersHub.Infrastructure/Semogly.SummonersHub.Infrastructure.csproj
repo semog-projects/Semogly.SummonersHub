@@ -11,6 +11,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Bestiário gerado por tools/Semogly.SummonersHub.GameDataSync -->
+    <EmbeddedResource Include="GameData\monsters.json" LogicalName="Semogly.SummonersHub.GameData.monsters.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Semogly.SummonersHub.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Semogly.SummonersHub.Application\Semogly.SummonersHub.Application.csproj" />
   </ItemGroup>
 

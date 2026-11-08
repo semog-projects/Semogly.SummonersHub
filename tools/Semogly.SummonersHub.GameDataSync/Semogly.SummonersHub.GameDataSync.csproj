@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Ferramenta de linha de comando: baixa o bestiário do SWARFARM e gera o monsters.json embarcado na Infrastructure. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+</Project>

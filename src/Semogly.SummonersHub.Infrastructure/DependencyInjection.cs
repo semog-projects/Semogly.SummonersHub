@@ -1,4 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Semogly.SummonersHub.Application.GameData;
+using Semogly.SummonersHub.Infrastructure.GameData;
 using Semogly.SummonersHub.Infrastructure.Persistence;
 
 namespace Semogly.SummonersHub.Infrastructure;
@@ -12,6 +15,8 @@ public static class DependencyInjection
     {
         // Registra o DbContext com pooling, retry, health check e telemetria
         builder.AddNpgsqlDbContext<SummonersHubDbContext>(DatabaseConnectionName);
+
+        builder.Services.AddSingleton<IMonsterCatalog, EmbeddedMonsterCatalog>();
 
         return builder;
     }
