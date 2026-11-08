@@ -57,16 +57,13 @@ internal sealed class GetAccountOverviewQueryHandler(
 
     public async Task<Result<AccountOverviewResponse>> HandleAsync(GetAccountOverviewQuery query, CancellationToken cancellationToken)
     {
-        if (!await wizardAccounts.IsOwnedByAsync(query.WizardId, userContext.UserId, cancellationToken))
+        var result = await repository.GetOwnedLatestAsync(wizardAccounts, query.WizardId, userContext.UserId, cancellationToken);
+        if (!result.IsSuccess)
         {
-            return AccountErrors.NotFound(query.WizardId);
+            return result.Error;
         }
 
-        var snapshot = await repository.GetLatestAsync(query.WizardId, cancellationToken);
-        if (snapshot is null)
-        {
-            return AccountErrors.NotFound(query.WizardId);
-        }
+        var snapshot = result.Value;
 
         var monsters = snapshot.Monsters
             .Select(m => (Monster: m, Definition: catalog.Find(m.MasterId)))
@@ -93,12 +90,15 @@ internal sealed class GetAccountOverviewQueryHandler(
     }
 
     /// <summary>Monstros mais rápidos pela velocidade total. Materiais (rainbowmons, devilmons...) ficam de fora.</summary>
-    private static List<SpeedRankingEntry> SpeedRanking(AccountSnapshot snapshot, List<(Monster Monster, MonsterDefinition? Definition)> monsters) =>
-        monsters
+    private static List<SpeedRankingEntry> SpeedRanking(AccountSnapshot snapshot, List<(Monster Monster, MonsterDefinition? Definition)> monsters)
+    {
+        var equipment = new EquipmentIndex(snapshot);
+
+        return monsters
             .Where(m => m.Definition?.Archetype != Archetype.Material)
             .Select(m =>
             {
-                var stats = MonsterStatsCalculator.Calculate(m.Monster, snapshot.Runes, snapshot.Artifacts);
+                var stats = equipment.StatsOf(m.Monster);
                 return new SpeedRankingEntry(
                     m.Monster.GameId,
                     m.Monster.MasterId,
@@ -114,4 +114,5 @@ internal sealed class GetAccountOverviewQueryHandler(
             .ThenBy(e => e.MonsterId)
             .Take(GetAccountOverviewQuery.SpeedRankingSize)
             .ToList();
+    }
 }

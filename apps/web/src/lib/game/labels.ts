@@ -180,3 +180,19 @@ export const AWAKEN_LABELS: Record<number, string> = {
   1: 'Desperto',
   2: '2º despertar',
 }
+
+export type ArchetypeName = 'None' | 'Attack' | 'Defense' | 'Hp' | 'Support' | 'Material'
+
+export const ARCHETYPE_NAME_LABELS: Record<ArchetypeName, string> = {
+  None: 'Nenhum',
+  Attack: 'Ataque',
+  Defense: 'Defesa',
+  Hp: 'HP',
+  Support: 'Suporte',
+  Material: 'Material',
+}
+
+/** Sets que um monstro pode ter ativos (Immemorial só existe em gems e grinds). */
+export const EQUIPPABLE_RUNE_SETS = Object.entries(RUNE_SET_LABELS)
+  .filter(([id]) => Number(id) !== 99)
+  .map(([, name]) => name)
