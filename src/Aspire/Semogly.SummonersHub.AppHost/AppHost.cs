@@ -16,7 +16,7 @@ var api = builder.AddProject<Projects.Semogly_SummonersHub_Api>(ResourceNames.Ap
 
 // Front-end (React + Vite): o dev server faz proxy de /api para a API, então o navegador
 // enxerga uma única origem e não é preciso configurar CORS
-builder.AddViteApp(ResourceNames.Web, "../../../apps/web")
+builder.AddViteApp(ResourceNames.Web, "../../Apps/web")
     .WithNpm(install: true)
     .WithReference(api).WaitFor(api)
     .WithExternalHttpEndpoints();

@@ -22,7 +22,7 @@ runas e artefatos.
 ## Estrutura
 
 ```
-apps/web/                                  Front-end React
+src/Apps/web                               Front-end React
 src/Aspire/Semogly.SummonersHub.AppHost    Orquestra Postgres, API e front
 src/Aspire/Semogly.SummonersHub.ServiceDefaults  Telemetria, health checks, resiliência
 src/Semogly.SummonersHub.Domain            Entidades e regras do jogo (sem dependências)
@@ -87,14 +87,14 @@ dotnet run --project tools/Semogly.SummonersHub.GameDataSync
 ```
 
 Sets, atributos de runa, efeitos de artefato e itens de craft são enums do domínio
-(`Domain/GameData`), com rótulos em pt-BR no front (`apps/web/src/lib/game/labels.ts`).
+(`Domain/GameData`), com rótulos em pt-BR no front (`src/Apps/web/src/lib/game/labels.ts`).
 Os ícones dos monstros são servidos pelo SWARFARM.
 
 ## Testes
 
 ```bash
 dotnet test                           # testes .NET (os de integração precisam do Docker)
-cd apps/web && npm test -- --run      # testes do front
+cd src/Apps/web && npm test -- --run      # testes do front
 ```
 
 ### CI
