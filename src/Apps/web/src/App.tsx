@@ -6,6 +6,7 @@ import { UserMenu } from '@/features/auth/UserMenu'
 import { cn } from '@/lib/utils'
 import { AccountLayout } from '@/pages/AccountLayout'
 import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
+import { ArtifactListPage } from '@/pages/ArtifactListPage'
 import { HomePage } from '@/pages/HomePage'
 import { ImportPage } from '@/pages/ImportPage'
 import { InventoryPage } from '@/pages/InventoryPage'
@@ -37,6 +38,7 @@ export function App() {
             <Route path="monstros" element={<MonsterListPage />} />
             <Route path="monstros/:monsterId" element={<MonsterDetailPage />} />
             <Route path="runas" element={<RuneListPage />} />
+            <Route path="artefatos" element={<ArtifactListPage />} />
             <Route path="inventario" element={<InventoryPage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />

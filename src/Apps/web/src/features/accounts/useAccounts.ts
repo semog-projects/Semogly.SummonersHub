@@ -3,6 +3,7 @@ import { getJson } from '@/lib/api'
 import type {
   AccountOverview,
   AccountSummary,
+  ArtifactListItem,
   InventoryStats,
   MonsterDetail,
   MonsterListItem,
@@ -53,6 +54,14 @@ export function useRunes(wizardId: number) {
   return useQuery({
     queryKey: ['accounts', wizardId, 'runes'],
     queryFn: ({ signal }) => getJson<RuneListItem[]>(`/accounts/${wizardId}/runes`, signal),
+    enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
+  })
+}
+
+export function useArtifacts(wizardId: number) {
+  return useQuery({
+    queryKey: ['accounts', wizardId, 'artifacts'],
+    queryFn: ({ signal }) => getJson<ArtifactListItem[]>(`/accounts/${wizardId}/artifacts`, signal),
     enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
   })
 }

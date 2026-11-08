@@ -200,3 +200,10 @@ export interface RuneListItem {
   /** Nulo quando a runa está no inventário. */
   equippedOn: EquippedMonster | null
 }
+
+/** GET /api/accounts/{wizardId}/artifacts */
+export interface ArtifactListItem {
+  artifact: ArtifactDetail
+  /** Nulo quando o artefato está no inventário. */
+  equippedOn: EquippedMonster | null
+}
