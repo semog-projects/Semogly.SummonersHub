@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useParams, useSearchParams } from 'react-router'
-import { Button } from '@/components/ui/button'
 import { RuneFiltersBar } from '@/features/accounts/runes/RuneFiltersBar'
 import {
   filterAndSortRunes,
@@ -11,7 +10,9 @@ import {
   type RuneSortKey,
 } from '@/features/accounts/runes/runeFilters'
 import { RuneTable } from '@/features/accounts/runes/RuneTable'
+import { ShowMoreButton } from '@/features/accounts/shared/ShowMoreButton'
 import { nextSort } from '@/features/accounts/shared/sorting'
+import { usePaging } from '@/features/accounts/shared/usePaging'
 import type { RuneListItem } from '@/features/accounts/types'
 import { useRunes } from '@/features/accounts/useAccounts'
 import { QueryStatus } from './QueryStatus'
@@ -53,15 +54,7 @@ function RuneList({
   onSort: (sort: RuneSortKey) => void
 }) {
   const visible = useMemo(() => filterAndSortRunes([...runes], filters), [runes, filters])
-  const [limit, setLimit] = useState(RUNE_PAGE_SIZE)
-
-  // Filtro novo volta para a primeira página
-  const filtersKey = runeFiltersToParams(filters).toString()
-  const [lastFiltersKey, setLastFiltersKey] = useState(filtersKey)
-  if (filtersKey !== lastFiltersKey) {
-    setLastFiltersKey(filtersKey)
-    setLimit(RUNE_PAGE_SIZE)
-  }
+  const { limit, showMore } = usePaging(runeFiltersToParams(filters).toString(), RUNE_PAGE_SIZE)
 
   return (
     <div className="space-y-4">
@@ -71,13 +64,7 @@ function RuneList({
         upgrades que faltam até o +12
       </p>
       <RuneTable wizardId={wizardId} runes={visible.slice(0, limit)} filters={filters} onSort={onSort} />
-      {visible.length > limit && (
-        <div className="flex justify-center">
-          <Button variant="outline" size="sm" onClick={() => setLimit(limit + RUNE_PAGE_SIZE)}>
-            Mostrar mais ({visible.length - limit} restantes)
-          </Button>
-        </div>
-      )}
+      <ShowMoreButton total={visible.length} limit={limit} onClick={showMore} />
     </div>
   )
 }
