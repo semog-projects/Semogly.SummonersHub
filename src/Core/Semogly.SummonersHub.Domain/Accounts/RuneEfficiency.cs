@@ -76,6 +76,9 @@ public static class RuneEfficiency
             ToPercent(ratio + (remainingUpgrades * MaxRollRatio)));
     }
 
+    /// <summary>Pontos de eficiência (em %) que um valor de sub vale, ex.: VEL 6 = 0,2 ÷ 2,8 = 7,14.</summary>
+    public static decimal SubstatPoints(RuneStat stat, int value) => (decimal)value / SubstatMax[stat] / PerfectRatio * 100;
+
     private static decimal MainStatRatio(Rune rune)
     {
         var table = MainStatMax[rune.MainStat.Stat];

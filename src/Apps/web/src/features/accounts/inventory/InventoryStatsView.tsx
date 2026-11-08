@@ -2,22 +2,14 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatNumber } from '@/lib/format'
-import { RARITY_LABELS, RUNE_STATS } from '@/lib/game/labels'
+import { RARITY_LABELS } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
+import { CRAFT_TYPE_LABELS, craftStatLabel, isGemType } from '../craft/craftLabels'
 import { DistributionCard } from '../overview/DistributionCard'
 import { RARITY_BAR_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
 import type { CraftItemStats, InventoryStats, RuneSetStats, SpeedRuneEntry } from '../types'
 
-const CRAFT_TYPE_LABELS: Record<CraftItemStats['type'], string> = {
-  EnchantedGem: 'Gem',
-  Grindstone: 'Grind',
-  ImmemorialGem: 'Gem Immemorial',
-  ImmemorialGrindstone: 'Grind Immemorial',
-  AncientGem: 'Gem Ancient',
-  AncientGrindstone: 'Grind Ancient',
-}
-
-const isGem = (item: CraftItemStats) => item.type.endsWith('Gem')
+const isGem = (item: CraftItemStats) => isGemType(item.type)
 
 /** Indicadores do inventário: runas, artefatos, gems e grinds. */
 export function InventoryStatsView({ inventory }: { inventory: InventoryStats }) {
@@ -211,7 +203,7 @@ function CraftCard({ title, items }: { title: string; items: CraftItemStats[] })
               >
                 <span>
                   <span className={cn('font-medium', RARITY_TEXT_CLASSES[item.rarity])}>
-                    {item.set === 'Immemorial' ? 'Qualquer set' : item.set} · {statLabel(item.stat)}
+                    {item.set === 'Immemorial' ? 'Qualquer set' : item.set} · {craftStatLabel(item.stat)}
                   </span>
                   {item.type !== 'EnchantedGem' && item.type !== 'Grindstone' && (
                     <Badge variant="secondary" className="ml-2">
@@ -230,8 +222,3 @@ function CraftCard({ title, items }: { title: string; items: CraftItemStats[] })
 }
 
 /** Rótulo do atributo de gem/grind: os percentuais de HP/ATK/DEF levam "%" para não confundir com os fixos. */
-function statLabel(type: number): string {
-  const stat = RUNE_STATS[type]
-  if (!stat) return `Atributo ${type}`
-  return [2, 4, 6].includes(type) ? `${stat.label} %` : stat.label
-}
