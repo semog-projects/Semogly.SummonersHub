@@ -5,7 +5,7 @@ import { afterEach, vi } from 'vitest'
 import type { MonsterDetail, OptimizeRunesResponse, RuneDetail } from '@/features/accounts/types'
 import { RuneOptimizerPage } from './RuneOptimizerPage'
 
-const stats = { hp: 10000, attack: 700, defense: 600, speed: 150, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 0 }
+const stats = { hp: 10000, attack: 700, defense: 600, speed: 150, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 0, effectiveHp: 27400 }
 
 function rune(runeId: number, slot: number, set: string): RuneDetail {
   return {
