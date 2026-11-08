@@ -207,3 +207,52 @@ export interface ArtifactListItem {
   /** Nulo quando o artefato está no inventário. */
   equippedOn: EquippedMonster | null
 }
+
+/** Valor na versão de referência e na comparada. */
+export interface Change<T> {
+  from: T
+  to: T
+}
+
+export interface MonsterChangeItem {
+  monsterId: number
+  masterId: number
+  name: string | null
+  element: ElementName
+  stars: number
+  level: number
+}
+
+export interface MonsterProgress {
+  monsterId: number
+  masterId: number
+  name: string | null
+  element: ElementName
+  stars: Change<number>
+  level: Change<number>
+  awakenLevel: Change<number | null>
+  speed: Change<number>
+}
+
+export interface EquipmentChanges {
+  total: Change<number>
+  added: number
+  removed: number
+  /** Itens presentes nas duas versões que subiram de nível. */
+  upgraded: number
+}
+
+/** GET /api/accounts/{wizardId}/snapshots/compare?from=&to= */
+export interface SnapshotComparison {
+  from: { version: number; importedAt: string; exportedAt: string | null }
+  to: { version: number; importedAt: string; exportedAt: string | null }
+  wizardLevel: Change<number>
+  monsters: Change<number>
+  addedMonsters: MonsterChangeItem[]
+  removedMonsters: MonsterChangeItem[]
+  progressedMonsters: MonsterProgress[]
+  runes: EquipmentChanges
+  artifacts: EquipmentChanges
+  averageRuneEfficiency: Change<number>
+  topNewRunes: RuneDetail[]
+}

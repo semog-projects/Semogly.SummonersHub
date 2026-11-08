@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { AccountLayout } from '@/pages/AccountLayout'
 import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
 import { ArtifactListPage } from '@/pages/ArtifactListPage'
+import { HistoryPage } from '@/pages/HistoryPage'
 import { HomePage } from '@/pages/HomePage'
 import { ImportPage } from '@/pages/ImportPage'
 import { InventoryPage } from '@/pages/InventoryPage'
@@ -40,6 +41,7 @@ export function App() {
             <Route path="runas" element={<RuneListPage />} />
             <Route path="artefatos" element={<ArtifactListPage />} />
             <Route path="inventario" element={<InventoryPage />} />
+            <Route path="historico" element={<HistoryPage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />
         </Routes>

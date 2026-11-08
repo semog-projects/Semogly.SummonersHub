@@ -8,6 +8,7 @@ import type {
   MonsterDetail,
   MonsterListItem,
   RuneListItem,
+  SnapshotComparison,
 } from './types'
 
 /** Invocadores do usuário logado, do import mais recente para o mais antigo. */
@@ -63,5 +64,22 @@ export function useArtifacts(wizardId: number) {
     queryKey: ['accounts', wizardId, 'artifacts'],
     queryFn: ({ signal }) => getJson<ArtifactListItem[]>(`/accounts/${wizardId}/artifacts`, signal),
     enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
+  })
+}
+
+/** Todas as versões (imports) do invocador, da mais recente para a mais antiga. */
+export function useSnapshots(wizardId: number) {
+  return useQuery({
+    queryKey: ['accounts', wizardId, 'snapshots'],
+    queryFn: ({ signal }) => getJson<AccountSummary[]>(`/accounts/${wizardId}/snapshots`, signal),
+    enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
+  })
+}
+
+export function useSnapshotComparison(wizardId: number, from: number | null, to: number | null) {
+  return useQuery({
+    queryKey: ['accounts', wizardId, 'snapshots', 'compare', from, to],
+    queryFn: ({ signal }) => getJson<SnapshotComparison>(`/accounts/${wizardId}/snapshots/compare?from=${from}&to=${to}`, signal),
+    enabled: Number.isSafeInteger(wizardId) && from !== null && to !== null && from !== to,
   })
 }
