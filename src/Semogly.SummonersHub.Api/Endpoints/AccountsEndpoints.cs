@@ -3,6 +3,7 @@ using Semogly.SummonersHub.Api.ErrorHandling;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
+using Semogly.SummonersHub.Application.Accounts.GetInventoryStats;
 using Semogly.SummonersHub.Application.Accounts.GetMonsterDetail;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
 using Semogly.SummonersHub.Application.Accounts.ListAccounts;
@@ -35,6 +36,10 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}/overview", GetAccountOverview)
             .WithName("GetAccountOverview")
             .WithSummary("Visão geral do último import: monstros por estrelas, elemento e despertar e ranking de velocidade");
+
+        api.MapGet("/accounts/{wizardId:long}/inventory", GetInventoryStats)
+            .WithName("GetInventoryStats")
+            .WithSummary("Indicadores de runas, artefatos, gems e grinds do último import");
 
         api.MapGet("/accounts/{wizardId:long}/monsters", ListMonsters)
             .WithName("ListMonsters")
@@ -70,6 +75,15 @@ internal static class AccountsEndpoints
     {
         var result = await handler.HandleAsync(new ListAccountsQuery(), cancellationToken);
         return TypedResults.Ok(result.Value);
+    }
+
+    private static async Task<Results<Ok<InventoryStatsResponse>, ProblemHttpResult>> GetInventoryStats(
+        long wizardId,
+        IQueryHandler<GetInventoryStatsQuery, InventoryStatsResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new GetInventoryStatsQuery(wizardId), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 
     private static async Task<Results<Ok<IReadOnlyList<MonsterListItem>>, ProblemHttpResult>> ListMonsters(

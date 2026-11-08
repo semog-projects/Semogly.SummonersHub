@@ -32,9 +32,6 @@ public sealed record WizardOverview(
     DateTimeOffset ImportedAt,
     DateTimeOffset? ExportedAt);
 
-/// <summary>Quantidade de monstros por chave (estrelas, elemento ou nível de despertar).</summary>
-public sealed record CountBy<TKey>(TKey Key, int Count);
-
 public sealed record SpeedRankingEntry(
     long MonsterId,
     int MasterId,
