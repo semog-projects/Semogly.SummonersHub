@@ -291,3 +291,30 @@ export interface PveTeamCheck {
   isReady: boolean
   slots: PveSlotCheck[]
 }
+
+/** Atributo usado como foco ou mínimo no otimizador (mesmo enum dos times PvE). */
+export type OptimizerStat = 'Hp' | 'Attack' | 'Defense' | 'Speed' | 'CriticalRate' | 'CriticalDamage' | 'Resistance' | 'Accuracy'
+
+/** POST /api/accounts/{wizardId}/monsters/{monsterId}/optimize */
+export interface OptimizeRunesRequest {
+  /** Sets obrigatórios; repetir pede mais de um. */
+  sets: string[]
+  /** Principais aceitos por slot (códigos do jogo). */
+  mainStats: Record<string, number[]>
+  focus: OptimizerStat[]
+  minimums: Array<{ stat: OptimizerStat; min: number }>
+  includeEquippedOnOthers: boolean
+  assumeMaxLevel: boolean
+}
+
+export interface OptimizedBuild {
+  score: number
+  total: StatValues
+  activeSets: string[]
+  runes: RuneListItem[]
+}
+
+export interface OptimizeRunesResponse {
+  current: OptimizedBuild
+  builds: OptimizedBuild[]
+}

@@ -36,6 +36,8 @@ public static class AccountErrors
         "Accounts.SameSnapshot",
         "Escolha duas versões diferentes para comparar.");
 
+    public static Error InvalidOptimization(string message) => Error.Validation("Accounts.InvalidOptimization", message);
+
     public static Error NotFound(long wizardId) => Error.NotFound(
         "Accounts.NotFound",
         $"Nenhum import encontrado para o invocador {wizardId}.");

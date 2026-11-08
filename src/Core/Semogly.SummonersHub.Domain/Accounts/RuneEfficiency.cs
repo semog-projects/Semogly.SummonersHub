@@ -82,6 +82,9 @@ public static class RuneEfficiency
         return (decimal)table[rune.Stars - 1] / table[^1];
     }
 
+    /// <summary>Valor do atributo principal em +15 para uma runa com essas estrelas.</summary>
+    public static int MainStatAtMaxLevel(RuneStat stat, int stars) => MainStatMax[stat][Math.Clamp(stars, 1, 6) - 1];
+
     private static decimal ToPercent(decimal ratio) => Math.Round(ratio / PerfectRatio * 100, 2);
 }
 

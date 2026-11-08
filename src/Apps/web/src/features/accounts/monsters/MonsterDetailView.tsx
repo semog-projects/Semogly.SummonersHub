@@ -1,4 +1,7 @@
+import { Sparkles } from 'lucide-react'
+import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMonsterDefinitions } from '@/features/game-data/useMonsterDefinitions'
 import { formatNumber } from '@/lib/format'
@@ -39,10 +42,13 @@ export function MonsterDetailView({ monster }: { monster: MonsterDetail }) {
             </p>
           )}
         </div>
-        <div className="flex flex-wrap gap-1 sm:ml-auto">
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
           {monster.activeSets.map((set, i) => (
             <Badge key={`${set}-${i}`}>{set}</Badge>
           ))}
+          <Link to="otimizar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+            <Sparkles aria-hidden /> Otimizar runas
+          </Link>
         </div>
       </div>
 
