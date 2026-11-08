@@ -129,7 +129,14 @@ public sealed record StatValues(
     int CriticalRate,
     int CriticalDamage,
     int Resistance,
-    int Accuracy);
+    int Accuracy)
+{
+    /// <summary>
+    /// HP efetivo, como a comunidade calcula (SWOP, SWARFARM): HP × (1140 + 3,5 × DEF) ÷ 1000.
+    /// Resume quanto dano o monstro aguenta considerando a redução da DEF.
+    /// </summary>
+    public int EffectiveHp => (int)Math.Round(Hp * (1140 + (3.5m * Defense)) / 1000);
+}
 
 /// <param name="ActiveSets">Sets completos, repetidos quando completos mais de uma vez.</param>
 public sealed record MonsterStats(StatValues Base, StatValues Total, IReadOnlyList<RuneSet> ActiveSets);

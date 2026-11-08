@@ -6,12 +6,12 @@ import type { MonsterDetail, MonsterListItem } from '@/features/accounts/types'
 import { MonsterDetailPage } from './MonsterDetailPage'
 import { MonsterListPage } from './MonsterListPage'
 
-const stats = { hp: 9885, attack: 736, defense: 582, speed: 95, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 0 }
+const stats = { hp: 9885, attack: 736, defense: 582, speed: 95, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 0, effectiveHp: 31405 }
 
 const list: MonsterListItem[] = [
-  { monsterId: 11, masterId: 19811, name: 'Lapis', element: 'Water', archetype: 'Attack', stars: 6, level: 40, awakenLevel: 1, total: { ...stats, speed: 151 }, activeSets: ['Vampire'], runes: 6, artifacts: 2 },
-  { monsterId: 12, masterId: 15105, name: 'Konamiya', element: 'Dark', archetype: 'Support', stars: 6, level: 40, awakenLevel: 1, total: { ...stats, speed: 214 }, activeSets: ['Swift', 'Will'], runes: 6, artifacts: 2 },
-  { monsterId: 13, masterId: 13715, name: 'Tyron', element: 'Water', archetype: 'Attack', stars: 6, level: 40, awakenLevel: 1, total: { ...stats, speed: 195 }, activeSets: ['Violent'], runes: 6, artifacts: 0 },
+  { monsterId: 11, masterId: 19811, name: 'Lapis', element: 'Water', archetype: 'Attack', stars: 6, level: 40, awakenLevel: 1, total: { ...stats, speed: 151 }, activeSets: ['Vampire'], runes: 6, artifacts: 2, averageRuneEfficiency: 80.5 },
+  { monsterId: 12, masterId: 15105, name: 'Konamiya', element: 'Dark', archetype: 'Support', stars: 6, level: 40, awakenLevel: 1, total: { ...stats, speed: 214 }, activeSets: ['Swift', 'Will'], runes: 6, artifacts: 2, averageRuneEfficiency: 80.5 },
+  { monsterId: 13, masterId: 13715, name: 'Tyron', element: 'Water', archetype: 'Attack', stars: 6, level: 40, awakenLevel: 1, total: { ...stats, speed: 195 }, activeSets: ['Violent'], runes: 6, artifacts: 0, averageRuneEfficiency: 91.2 },
 ]
 
 const detail: MonsterDetail = {
@@ -26,6 +26,7 @@ const detail: MonsterDetail = {
   base: stats,
   total: { ...stats, hp: 14281, speed: 151 },
   activeSets: ['Vampire'],
+  averageRuneEfficiency: 85.71,
   skills: [{ skillId: 1, level: 5 }],
   runes: [
     {
@@ -121,7 +122,10 @@ describe('MonsterDetailPage', () => {
     expect(await screen.findByRole('heading', { name: 'Lapis' })).toBeInTheDocument()
 
     const attributes = screen.getByRole('table', { name: 'Atributos' })
-    expect(within(attributes).getByRole('row', { name: /HP/ })).toHaveTextContent('9.88514.281+4.396')
+    const [hp, effectiveHp] = within(attributes).getAllByRole('row', { name: /HP/ })
+    expect(hp).toHaveTextContent('9.88514.281+4.396')
+    expect(effectiveHp).toHaveTextContent('HP Efet.')
+    expect(screen.getByText(/Eficiência média das runas/)).toHaveTextContent('85,71%')
 
     const rune = screen.getByLabelText('Runa do slot 2')
     expect(rune).toHaveTextContent('Vampire (2) +15')

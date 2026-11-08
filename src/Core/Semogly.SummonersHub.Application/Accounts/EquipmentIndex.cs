@@ -15,6 +15,13 @@ internal sealed class EquipmentIndex(AccountSnapshot snapshot)
 
     public IEnumerable<Artifact> ArtifactsOf(long monsterId) => _artifacts[monsterId];
 
+    /// <summary>Eficiência média (atual) das runas equipadas no monstro, ou nulo se ele não tem runas.</summary>
+    public decimal? AverageRuneEfficiencyOf(long monsterId)
+    {
+        var runes = RunesOf(monsterId).ToList();
+        return runes.Count == 0 ? null : Math.Round(runes.Average(r => RuneEfficiency.Calculate(r).Current), 2);
+    }
+
     public MonsterStats StatsOf(Monster monster) =>
         MonsterStatsCalculator.Calculate(monster, RunesOf(monster.GameId), ArtifactsOf(monster.GameId));
 }

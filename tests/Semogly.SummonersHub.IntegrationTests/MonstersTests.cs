@@ -39,6 +39,8 @@ public sealed class MonstersTests(ApiFixture fixture) : IAsyncLifetime
         Assert.Equal(2, lapis.Artifacts);
         Assert.NotEmpty(lapis.ActiveSets);
         Assert.True(lapis.Total.Hp > 9885);
+        Assert.True(lapis.Total.EffectiveHp > lapis.Total.Hp);
+        Assert.NotNull(lapis.AverageRuneEfficiency);
     }
 
     [Fact]
@@ -56,6 +58,10 @@ public sealed class MonstersTests(ApiFixture fixture) : IAsyncLifetime
         Assert.True(detail.Total.Attack > detail.Base.Attack);
         Assert.True(detail.Total.Speed > detail.Base.Speed);
         Assert.NotEmpty(detail.Skills);
+
+        // Média da eficiência das 6 runas equipadas (a API arredonda a média, não cada runa: tolerância de 0,01)
+        var average = detail.Runes.Average(r => r.Efficiency);
+        Assert.InRange(detail.AverageRuneEfficiency!.Value, average - 0.01m, average + 0.01m);
 
         // Runas ordenadas por slot e com os códigos do jogo
         Assert.Equal([1, 2, 3, 4, 5, 6], detail.Runes.Select(r => r.Slot));

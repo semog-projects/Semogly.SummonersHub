@@ -1,10 +1,11 @@
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { useMonsterDefinitions } from '@/features/game-data/useMonsterDefinitions'
-import { formatNumber } from '@/lib/format'
+import { formatNumber, formatPercent } from '@/lib/format'
 import { ELEMENT_NAME_LABELS } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES } from '../overview/elementStyles'
+import { efficiencyClass } from '../runes/efficiency'
 import { SortHeader } from '../shared/SortHeader'
 import type { MonsterListItem } from '../types'
 import { MonsterIcon } from './MonsterIcon'
@@ -44,6 +45,13 @@ export function MonsterTable({ monsters, filters, onSort }: Props) {
                 onSort={onSort}
               />
             ))}
+            <SortHeader
+              sortKey="averageRuneEfficiency"
+              label="Ef. runas"
+              sort={filters.sort}
+              direction={filters.direction}
+              onSort={onSort}
+            />
           </tr>
         </thead>
         <tbody>
@@ -88,6 +96,15 @@ export function MonsterTable({ monsters, filters, onSort }: Props) {
                   {column.percent && '%'}
                 </td>
               ))}
+              <td
+                className={cn(
+                  'py-2 pr-3 text-right tabular-nums',
+                  monster.averageRuneEfficiency !== null && efficiencyClass(monster.averageRuneEfficiency),
+                  filters.sort === 'averageRuneEfficiency' && 'font-semibold',
+                )}
+              >
+                {monster.averageRuneEfficiency === null ? '—' : formatPercent(monster.averageRuneEfficiency)}
+              </td>
             </tr>
           ))}
         </tbody>
