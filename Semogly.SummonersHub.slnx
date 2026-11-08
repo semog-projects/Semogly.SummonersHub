@@ -1,9 +1,11 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Semogly.SummonersHub.Api/Semogly.SummonersHub.Api.csproj" />
-    <Project Path="src/Semogly.SummonersHub.Application/Semogly.SummonersHub.Application.csproj" />
-    <Project Path="src/Semogly.SummonersHub.Domain/Semogly.SummonersHub.Domain.csproj" />
-    <Project Path="src/Semogly.SummonersHub.Infrastructure/Semogly.SummonersHub.Infrastructure.csproj" />
+  <Folder Name="/src/Core/">
+    <Project Path="src/Core/Semogly.SummonersHub.Application/Semogly.SummonersHub.Application.csproj" />
+    <Project Path="src/Core/Semogly.SummonersHub.Domain/Semogly.SummonersHub.Domain.csproj" />
+    <Project Path="src/Core/Semogly.SummonersHub.Infrastructure/Semogly.SummonersHub.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/">
+    <Project Path="src/Services/Semogly.SummonersHub.Api/Semogly.SummonersHub.Api.csproj" />
   </Folder>
   <Folder Name="/src/Aspire/">
     <Project Path="src/Aspire/Semogly.SummonersHub.AppHost/Semogly.SummonersHub.AppHost.csproj" />

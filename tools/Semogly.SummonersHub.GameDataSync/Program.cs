@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 // Sem argumento, sobrescreve o monsters.json embarcado na Infrastructure.
 var outputPath = args.Length > 0
     ? args[0]
-    : Path.Combine(FindRepositoryRoot(), "src", "Semogly.SummonersHub.Infrastructure", "GameData", "monsters.json");
+    : Path.Combine(FindRepositoryRoot(), "src", "Core", "Semogly.SummonersHub.Infrastructure", "GameData", "monsters.json");
 
 using var http = new HttpClient { BaseAddress = new Uri("https://swarfarm.com/api/v2/") };
 http.DefaultRequestHeaders.UserAgent.ParseAdd("Semogly.SummonersHub-GameDataSync/1.0");

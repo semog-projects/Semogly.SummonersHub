@@ -22,13 +22,13 @@ runas e artefatos.
 ## Estrutura
 
 ```
-apps/web/                                  Front-end React
+src/Apps/web                               Front-end React
 src/Aspire/Semogly.SummonersHub.AppHost    Orquestra Postgres, API e front
 src/Aspire/Semogly.SummonersHub.ServiceDefaults  Telemetria, health checks, resiliência
-src/Semogly.SummonersHub.Domain            Entidades e regras do jogo (sem dependências)
-src/Semogly.SummonersHub.Application       Casos de uso (ICommandHandler / IQueryHandler, Result)
-src/Semogly.SummonersHub.Infrastructure    EF Core / PostgreSQL
-src/Semogly.SummonersHub.Api               Endpoints HTTP e composição
+src/Core/Semogly.SummonersHub.Domain          Entidades e regras do jogo (sem dependências)
+src/Core/Semogly.SummonersHub.Application     Casos de uso (ICommandHandler / IQueryHandler, Result)
+src/Core/Semogly.SummonersHub.Infrastructure  EF Core / PostgreSQL / Identity
+src/Services/Semogly.SummonersHub.Api         Endpoints HTTP e composição
 tests/Semogly.SummonersHub.ArchitectureTests  Regra de dependência da Clean Architecture
 tests/Semogly.SummonersHub.UnitTests       Testes de domínio e aplicação
 tests/Semogly.SummonersHub.IntegrationTests  API em memória + PostgreSQL em container (Testcontainers)
@@ -69,17 +69,17 @@ O front lê o JSON do SW Exporter no navegador, remove os dados sensíveis e env
 o mesmo conteúdo, mesmo vindo de outro export, devolve a versão existente: a idempotência é feita pelo hash
 SHA-256 do conteúdo, ignorando a data do export.
 
-Migrations do EF Core ficam em `src/Semogly.SummonersHub.Infrastructure/Persistence/Migrations` e são aplicadas
+Migrations do EF Core ficam em `src/Core/Semogly.SummonersHub.Infrastructure/Persistence/Migrations` e são aplicadas
 na inicialização em desenvolvimento. Para criar uma nova:
 
 ```bash
-dotnet ef migrations add <Nome> --project src/Semogly.SummonersHub.Infrastructure --output-dir Persistence/Migrations
+dotnet ef migrations add <Nome> --project src/Core/Semogly.SummonersHub.Infrastructure --output-dir Persistence/Migrations
 ```
 
 ## Dados do jogo
 
 O bestiário (nome, elemento, arquétipo, estrelas e ícone de cada monstro) fica em
-`src/Semogly.SummonersHub.Infrastructure/GameData/monsters.json`, embarcado na API e carregado em memória.
+`src/Core/Semogly.SummonersHub.Infrastructure/GameData/monsters.json`, embarcado na API e carregado em memória.
 Ele é gerado a partir da [API do SWARFARM](https://swarfarm.com/api/v2/). Para atualizar depois de um patch do jogo:
 
 ```bash
@@ -87,14 +87,14 @@ dotnet run --project tools/Semogly.SummonersHub.GameDataSync
 ```
 
 Sets, atributos de runa, efeitos de artefato e itens de craft são enums do domínio
-(`Domain/GameData`), com rótulos em pt-BR no front (`apps/web/src/lib/game/labels.ts`).
+(`Domain/GameData`), com rótulos em pt-BR no front (`src/Apps/web/src/lib/game/labels.ts`).
 Os ícones dos monstros são servidos pelo SWARFARM.
 
 ## Testes
 
 ```bash
 dotnet test                           # testes .NET (os de integração precisam do Docker)
-cd apps/web && npm test -- --run      # testes do front
+cd src/Apps/web && npm test -- --run      # testes do front
 ```
 
 ### CI
