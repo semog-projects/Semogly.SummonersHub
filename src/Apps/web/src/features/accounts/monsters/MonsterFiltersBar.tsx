@@ -6,6 +6,10 @@ import { DEFAULT_FILTERS, type MonsterFilters } from './monsterFilters'
 const controlClass =
   'h-8 rounded-md border bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50'
 
+// Fundo explícito: a lista aberta do select é desenhada pelo navegador e não herda o fundo transparente
+const selectClass = cn(controlClass, 'bg-background text-foreground')
+const optionClass = 'bg-popover text-popover-foreground'
+
 interface Props {
   filters: MonsterFilters
   onChange: (filters: MonsterFilters) => void
@@ -41,11 +45,11 @@ export function MonsterFiltersBar({ filters, onChange }: Props) {
         aria-label="Elemento"
         value={filters.element ?? ''}
         onChange={(event) => update({ element: (event.target.value || null) as ElementName | null })}
-        className={controlClass}
+        className={selectClass}
       >
-        <option value="">Todos os elementos</option>
+        <option value="" className={optionClass}>Todos os elementos</option>
         {Object.entries(ELEMENT_NAME_LABELS).map(([value, label]) => (
-          <option key={value} value={value}>
+          <option key={value} value={value} className={optionClass}>
             {label}
           </option>
         ))}
@@ -55,11 +59,11 @@ export function MonsterFiltersBar({ filters, onChange }: Props) {
         aria-label="Set"
         value={filters.set ?? ''}
         onChange={(event) => update({ set: event.target.value || null })}
-        className={controlClass}
+        className={selectClass}
       >
-        <option value="">Todos os sets</option>
+        <option value="" className={optionClass}>Todos os sets</option>
         {EQUIPPABLE_RUNE_SETS.map((set) => (
-          <option key={set} value={set}>
+          <option key={set} value={set} className={optionClass}>
             {set}
           </option>
         ))}
