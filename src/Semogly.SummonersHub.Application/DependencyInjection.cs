@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
+using Semogly.SummonersHub.Application.Accounts.ImportAccount;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
 using Semogly.SummonersHub.Domain.GameData;
 
@@ -12,6 +14,8 @@ public static class DependencyInjection
     {
         services.AddSingleton(TimeProvider.System);
 
+        services.AddScoped<ICommandHandler<ImportAccountCommand, ImportAccountResponse>, ImportAccountCommandHandler>();
+        services.AddScoped<IQueryHandler<GetAccountSummaryQuery, AccountSummaryResponse>, GetAccountSummaryQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonstersQuery, IReadOnlyList<MonsterDefinition>>, GetMonstersQueryHandler>();
 
         return services;

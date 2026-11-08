@@ -29,6 +29,7 @@ src/Semogly.SummonersHub.Infrastructure    EF Core / PostgreSQL
 src/Semogly.SummonersHub.Api               Endpoints HTTP e composição
 tests/Semogly.SummonersHub.ArchitectureTests  Regra de dependência da Clean Architecture
 tests/Semogly.SummonersHub.UnitTests       Testes de domínio e aplicação
+tests/Semogly.SummonersHub.IntegrationTests  API em memória + PostgreSQL em container (Testcontainers)
 tools/Semogly.SummonersHub.GameDataSync    Sincroniza o bestiário com o SWARFARM
 ```
 
@@ -44,6 +45,20 @@ dotnet run --project src/Aspire/Semogly.SummonersHub.AppHost
 
 O link do dashboard do Aspire aparece no terminal; por ele se acessam o front (`web`), a API (`api`,
 documentação em `/scalar`) e o pgAdmin. O front faz proxy de `/api` para a API, sem CORS.
+
+## Import da conta
+
+O front lê o JSON do SW Exporter no navegador, remove os dados sensíveis e envia o resultado para
+`POST /api/imports`. Cada import com conteúdo novo gera uma versão (`AccountSnapshot`) do invocador. Reenviar
+o mesmo conteúdo, mesmo vindo de outro export, devolve a versão existente: a idempotência é feita pelo hash
+SHA-256 do conteúdo, ignorando a data do export.
+
+Migrations do EF Core ficam em `src/Semogly.SummonersHub.Infrastructure/Persistence/Migrations` e são aplicadas
+na inicialização em desenvolvimento. Para criar uma nova:
+
+```bash
+dotnet ef migrations add <Nome> --project src/Semogly.SummonersHub.Infrastructure --output-dir Persistence/Migrations
+```
 
 ## Dados do jogo
 
@@ -62,6 +77,6 @@ Os ícones dos monstros são servidos pelo SWARFARM.
 ## Testes
 
 ```bash
-dotnet test                           # testes .NET
+dotnet test                           # testes .NET (os de integração precisam do Docker)
 cd apps/web && npm test -- --run      # testes do front
 ```
