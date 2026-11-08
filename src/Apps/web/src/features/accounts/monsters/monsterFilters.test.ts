@@ -10,10 +10,11 @@ function monster(overrides: Partial<MonsterListItem> & { monsterId: number }): M
     stars: 6,
     level: 40,
     awakenLevel: 1,
-    total: { hp: 10000, attack: 1000, defense: 500, speed: 100, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 0 },
+    total: { hp: 10000, attack: 1000, defense: 500, speed: 100, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 0, effectiveHp: 30000 },
     activeSets: [],
     runes: 6,
     artifacts: 2,
+    averageRuneEfficiency: null,
     ...overrides,
   }
 }
@@ -53,6 +54,16 @@ describe('filterAndSortMonsters', () => {
 
   it('busca pelo nome sem diferenciar maiúsculas nem acentos', () => {
     expect(names(filterAndSortMonsters([...monsters], { ...DEFAULT_FILTERS, search: 'GANI' }))).toEqual(['Gânimedes'])
+  })
+
+  it('ordena pela eficiência média das runas, com quem não tem runas por último', () => {
+    const withEfficiency = [
+      monster({ monsterId: 1, averageRuneEfficiency: 70 }),
+      monster({ monsterId: 2, averageRuneEfficiency: null }),
+      monster({ monsterId: 3, averageRuneEfficiency: 95 }),
+    ]
+    const sorted = filterAndSortMonsters(withEfficiency, { ...DEFAULT_FILTERS, sort: 'averageRuneEfficiency' })
+    expect(sorted.map((m) => m.monsterId)).toEqual([3, 1, 2])
   })
 
   it('ordena por nome em ordem crescente', () => {

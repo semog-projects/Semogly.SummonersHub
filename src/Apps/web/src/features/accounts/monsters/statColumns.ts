@@ -10,4 +10,5 @@ export const STAT_COLUMNS: Array<{ key: keyof StatValues; label: string; percent
   { key: 'criticalDamage', label: 'Dano Crít.', percent: true },
   { key: 'resistance', label: 'RES', percent: true },
   { key: 'accuracy', label: 'PRE', percent: true },
+  { key: 'effectiveHp', label: 'HP Efet.', percent: false },
 ]

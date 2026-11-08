@@ -24,7 +24,8 @@ public sealed record MonsterDetailResponse(
     IReadOnlyList<RuneSet> ActiveSets,
     IReadOnlyList<MonsterSkill> Skills,
     IReadOnlyList<RuneDetail> Runes,
-    IReadOnlyList<ArtifactDetail> Artifacts);
+    IReadOnlyList<ArtifactDetail> Artifacts,
+    decimal? AverageRuneEfficiency);
 
 internal sealed class GetMonsterDetailQueryHandler(
     IAccountSnapshotRepository repository,
@@ -64,6 +65,7 @@ internal sealed class GetMonsterDetailQueryHandler(
             stats.ActiveSets,
             monster.Skills,
             [.. equipment.RunesOf(monster.GameId).OrderBy(r => r.Slot).Select(EquipmentDetails.ToDetail)],
-            [.. equipment.ArtifactsOf(monster.GameId).OrderBy(a => a.Type).Select(EquipmentDetails.ToDetail)]);
+            [.. equipment.ArtifactsOf(monster.GameId).OrderBy(a => a.Type).Select(EquipmentDetails.ToDetail)],
+            equipment.AverageRuneEfficiencyOf(monster.GameId));
     }
 }

@@ -2,7 +2,7 @@ import type { ElementName } from '@/lib/game/labels'
 import { normalizeText } from '../shared/sorting'
 import type { MonsterListItem, StatValues } from '../types'
 
-export type SortKey = 'name' | 'stars' | 'level' | keyof StatValues
+export type SortKey = 'name' | 'stars' | 'level' | 'averageRuneEfficiency' | keyof StatValues
 
 export interface MonsterFilters {
   search: string
@@ -37,6 +37,8 @@ const SORT_KEYS: SortKey[] = [
   'criticalDamage',
   'resistance',
   'accuracy',
+  'effectiveHp',
+  'averageRuneEfficiency',
 ]
 
 const ELEMENTS: ElementName[] = ['Water', 'Fire', 'Wind', 'Light', 'Dark', 'Pure']
@@ -101,6 +103,9 @@ function compare(a: MonsterListItem, b: MonsterListItem, key: SortKey): number {
       return a.stars - b.stars
     case 'level':
       return a.level - b.level
+    case 'averageRuneEfficiency':
+      // Sem runas fica abaixo de qualquer eficiência
+      return (a.averageRuneEfficiency ?? -1) - (b.averageRuneEfficiency ?? -1)
     default:
       return a.total[key] - b.total[key]
   }

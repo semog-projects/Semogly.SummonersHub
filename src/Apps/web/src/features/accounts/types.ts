@@ -63,6 +63,8 @@ export interface StatValues {
   criticalDamage: number
   resistance: number
   accuracy: number
+  /** HP × (1140 + 3,5 × DEF) ÷ 1000, calculado pela API. */
+  effectiveHp: number
 }
 
 /** GET /api/accounts/{wizardId}/monsters */
@@ -79,6 +81,8 @@ export interface MonsterListItem {
   activeSets: string[]
   runes: number
   artifacts: number
+  /** Eficiência média das runas equipadas, ou nulo sem runas. */
+  averageRuneEfficiency: number | null
 }
 
 /** Atributo com o código numérico do jogo (mesma tabela de rótulos do import). */
