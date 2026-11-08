@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Camada de domínio: entidades e regras do jogo, sem dependências externas. -->
+
+</Project>
