@@ -1,14 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { ELEMENT_NAME_LABELS, EQUIPPABLE_RUNE_SETS, type ElementName } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
+import { Chip } from '../shared/filterControls'
+import { controlClass, optionClass, selectClass } from '../shared/filterStyles'
 import { DEFAULT_FILTERS, type MonsterFilters } from './monsterFilters'
-
-const controlClass =
-  'h-8 rounded-md border bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50'
-
-// Fundo explícito: a lista aberta do select é desenhada pelo navegador e não herda o fundo transparente
-const selectClass = cn(controlClass, 'bg-background text-foreground')
-const optionClass = 'bg-popover text-popover-foreground'
 
 interface Props {
   filters: MonsterFilters
@@ -86,21 +81,5 @@ export function MonsterFiltersBar({ filters, onChange }: Props) {
         Limpar filtros
       </Button>
     </div>
-  )
-}
-
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        'h-8 rounded-md border px-2 text-sm tabular-nums transition-colors hover:bg-muted',
-        active && 'border-primary bg-muted font-medium',
-      )}
-    >
-      {children}
-    </button>
   )
 }

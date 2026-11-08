@@ -12,6 +12,7 @@ import { InventoryPage } from '@/pages/InventoryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
 import { MonsterListPage } from '@/pages/MonsterListPage'
+import { RuneListPage } from '@/pages/RuneListPage'
 
 export function App() {
   return (
@@ -35,6 +36,7 @@ export function App() {
             <Route index element={<AccountOverviewPage />} />
             <Route path="monstros" element={<MonsterListPage />} />
             <Route path="monstros/:monsterId" element={<MonsterDetailPage />} />
+            <Route path="runas" element={<RuneListPage />} />
             <Route path="inventario" element={<InventoryPage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />

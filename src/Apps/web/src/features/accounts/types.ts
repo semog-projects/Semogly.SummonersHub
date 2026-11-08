@@ -99,6 +99,10 @@ export interface RuneDetail {
   mainStat: StatCode
   innateStat: StatCode | null
   substats: Array<StatCode & { isGemmed: boolean; grindValue: number }>
+  /** Eficiência atual em % (modelo do SW Exporter). */
+  efficiency: number
+  /** Eficiência com roll máximo nos upgrades que faltam até o +12. */
+  maxEfficiency: number
 }
 
 export interface ArtifactDetail {
@@ -180,4 +184,19 @@ export interface InventoryStats {
     grinds: number
     items: CraftItemStats[]
   }
+}
+
+/** Monstro que equipa uma runa ou artefato. */
+export interface EquippedMonster {
+  monsterId: number
+  masterId: number
+  name: string | null
+  element: ElementName
+}
+
+/** GET /api/accounts/{wizardId}/runes */
+export interface RuneListItem {
+  rune: RuneDetail
+  /** Nulo quando a runa está no inventário. */
+  equippedOn: EquippedMonster | null
 }

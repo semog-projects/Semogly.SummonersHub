@@ -1,4 +1,3 @@
-import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { useMonsterDefinitions } from '@/features/game-data/useMonsterDefinitions'
@@ -6,6 +5,7 @@ import { formatNumber } from '@/lib/format'
 import { ELEMENT_NAME_LABELS } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES } from '../overview/elementStyles'
+import { SortHeader } from '../shared/SortHeader'
 import type { MonsterListItem } from '../types'
 import { MonsterIcon } from './MonsterIcon'
 import type { MonsterFilters, SortKey } from './monsterFilters'
@@ -30,12 +30,19 @@ export function MonsterTable({ monsters, filters, onSort }: Props) {
       <table className="w-full text-sm">
         <thead className="text-left text-xs text-muted-foreground">
           <tr className="border-b">
-            <SortHeader sortKey="name" label="Monstro" align="left" filters={filters} onSort={onSort} />
+            <SortHeader sortKey="name" label="Monstro" align="left" sort={filters.sort} direction={filters.direction} onSort={onSort} />
             <th scope="col" className="py-2 pr-3 font-medium">
               Sets
             </th>
             {STAT_COLUMNS.map((column) => (
-              <SortHeader key={column.key} sortKey={column.key} label={column.label} filters={filters} onSort={onSort} />
+              <SortHeader
+                key={column.key}
+                sortKey={column.key}
+                label={column.label}
+                sort={filters.sort}
+                direction={filters.direction}
+                onSort={onSort}
+              />
             ))}
           </tr>
         </thead>
@@ -86,34 +93,5 @@ export function MonsterTable({ monsters, filters, onSort }: Props) {
         </tbody>
       </table>
     </div>
-  )
-}
-
-interface SortHeaderProps {
-  sortKey: SortKey
-  label: string
-  align?: 'left' | 'right'
-  filters: MonsterFilters
-  onSort: (sort: SortKey) => void
-}
-
-function SortHeader({ sortKey, label, align = 'right', filters, onSort }: SortHeaderProps) {
-  const active = filters.sort === sortKey
-  const Icon = filters.direction === 'asc' ? ArrowUp : ArrowDown
-  return (
-    <th
-      scope="col"
-      aria-sort={active ? (filters.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
-      className={cn('py-2 pr-3 font-medium whitespace-nowrap', align === 'right' && 'text-right')}
-    >
-      <button
-        type="button"
-        onClick={() => onSort(sortKey)}
-        className={cn('inline-flex items-center gap-1 hover:text-foreground', active && 'text-foreground')}
-      >
-        {label}
-        {active && <Icon className="size-3" aria-hidden />}
-      </button>
-    </th>
   )
 }

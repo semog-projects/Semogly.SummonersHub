@@ -2,7 +2,7 @@ import { NavLink, Outlet, useParams } from 'react-router'
 import { useAccounts } from '@/features/accounts/useAccounts'
 import { cn } from '@/lib/utils'
 
-/** Moldura das páginas de uma conta: troca de invocador e abas (visão geral, monstros, inventário). */
+/** Moldura das páginas de uma conta: troca de invocador e abas (visão geral, monstros, runas, inventário...). */
 export function AccountLayout() {
   const { wizardId } = useParams()
 
@@ -22,6 +22,9 @@ export function AccountLayout() {
         </NavLink>
         <NavLink to={`/contas/${wizardId}/monstros`} className={tabClass}>
           Monstros
+        </NavLink>
+        <NavLink to={`/contas/${wizardId}/runas`} className={tabClass}>
+          Runas
         </NavLink>
         <NavLink to={`/contas/${wizardId}/inventario`} className={tabClass}>
           Inventário

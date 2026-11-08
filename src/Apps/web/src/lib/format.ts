@@ -10,3 +10,10 @@ export function formatDateTime(value: string): string {
 export function formatNumber(value: number): string {
   return numberFormat.format(value)
 }
+
+const percentFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
+
+/** Percentual com até 2 casas, ex.: 85,71%. */
+export function formatPercent(value: number): string {
+  return `${percentFormat.format(value)}%`
+}

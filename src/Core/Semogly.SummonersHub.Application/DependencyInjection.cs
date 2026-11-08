@@ -7,6 +7,7 @@ using Semogly.SummonersHub.Application.Accounts.GetMonsterDetail;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
 using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
+using Semogly.SummonersHub.Application.Accounts.ListRunes;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
 using Semogly.SummonersHub.Domain.GameData;
 
@@ -25,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<ListAccountsQuery, IReadOnlyList<AccountSummaryResponse>>, ListAccountsQueryHandler>();
         services.AddScoped<IQueryHandler<GetInventoryStatsQuery, InventoryStatsResponse>, GetInventoryStatsQueryHandler>();
         services.AddScoped<IQueryHandler<ListMonstersQuery, IReadOnlyList<MonsterListItem>>, ListMonstersQueryHandler>();
+        services.AddScoped<IQueryHandler<ListRunesQuery, IReadOnlyList<RuneListItem>>, ListRunesQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse>, GetMonsterDetailQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonstersQuery, IReadOnlyList<MonsterDefinition>>, GetMonstersQueryHandler>();
 
