@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-// Uso: dotnet run --project tools/Semogly.SummonersHub.GameDataSync [caminho de saída]
+// Uso: dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync [caminho de saída]
 // Sem argumento, sobrescreve o monsters.json embarcado na Infrastructure.
 var outputPath = args.Length > 0
     ? args[0]

@@ -29,10 +29,10 @@ src/Core/Semogly.SummonersHub.Domain          Entidades e regras do jogo (sem de
 src/Core/Semogly.SummonersHub.Application     Casos de uso (ICommandHandler / IQueryHandler, Result)
 src/Core/Semogly.SummonersHub.Infrastructure  EF Core / PostgreSQL / Identity
 src/Services/Semogly.SummonersHub.Api         Endpoints HTTP e composição
+src/Tools/Semogly.SummonersHub.GameDataSync  Sincroniza o bestiário com o SWARFARM
 tests/Semogly.SummonersHub.ArchitectureTests  Regra de dependência da Clean Architecture
 tests/Semogly.SummonersHub.UnitTests       Testes de domínio e aplicação
 tests/Semogly.SummonersHub.IntegrationTests  API em memória + PostgreSQL em container (Testcontainers)
-tools/Semogly.SummonersHub.GameDataSync    Sincroniza o bestiário com o SWARFARM
 ```
 
 As dependências apontam sempre para dentro: `Api → Infrastructure → Application → Domain`.
@@ -83,7 +83,7 @@ O bestiário (nome, elemento, arquétipo, estrelas e ícone de cada monstro) fic
 Ele é gerado a partir da [API do SWARFARM](https://swarfarm.com/api/v2/). Para atualizar depois de um patch do jogo:
 
 ```bash
-dotnet run --project tools/Semogly.SummonersHub.GameDataSync
+dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync
 ```
 
 Sets, atributos de runa, efeitos de artefato e itens de craft são enums do domínio

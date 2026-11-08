@@ -11,12 +11,12 @@
     <Project Path="src/Aspire/Semogly.SummonersHub.AppHost/Semogly.SummonersHub.AppHost.csproj" />
     <Project Path="src/Aspire/Semogly.SummonersHub.ServiceDefaults/Semogly.SummonersHub.ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/src/Tools/">
+    <Project Path="src/Tools/Semogly.SummonersHub.GameDataSync/Semogly.SummonersHub.GameDataSync.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Semogly.SummonersHub.ArchitectureTests/Semogly.SummonersHub.ArchitectureTests.csproj" />
     <Project Path="tests/Semogly.SummonersHub.IntegrationTests/Semogly.SummonersHub.IntegrationTests.csproj" />
     <Project Path="tests/Semogly.SummonersHub.UnitTests/Semogly.SummonersHub.UnitTests.csproj" />
-  </Folder>
-  <Folder Name="/tools/">
-    <Project Path="tools/Semogly.SummonersHub.GameDataSync/Semogly.SummonersHub.GameDataSync.csproj" />
   </Folder>
 </Solution>
