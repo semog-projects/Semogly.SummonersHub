@@ -8,5 +8,8 @@ public interface IAccountSnapshotRepository
     /// <summary>Última versão importada do invocador, ou 0 se nunca importou.</summary>
     Task<int> GetLatestVersionAsync(long wizardGameId, CancellationToken cancellationToken);
 
+    /// <summary>Último snapshot do invocador com monstros, runas, artefatos e itens de craft.</summary>
+    Task<AccountSnapshot?> GetLatestAsync(long wizardGameId, CancellationToken cancellationToken);
+
     void Add(AccountSnapshot snapshot);
 }
