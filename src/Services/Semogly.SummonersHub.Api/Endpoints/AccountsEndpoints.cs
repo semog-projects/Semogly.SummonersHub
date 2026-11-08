@@ -8,6 +8,7 @@ using Semogly.SummonersHub.Application.Accounts.GetMonsterDetail;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
 using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
+using Semogly.SummonersHub.Application.Accounts.ListRunes;
 
 namespace Semogly.SummonersHub.Api.Endpoints;
 
@@ -48,6 +49,10 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}/monsters/{monsterId:long}", GetMonsterDetail)
             .WithName("GetMonsterDetail")
             .WithSummary("Monstro com atributos base e totais (base + runas + sets + artefatos), skills, runas e artefatos");
+
+        api.MapGet("/accounts/{wizardId:long}/runes", ListRunes)
+            .WithName("ListRunes")
+            .WithSummary("Todas as runas do último import com eficiência atual e máxima e o monstro que as equipa");
 
         return app;
     }
@@ -92,6 +97,15 @@ internal static class AccountsEndpoints
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new ListMonstersQuery(wizardId), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<IReadOnlyList<RuneListItem>>, ProblemHttpResult>> ListRunes(
+        long wizardId,
+        IQueryHandler<ListRunesQuery, IReadOnlyList<RuneListItem>> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new ListRunesQuery(wizardId), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 

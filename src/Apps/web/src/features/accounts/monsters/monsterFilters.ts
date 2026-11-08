@@ -1,4 +1,5 @@
 import type { ElementName } from '@/lib/game/labels'
+import { normalizeText } from '../shared/sorting'
 import type { MonsterListItem, StatValues } from '../types'
 
 export type SortKey = 'name' | 'stars' | 'level' | keyof StatValues
@@ -73,7 +74,7 @@ export function filtersToParams(filters: MonsterFilters): URLSearchParams {
 }
 
 export function filterAndSortMonsters(monsters: MonsterListItem[], filters: MonsterFilters): MonsterListItem[] {
-  const search = normalize(filters.search.trim())
+  const search = normalizeText(filters.search.trim())
 
   const filtered = monsters.filter(
     (monster) =>
@@ -81,7 +82,7 @@ export function filterAndSortMonsters(monsters: MonsterListItem[], filters: Mons
       (filters.stars === null || monster.stars === filters.stars) &&
       (filters.element === null || monster.element === filters.element) &&
       (filters.set === null || monster.activeSets.includes(filters.set)) &&
-      (search === '' || normalize(monster.name ?? '').includes(search)),
+      (search === '' || normalizeText(monster.name ?? '').includes(search)),
   )
 
   const factor = filters.direction === 'asc' ? 1 : -1
@@ -103,9 +104,4 @@ function compare(a: MonsterListItem, b: MonsterListItem, key: SortKey): number {
     default:
       return a.total[key] - b.total[key]
   }
-}
-
-/** Busca sem diferenciar maiúsculas nem acentos. */
-function normalize(text: string): string {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 }

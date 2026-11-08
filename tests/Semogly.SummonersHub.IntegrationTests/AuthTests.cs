@@ -18,6 +18,7 @@ public class AuthTests(ApiFixture fixture)
     [InlineData("/api/accounts/1/inventory")]
     [InlineData("/api/accounts/1/monsters")]
     [InlineData("/api/accounts/1/monsters/1")]
+    [InlineData("/api/accounts/1/runes")]
     public async Task AccountEndpoints_ShouldRequireLogin(string url)
     {
         using var client = fixture.CreateClient();
@@ -109,6 +110,7 @@ public class AuthTests(ApiFixture fixture)
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/inventory", Ct)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/monsters", Ct)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/monsters/{monsterId}", Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/runes", Ct)).StatusCode);
         Assert.Empty((await intruder.GetFromJsonAsync<List<AccountSummaryResponse>>("/api/accounts", Ct))!);
 
         Assert.Equal(HttpStatusCode.OK, (await owner.GetAsync($"/api/accounts/{wizardId}", Ct)).StatusCode);

@@ -43,6 +43,8 @@ const detail: MonsterDetail = {
         { type: 2, value: 10, isGemmed: true, grindValue: 0 },
         { type: 4, value: 8, isGemmed: false, grindValue: 5 },
       ],
+      efficiency: 85.71,
+      maxEfficiency: 85.71,
     },
   ],
   artifacts: [
@@ -128,6 +130,7 @@ describe('MonsterDetailPage', () => {
     expect(rune).toHaveTextContent('Inata: Taxa Crít. +6%')
     expect(rune).toHaveTextContent('ATK +13%(5 grind)')
     expect(within(rune).getByText('gem')).toBeInTheDocument()
+    expect(rune).toHaveTextContent('Eficiência 85,71%')
     expect(screen.getAllByText(/Slot \d vazio/)).toHaveLength(5)
 
     const artifact = screen.getByLabelText('Artefato de elemento água')

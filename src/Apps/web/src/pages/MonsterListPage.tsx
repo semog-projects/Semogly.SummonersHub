@@ -9,6 +9,7 @@ import {
   type MonsterFilters,
   type SortKey,
 } from '@/features/accounts/monsters/monsterFilters'
+import { nextSort } from '@/features/accounts/shared/sorting'
 import { useMonsters } from '@/features/accounts/useAccounts'
 import { QueryStatus } from './QueryStatus'
 
@@ -22,10 +23,8 @@ export function MonsterListPage() {
   const setFilters = (next: MonsterFilters) => setSearchParams(filtersToParams(next), { replace: true })
 
   function handleSort(sort: SortKey) {
-    // Mesma coluna inverte a direção; coluna nova começa pelo maior (nome começa pelo A)
-    const direction =
-      filters.sort === sort ? (filters.direction === 'asc' ? 'desc' : 'asc') : sort === 'name' ? 'asc' : 'desc'
-    setFilters({ ...filters, sort, direction })
+    // Coluna nova começa pelo maior; nome começa pelo A
+    setFilters({ ...filters, ...nextSort(filters, sort, sort === 'name' ? 'asc' : 'desc') })
   }
 
   return (
