@@ -35,5 +35,6 @@ if (app.Environment.IsDevelopment())
 
 app.MapDefaultEndpoints();
 app.MapSystemEndpoints();
+app.MapGameDataEndpoints();
 
 await app.RunAsync();
