@@ -32,6 +32,9 @@ export function AccountLayout() {
         <NavLink to={`/contas/${wizardId}/inventario`} className={tabClass}>
           Inventário
         </NavLink>
+        <NavLink to={`/contas/${wizardId}/historico`} className={tabClass}>
+          Histórico
+        </NavLink>
       </nav>
 
       <Outlet />

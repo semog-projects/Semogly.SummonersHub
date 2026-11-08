@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Semogly.SummonersHub.Api.ErrorHandling;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.Accounts.CompareSnapshots;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
 using Semogly.SummonersHub.Application.Accounts.GetInventoryStats;
@@ -10,6 +11,7 @@ using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
+using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
 
 namespace Semogly.SummonersHub.Api.Endpoints;
 
@@ -58,6 +60,14 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}/artifacts", ListArtifacts)
             .WithName("ListArtifacts")
             .WithSummary("Todos os artefatos do último import com o monstro que os equipa");
+
+        api.MapGet("/accounts/{wizardId:long}/snapshots", ListSnapshots)
+            .WithName("ListSnapshots")
+            .WithSummary("Linha do tempo dos imports: o resumo de cada versão, da mais recente para a mais antiga");
+
+        api.MapGet("/accounts/{wizardId:long}/snapshots/compare", CompareSnapshots)
+            .WithName("CompareSnapshots")
+            .WithSummary("O que mudou entre duas versões (?from=&to=): monstros, evolução, runas e artefatos");
 
         return app;
     }
@@ -120,6 +130,26 @@ internal static class AccountsEndpoints
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new ListArtifactsQuery(wizardId), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<IReadOnlyList<AccountSummaryResponse>>, ProblemHttpResult>> ListSnapshots(
+        long wizardId,
+        IQueryHandler<ListSnapshotsQuery, IReadOnlyList<AccountSummaryResponse>> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new ListSnapshotsQuery(wizardId), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<SnapshotComparisonResponse>, ProblemHttpResult>> CompareSnapshots(
+        long wizardId,
+        int from,
+        int to,
+        IQueryHandler<CompareSnapshotsQuery, SnapshotComparisonResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new CompareSnapshotsQuery(wizardId, from, to), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 

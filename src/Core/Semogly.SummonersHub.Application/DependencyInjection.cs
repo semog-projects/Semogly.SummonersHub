@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.Accounts.CompareSnapshots;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
 using Semogly.SummonersHub.Application.Accounts.GetInventoryStats;
@@ -9,6 +10,7 @@ using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
+using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
 using Semogly.SummonersHub.Domain.GameData;
 
@@ -29,6 +31,8 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<ListMonstersQuery, IReadOnlyList<MonsterListItem>>, ListMonstersQueryHandler>();
         services.AddScoped<IQueryHandler<ListRunesQuery, IReadOnlyList<RuneListItem>>, ListRunesQueryHandler>();
         services.AddScoped<IQueryHandler<ListArtifactsQuery, IReadOnlyList<ArtifactListItem>>, ListArtifactsQueryHandler>();
+        services.AddScoped<IQueryHandler<ListSnapshotsQuery, IReadOnlyList<AccountSummaryResponse>>, ListSnapshotsQueryHandler>();
+        services.AddScoped<IQueryHandler<CompareSnapshotsQuery, SnapshotComparisonResponse>, CompareSnapshotsQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse>, GetMonsterDetailQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonstersQuery, IReadOnlyList<MonsterDefinition>>, GetMonstersQueryHandler>();
 

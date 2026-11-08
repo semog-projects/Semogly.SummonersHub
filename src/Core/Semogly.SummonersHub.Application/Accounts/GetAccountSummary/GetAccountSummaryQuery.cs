@@ -28,6 +28,9 @@ public interface IAccountReadService
 
     /// <summary>Resumo do último import de cada invocador do usuário, do import mais recente para o mais antigo.</summary>
     Task<IReadOnlyList<AccountSummaryResponse>> ListLatestSummariesAsync(Guid ownerId, CancellationToken cancellationToken);
+
+    /// <summary>Resumo de todas as versões do invocador, da mais recente para a mais antiga.</summary>
+    Task<IReadOnlyList<AccountSummaryResponse>> ListSummariesAsync(long wizardId, CancellationToken cancellationToken);
 }
 
 internal sealed class GetAccountSummaryQueryHandler(

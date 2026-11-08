@@ -36,4 +36,12 @@ internal sealed class AccountReadService(SummonersHubDbContext db) : IAccountRea
             .OrderByDescending(s => s.ImportedAt)
             .Select(ToSummary)
             .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<AccountSummaryResponse>> ListSummariesAsync(long wizardId, CancellationToken cancellationToken) =>
+        await db.AccountSnapshots
+            .AsNoTracking()
+            .Where(s => s.WizardId == wizardId)
+            .OrderByDescending(s => s.Version)
+            .Select(ToSummary)
+            .ToListAsync(cancellationToken);
 }
