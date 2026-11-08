@@ -15,7 +15,8 @@ public class AuthTests(ApiFixture fixture)
     [Theory]
     [InlineData("/api/accounts")]
     [InlineData("/api/accounts/1")]
-    [InlineData("/api/accounts/1/monsters/1/stats")]
+    [InlineData("/api/accounts/1/monsters")]
+    [InlineData("/api/accounts/1/monsters/1")]
     public async Task AccountEndpoints_ShouldRequireLogin(string url)
     {
         using var client = fixture.CreateClient();
@@ -104,7 +105,8 @@ public class AuthTests(ApiFixture fixture)
 
         // ...nem ler os dados dele (responde como se não existisse)
         Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}", Ct)).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/monsters/{monsterId}/stats", Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/monsters", Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await intruder.GetAsync($"/api/accounts/{wizardId}/monsters/{monsterId}", Ct)).StatusCode);
         Assert.Empty((await intruder.GetFromJsonAsync<List<AccountSummaryResponse>>("/api/accounts", Ct))!);
 
         Assert.Equal(HttpStatusCode.OK, (await owner.GetAsync($"/api/accounts/{wizardId}", Ct)).StatusCode);

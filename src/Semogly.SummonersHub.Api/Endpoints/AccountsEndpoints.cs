@@ -3,9 +3,10 @@ using Semogly.SummonersHub.Api.ErrorHandling;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
-using Semogly.SummonersHub.Application.Accounts.GetMonsterStats;
+using Semogly.SummonersHub.Application.Accounts.GetMonsterDetail;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
 using Semogly.SummonersHub.Application.Accounts.ListAccounts;
+using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 
 namespace Semogly.SummonersHub.Api.Endpoints;
 
@@ -35,9 +36,13 @@ internal static class AccountsEndpoints
             .WithName("GetAccountOverview")
             .WithSummary("Visão geral do último import: monstros por estrelas, elemento e despertar e ranking de velocidade");
 
-        api.MapGet("/accounts/{wizardId:long}/monsters/{monsterId:long}/stats", GetMonsterStats)
-            .WithName("GetMonsterStats")
-            .WithSummary("Atributos totais do monstro (base + runas + sets + artefatos) no último import");
+        api.MapGet("/accounts/{wizardId:long}/monsters", ListMonsters)
+            .WithName("ListMonsters")
+            .WithSummary("Todos os monstros do último import com atributos totais, sets ativos e equipamentos");
+
+        api.MapGet("/accounts/{wizardId:long}/monsters/{monsterId:long}", GetMonsterDetail)
+            .WithName("GetMonsterDetail")
+            .WithSummary("Monstro com atributos base e totais (base + runas + sets + artefatos), skills, runas e artefatos");
 
         return app;
     }
@@ -67,13 +72,22 @@ internal static class AccountsEndpoints
         return TypedResults.Ok(result.Value);
     }
 
-    private static async Task<Results<Ok<MonsterStatsResponse>, ProblemHttpResult>> GetMonsterStats(
+    private static async Task<Results<Ok<IReadOnlyList<MonsterListItem>>, ProblemHttpResult>> ListMonsters(
         long wizardId,
-        long monsterId,
-        IQueryHandler<GetMonsterStatsQuery, MonsterStatsResponse> handler,
+        IQueryHandler<ListMonstersQuery, IReadOnlyList<MonsterListItem>> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.HandleAsync(new GetMonsterStatsQuery(wizardId, monsterId), cancellationToken);
+        var result = await handler.HandleAsync(new ListMonstersQuery(wizardId), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<MonsterDetailResponse>, ProblemHttpResult>> GetMonsterDetail(
+        long wizardId,
+        long monsterId,
+        IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new GetMonsterDetailQuery(wizardId, monsterId), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 

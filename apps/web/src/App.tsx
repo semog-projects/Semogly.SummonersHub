@@ -4,10 +4,13 @@ import { RequireAuth } from '@/features/auth/RequireAuth'
 import { useCurrentUser } from '@/features/auth/useAuth'
 import { UserMenu } from '@/features/auth/UserMenu'
 import { cn } from '@/lib/utils'
+import { AccountLayout } from '@/pages/AccountLayout'
 import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
 import { HomePage } from '@/pages/HomePage'
 import { ImportPage } from '@/pages/ImportPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
+import { MonsterListPage } from '@/pages/MonsterListPage'
 
 export function App() {
   return (
@@ -27,7 +30,11 @@ export function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route index element={<Protected><HomePage /></Protected>} />
-          <Route path="/contas/:wizardId" element={<Protected><AccountOverviewPage /></Protected>} />
+          <Route path="/contas/:wizardId" element={<Protected><AccountLayout /></Protected>}>
+            <Route index element={<AccountOverviewPage />} />
+            <Route path="monstros" element={<MonsterListPage />} />
+            <Route path="monstros/:monsterId" element={<MonsterDetailPage />} />
+          </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />
         </Routes>
       </main>
