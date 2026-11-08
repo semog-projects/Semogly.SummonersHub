@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ImportCard } from '@/features/import/ImportCard'
 import { ApiStatusBadge } from '@/features/system/ApiStatusBadge'
 
 export function HomePage() {
@@ -9,16 +9,7 @@ export function HomePage() {
         <ApiStatusBadge />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Importar dados</CardTitle>
-          <CardDescription>
-            Exporte sua conta com o SW Exporter e envie o arquivo JSON aqui. Os dados sensíveis (chaves de sessão e
-            token) são removidos no seu navegador antes do envio.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">O upload chega na próxima etapa.</CardContent>
-      </Card>
+      <ImportCard />
     </div>
   )
 }
