@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getJson } from '@/lib/api'
-import type { AccountOverview, AccountSummary, MonsterDetail, MonsterListItem } from './types'
+import type { AccountOverview, AccountSummary, InventoryStats, MonsterDetail, MonsterListItem } from './types'
 
 /** Invocadores do usuário logado, do import mais recente para o mais antigo. */
 export function useAccounts() {
@@ -31,5 +31,13 @@ export function useMonsterDetail(wizardId: number, monsterId: number) {
     queryKey: ['accounts', wizardId, 'monsters', monsterId],
     queryFn: ({ signal }) => getJson<MonsterDetail>(`/accounts/${wizardId}/monsters/${monsterId}`, signal),
     enabled: Number.isSafeInteger(wizardId) && Number.isSafeInteger(monsterId),
+  })
+}
+
+export function useInventoryStats(wizardId: number) {
+  return useQuery({
+    queryKey: ['accounts', wizardId, 'inventory'],
+    queryFn: ({ signal }) => getJson<InventoryStats>(`/accounts/${wizardId}/inventory`, signal),
+    enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
   })
 }

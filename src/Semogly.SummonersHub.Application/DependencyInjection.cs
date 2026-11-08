@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
 using Semogly.SummonersHub.Application.Accounts.GetAccountOverview;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
+using Semogly.SummonersHub.Application.Accounts.GetInventoryStats;
 using Semogly.SummonersHub.Application.Accounts.GetMonsterDetail;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
 using Semogly.SummonersHub.Application.Accounts.ListAccounts;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetAccountSummaryQuery, AccountSummaryResponse>, GetAccountSummaryQueryHandler>();
         services.AddScoped<IQueryHandler<GetAccountOverviewQuery, AccountOverviewResponse>, GetAccountOverviewQueryHandler>();
         services.AddScoped<IQueryHandler<ListAccountsQuery, IReadOnlyList<AccountSummaryResponse>>, ListAccountsQueryHandler>();
+        services.AddScoped<IQueryHandler<GetInventoryStatsQuery, InventoryStatsResponse>, GetInventoryStatsQueryHandler>();
         services.AddScoped<IQueryHandler<ListMonstersQuery, IReadOnlyList<MonsterListItem>>, ListMonstersQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse>, GetMonsterDetailQueryHandler>();
         services.AddScoped<IQueryHandler<GetMonstersQuery, IReadOnlyList<MonsterDefinition>>, GetMonstersQueryHandler>();

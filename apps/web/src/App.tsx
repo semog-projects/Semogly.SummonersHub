@@ -8,6 +8,7 @@ import { AccountLayout } from '@/pages/AccountLayout'
 import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
 import { HomePage } from '@/pages/HomePage'
 import { ImportPage } from '@/pages/ImportPage'
+import { InventoryPage } from '@/pages/InventoryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
 import { MonsterListPage } from '@/pages/MonsterListPage'
@@ -34,6 +35,7 @@ export function App() {
             <Route index element={<AccountOverviewPage />} />
             <Route path="monstros" element={<MonsterListPage />} />
             <Route path="monstros/:monsterId" element={<MonsterDetailPage />} />
+            <Route path="inventario" element={<InventoryPage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />
         </Routes>

@@ -121,3 +121,63 @@ export interface MonsterDetail extends Omit<MonsterListItem, 'total' | 'runes' |
   runes: RuneDetail[]
   artifacts: ArtifactDetail[]
 }
+
+export interface RuneSetStats {
+  set: string
+  total: number
+  equipped: number
+  maxLevel: number
+}
+
+export interface SpeedRuneEntry {
+  runeId: number
+  slot: number
+  set: string
+  stars: number
+  level: number
+  isAncient: boolean
+  originalRarity: number
+  /** Velocidade da sub com o grind já somado (ou a inata). */
+  speed: number
+  grind: number
+  isGemmed: boolean
+  isInnate: boolean
+  equippedMonsterId: number | null
+  equippedMonsterName: string | null
+}
+
+export interface CraftItemStats {
+  type: 'EnchantedGem' | 'Grindstone' | 'ImmemorialGem' | 'ImmemorialGrindstone' | 'AncientGem' | 'AncientGrindstone'
+  set: string
+  /** Código numérico do atributo (mesma tabela das runas). */
+  stat: number
+  rarity: number
+  amount: number
+}
+
+/** GET /api/accounts/{wizardId}/inventory */
+export interface InventoryStats {
+  runes: {
+    total: number
+    equipped: number
+    maxLevel: number
+    ancient: number
+    bySet: RuneSetStats[]
+    bySlot: CountBy<number>[]
+    byRarity: CountBy<number>[]
+    byStars: CountBy<number>[]
+    topSpeed: SpeedRuneEntry[]
+  }
+  artifacts: {
+    total: number
+    equipped: number
+    maxLevel: number
+    byType: CountBy<'Element' | 'Archetype'>[]
+    byRarity: CountBy<number>[]
+  }
+  craft: {
+    gems: number
+    grinds: number
+    items: CraftItemStats[]
+  }
+}

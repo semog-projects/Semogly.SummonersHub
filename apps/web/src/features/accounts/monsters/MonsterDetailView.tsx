@@ -12,19 +12,10 @@ import {
   RARITY_LABELS,
 } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
-import { ELEMENT_TEXT_CLASSES } from '../overview/elementStyles'
+import { ELEMENT_TEXT_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
 import type { ArtifactDetail, MonsterDetail, RuneDetail } from '../types'
 import { MonsterIcon } from './MonsterIcon'
 import { STAT_COLUMNS } from './statColumns'
-
-/** Cor da raridade como no jogo: comum, mágica, rara, heroica e lendária. */
-const RARITY_TEXT_CLASSES: Record<number, string> = {
-  1: 'text-muted-foreground',
-  2: 'text-emerald-400',
-  3: 'text-sky-400',
-  4: 'text-fuchsia-400',
-  5: 'text-orange-400',
-}
 
 export function MonsterDetailView({ monster }: { monster: MonsterDetail }) {
   const { data: definitions } = useMonsterDefinitions([monster.masterId])
