@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Semogly.SummonersHub.Api\Semogly.SummonersHub.Api.csproj" />
+    <ProjectReference Include="..\..\Services\Semogly.SummonersHub.Api\Semogly.SummonersHub.Api.csproj" />
   </ItemGroup>
 
 </Project>
