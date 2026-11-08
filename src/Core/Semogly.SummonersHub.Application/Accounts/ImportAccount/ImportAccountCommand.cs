@@ -4,7 +4,7 @@ namespace Semogly.SummonersHub.Application.Accounts.ImportAccount;
 
 /// <summary>
 /// Conta exportada pelo SW Exporter, já reduzida e sanitizada no navegador
-/// (mesmo contrato de <c>AccountImport</c> em apps/web/src/features/import/types.ts).
+/// (mesmo contrato de <c>AccountImport</c> em src/Apps/web/src/features/import/types.ts).
 /// </summary>
 public sealed record ImportAccountCommand(
     int SchemaVersion,
