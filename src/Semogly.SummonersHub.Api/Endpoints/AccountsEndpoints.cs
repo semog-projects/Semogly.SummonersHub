@@ -4,6 +4,7 @@ using Semogly.SummonersHub.Application.Abstractions.Messaging;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
 using Semogly.SummonersHub.Application.Accounts.GetMonsterStats;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
+using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 
 namespace Semogly.SummonersHub.Api.Endpoints;
 
@@ -11,20 +12,26 @@ internal static class AccountsEndpoints
 {
     public static IEndpointRouteBuilder MapAccountsEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/imports", ImportAccount)
-            .WithName("ImportAccount")
-            .WithTags("Accounts")
-            .WithSummary("Importa a conta exportada pelo SW Exporter (payload já sanitizado pelo front)")
-            .WithDescription("201 quando gera uma nova versão; 200 quando o mesmo conteúdo já tinha sido importado.");
+        // Dados da conta só para o usuário logado que é dono do invocador
+        var api = app.MapGroup("/api").WithTags("Accounts").RequireAuthorization();
 
-        app.MapGet("/api/accounts/{wizardId:long}", GetAccountSummary)
+        api.MapPost("/imports", ImportAccount)
+            .WithName("ImportAccount")
+            .WithSummary("Importa a conta exportada pelo SW Exporter (payload já sanitizado pelo front)")
+            .WithDescription(
+                "201 quando gera uma nova versão; 200 quando o mesmo conteúdo já tinha sido importado. " +
+                "O primeiro import vincula o invocador ao usuário; 409 se ele já for de outro usuário.");
+
+        api.MapGet("/accounts", ListAccounts)
+            .WithName("ListAccounts")
+            .WithSummary("Invocadores do usuário com o resumo do último import de cada um");
+
+        api.MapGet("/accounts/{wizardId:long}", GetAccountSummary)
             .WithName("GetAccountSummary")
-            .WithTags("Accounts")
             .WithSummary("Resumo do último import do invocador");
 
-        app.MapGet("/api/accounts/{wizardId:long}/monsters/{monsterId:long}/stats", GetMonsterStats)
+        api.MapGet("/accounts/{wizardId:long}/monsters/{monsterId:long}/stats", GetMonsterStats)
             .WithName("GetMonsterStats")
-            .WithTags("Accounts")
             .WithSummary("Atributos totais do monstro (base + runas + sets + artefatos) no último import");
 
         return app;
@@ -45,6 +52,14 @@ internal static class AccountsEndpoints
         return result.Value.Created
             ? TypedResults.Created($"/api/accounts/{result.Value.WizardId}", result.Value)
             : TypedResults.Ok(result.Value);
+    }
+
+    private static async Task<Ok<IReadOnlyList<AccountSummaryResponse>>> ListAccounts(
+        IQueryHandler<ListAccountsQuery, IReadOnlyList<AccountSummaryResponse>> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new ListAccountsQuery(), cancellationToken);
+        return TypedResults.Ok(result.Value);
     }
 
     private static async Task<Results<Ok<MonsterStatsResponse>, ProblemHttpResult>> GetMonsterStats(

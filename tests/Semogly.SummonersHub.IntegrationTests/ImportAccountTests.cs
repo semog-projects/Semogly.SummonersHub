@@ -11,9 +11,17 @@ using Semogly.SummonersHub.IntegrationTests.Infrastructure;
 namespace Semogly.SummonersHub.IntegrationTests;
 
 [Collection(ApiTestGroup.Name)]
-public class ImportAccountTests(ApiFixture fixture)
+public sealed class ImportAccountTests(ApiFixture fixture) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.CreateClient();
+    private HttpClient _client = null!;
+
+    public async ValueTask InitializeAsync() => _client = await fixture.CreateAuthenticatedClientAsync(Ct);
+
+    public ValueTask DisposeAsync()
+    {
+        _client.Dispose();
+        return ValueTask.CompletedTask;
+    }
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 

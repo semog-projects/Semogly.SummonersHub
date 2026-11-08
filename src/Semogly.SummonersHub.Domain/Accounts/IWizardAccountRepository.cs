@@ -1,0 +1,9 @@
+namespace Semogly.SummonersHub.Domain.Accounts;
+
+public interface IWizardAccountRepository
+{
+    /// <summary>Vínculo do invocador com um usuário, se já existir.</summary>
+    Task<WizardAccount?> FindByWizardIdAsync(long wizardGameId, CancellationToken cancellationToken);
+
+    void Add(WizardAccount account);
+}
