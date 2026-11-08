@@ -1,5 +1,7 @@
 # Semogly.SummonersHub
 
+[![CI](https://github.com/semog-projects/Semogly.SummonersHub/actions/workflows/ci.yml/badge.svg)](https://github.com/semog-projects/Semogly.SummonersHub/actions/workflows/ci.yml)
+
 Companion web de **Summoners War**: o jogador exporta a conta com o
 [SW Exporter](https://github.com/Xzandro/sw-exporter), envia o JSON e recebe um painel com monstros,
 runas e artefatos.
@@ -94,3 +96,12 @@ Os ícones dos monstros são servidos pelo SWARFARM.
 dotnet test                           # testes .NET (os de integração precisam do Docker)
 cd apps/web && npm test -- --run      # testes do front
 ```
+
+### CI
+
+O workflow `.github/workflows/ci.yml` roda a cada PR (inclusive os abertos sobre outros branches) e a cada push na
+`main`, com dois jobs em paralelo:
+
+- **API**: restore, build em Release (avisos como erro, inclusive vulnerabilidades de pacotes) e todos os testes
+  .NET. Os de integração sobem o PostgreSQL com Testcontainers no Docker do runner.
+- **Web**: `npm ci`, lint (oxlint), testes (Vitest) e build de produção (`tsc -b` + `vite build`).
