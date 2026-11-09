@@ -6,6 +6,7 @@ import { ELEMENT_NAME_LABELS } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES } from '../overview/elementStyles'
 import { efficiencyClass } from '../runes/efficiency'
+import { BuildKindBadges } from '../builds/BuildKindBadges'
 import { ManualBadge } from '../manual/ManualBadge'
 import { MonsterLockButton } from '../marks/MonsterLockButton'
 import { SortHeader } from '../shared/SortHeader'
@@ -72,6 +73,7 @@ export function MonsterTable({ monsters, filters, onSort }: Props) {
                     ) : (
                       <MonsterLockButton wizardId={wizardId} monsterId={monster.monsterId} locked={monster.locked ?? false} />
                     )}
+                    <BuildKindBadges kinds={monster.buildKinds} />
                     <p className="text-xs whitespace-nowrap text-muted-foreground">
                       <span className={ELEMENT_TEXT_CLASSES[monster.element]}>{ELEMENT_NAME_LABELS[monster.element]}</span>{' '}
                       · {monster.stars}★ · nv. {monster.level}

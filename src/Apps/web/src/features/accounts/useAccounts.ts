@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getJson } from '@/lib/api'
 import type {
   AccountOverview,
@@ -38,11 +38,15 @@ export function useMonsters(wizardId: number) {
   })
 }
 
-export function useMonsterDetail(wizardId: number, monsterId: number) {
+/** @param build Build de RTA/Siege/Arena (chave da API); nula = build normal. */
+export function useMonsterDetail(wizardId: number, monsterId: number, build: string | null = null) {
+  const query = build ? `?build=${encodeURIComponent(build)}` : ''
   return useQuery({
-    queryKey: ['accounts', wizardId, 'monsters', monsterId],
-    queryFn: ({ signal }) => getJson<MonsterDetail>(`/accounts/${wizardId}/monsters/${monsterId}`, signal),
+    queryKey: ['accounts', wizardId, 'monsters', monsterId, ...(build ? [build] : [])],
+    queryFn: ({ signal }) => getJson<MonsterDetail>(`/accounts/${wizardId}/monsters/${monsterId}${query}`, signal),
     enabled: Number.isSafeInteger(wizardId) && Number.isSafeInteger(monsterId),
+    // Mantém a build anterior na tela enquanto a nova carrega
+    placeholderData: keepPreviousData,
   })
 }
 

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
 
 namespace Semogly.SummonersHub.Application.Accounts.ImportAccount;
@@ -13,7 +14,9 @@ public sealed record ImportAccountCommand(
     IReadOnlyList<ImportMonster> Monsters,
     IReadOnlyList<ImportRune> Runes,
     IReadOnlyList<ImportArtifact> Artifacts,
-    IReadOnlyList<ImportCraftItem> CraftItems) : ICommand<ImportAccountResponse>
+    IReadOnlyList<ImportCraftItem> CraftItems,
+    // Fora do JSON quando ausente: imports antigos (sem builds) mantêm o mesmo hash de conteúdo
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<ImportBuild>? Builds = null) : ICommand<ImportAccountResponse>
 {
     public const int SupportedSchemaVersion = 1;
 }
@@ -74,6 +77,10 @@ public sealed record ImportArtifact(
     ImportStat MainStat,
     IReadOnlyList<ImportArtifactSubstat> Substats,
     long? EquippedMonsterId);
+
+/// <summary>Build de RTA (1), Siege (2) ou Arena (3); ver <c>BuildKind</c>.</summary>
+/// <param name="DeckId">Id do deck de Siege; 0 nos demais modos.</param>
+public sealed record ImportBuild(long MonsterId, int Kind, long DeckId, IReadOnlyList<long> RuneIds, IReadOnlyList<long> ArtifactIds);
 
 public sealed record ImportCraftItem(long Id, int CraftType, int CraftTypeId, int Amount);
 

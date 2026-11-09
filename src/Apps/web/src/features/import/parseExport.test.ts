@@ -82,6 +82,34 @@ describe('parseExport', () => {
     expect(parseExportText(sampleText).craftItems).toHaveLength(3)
   })
 
+  it('não envia builds quando o export não tem RTA/Siege/Arena', () => {
+    expect(parseExportText(sampleText)).not.toHaveProperty('builds')
+  })
+
+  it('extrai as builds de RTA, Siege e Arena descartando ids desconhecidos', () => {
+    const raw = sample()
+    const [first, second] = raw.unit_list
+    const loose = raw.runes[0].rune_id
+    const own = first.runes[0].rune_id
+
+    raw.world_arena_rune_equip_list = [
+      { rune_id: loose, occupied_id: first.unit_id },
+      { rune_id: own, occupied_id: first.unit_id },
+      { rune_id: 999, occupied_id: first.unit_id }, // runa que não está no export
+      { rune_id: loose, occupied_id: 777 }, // monstro que não está no export
+    ]
+    raw.guildsiege_defense_deck_equip_list = {
+      '55': { deck_id: 55, equip: [{ unit_id: second.unit_id, rune_id_list: [own], artifact_id_list: [] }] },
+    }
+    raw.defense_deck_info = { equip: [{ unit_id: first.unit_id, rune_id_list: [], artifact_id_list: [] }] }
+
+    expect(parseExport(raw).builds).toEqual([
+      { monsterId: first.unit_id, kind: 1, deckId: 0, runeIds: [loose, own], artifactIds: [] },
+      { monsterId: second.unit_id, kind: 2, deckId: 55, runeIds: [own], artifactIds: [] },
+      { monsterId: first.unit_id, kind: 3, deckId: 0, runeIds: [], artifactIds: [] },
+    ])
+  })
+
   it.each([
     ['texto que não é JSON', 'isso não é json'],
     ['JSON de outro tipo', JSON.stringify({ command: 'Other' })],

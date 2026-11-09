@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { ELEMENT_NAME_LABELS, EQUIPPABLE_RUNE_SETS, type ElementName } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
+import { BUILD_KIND_LABELS } from '../builds/buildLabels'
 import { Chip } from '../shared/filterControls'
 import { controlClass, optionClass, selectClass } from '../shared/filterStyles'
+import type { BuildKindName } from '../types'
 import { DEFAULT_FILTERS, type MonsterFilters } from './monsterFilters'
 
 interface Props {
@@ -60,6 +62,20 @@ export function MonsterFiltersBar({ filters, onChange }: Props) {
         {EQUIPPABLE_RUNE_SETS.map((set) => (
           <option key={set} value={set} className={optionClass}>
             {set}
+          </option>
+        ))}
+      </select>
+
+      <select
+        aria-label="Build própria"
+        value={filters.buildKind ?? ''}
+        onChange={(event) => update({ buildKind: (event.target.value || null) as BuildKindName | null })}
+        className={selectClass}
+      >
+        <option value="" className={optionClass}>Qualquer build</option>
+        {Object.entries(BUILD_KIND_LABELS).map(([value, label]) => (
+          <option key={value} value={value} className={optionClass}>
+            Com build de {label}
           </option>
         ))}
       </select>

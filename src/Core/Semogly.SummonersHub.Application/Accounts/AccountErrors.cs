@@ -28,6 +28,10 @@ public static class AccountErrors
         "Accounts.MonsterNotFound",
         $"O monstro {monsterId} não está no último import do invocador.");
 
+    public static Error BuildNotFound(string build) => Error.NotFound(
+        "Accounts.BuildNotFound",
+        $"O monstro não tem a build \"{build}\" no último import.");
+
     public static Error SnapshotNotFound(int version) => Error.NotFound(
         "Accounts.SnapshotNotFound",
         $"A versão {version} não existe para este invocador.");

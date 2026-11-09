@@ -1,5 +1,6 @@
 import type {
   AccountImport,
+  AlternativeBuild,
   Artifact,
   ArtifactSubstat,
   CraftItem,
@@ -59,6 +60,16 @@ export function parseExport(raw: unknown): AccountImport {
   const equippedRunes = units.flatMap((unit) => toArray(unit.runes))
   const equippedArtifacts = units.flatMap((unit) => toArray(unit.artifacts))
 
+  const monsters = units.map(toMonster)
+  const runes = uniqueBy([...equippedRunes, ...toArray(raw.runes)].map(toRune), (rune) => rune.id)
+  const artifacts = uniqueBy([...equippedArtifacts, ...toArray(raw.artifacts)].map(toArtifact), (a) => a.id)
+  const builds = parseBuilds(
+    raw,
+    new Set(monsters.map((m) => m.id)),
+    new Set(runes.map((r) => r.id)),
+    new Set(artifacts.map((a) => a.id)),
+  )
+
   return {
     schemaVersion: 1,
     exportedAt: typeof raw.tvalue === 'number' ? new Date(raw.tvalue * 1000).toISOString() : null,
@@ -68,11 +79,59 @@ export function parseExport(raw: unknown): AccountImport {
       level: num(wizardInfo.wizard_level),
       serverId: typeof raw.this_server_id === 'number' ? raw.this_server_id : null,
     },
-    monsters: units.map(toMonster),
-    runes: uniqueBy([...equippedRunes, ...toArray(raw.runes)].map(toRune), (rune) => rune.id),
-    artifacts: uniqueBy([...equippedArtifacts, ...toArray(raw.artifacts)].map(toArtifact), (a) => a.id),
+    monsters,
+    runes,
+    artifacts,
     craftItems: toArray(raw.rune_craft_item_list).map(toCraftItem),
+    // Só envia o campo quando há builds: imports sem elas mantêm o mesmo conteúdo de antes
+    ...(builds.length > 0 ? { builds } : {}),
   }
+}
+
+/**
+ * Builds com equipamento próprio: RTA (só as runas/artefatos que mudam em relação à build normal),
+ * defesas de Siege (uma por deck) e defesa da Arena. Ids desconhecidos são descartados.
+ */
+function parseBuilds(raw: RawObject, monsterIds: Set<number>, runeIds: Set<number>, artifactIds: Set<number>): AlternativeBuild[] {
+  const builds = new Map<string, AlternativeBuild>()
+
+  const add = (kind: AlternativeBuild['kind'], deckId: number, monsterId: number, runes: unknown, artifacts: unknown) => {
+    if (!monsterIds.has(monsterId)) return
+    const key = `${monsterId}:${kind}:${deckId}`
+    const build = builds.get(key) ?? { monsterId, kind, deckId, runeIds: [], artifactIds: [] }
+    for (const id of ids(runes)) if (runeIds.has(id) && !build.runeIds.includes(id)) build.runeIds.push(id)
+    for (const id of ids(artifacts)) if (artifactIds.has(id) && !build.artifactIds.includes(id)) build.artifactIds.push(id)
+    builds.set(key, build)
+  }
+
+  // RTA: [{ rune_id, occupied_id }]; artefatos no mesmo formato
+  for (const item of toArray(raw.world_arena_rune_equip_list)) {
+    add(1, 0, num(item.occupied_id), [item.rune_id], [])
+  }
+  for (const item of toArray(raw.world_arena_artifact_equip_list)) {
+    add(1, 0, num(item.occupied_id), [], [item.artifact_id ?? item.rid])
+  }
+
+  // Siege: { [deck]: { deck_id, equip: [{ unit_id, rune_id_list, artifact_id_list }] } }
+  for (const deck of toArray(raw.guildsiege_defense_deck_equip_list)) {
+    for (const equip of toArray(deck.equip)) {
+      add(2, num(deck.deck_id), num(equip.unit_id), equip.rune_id_list, equip.artifact_id_list)
+    }
+  }
+
+  // Arena: { equip: [{ unit_id, rune_id_list, artifact_id_list }] }
+  const arena = raw.defense_deck_info
+  if (isObject(arena)) {
+    for (const equip of toArray(arena.equip)) {
+      add(3, 0, num(equip.unit_id), equip.rune_id_list, equip.artifact_id_list)
+    }
+  }
+
+  return [...builds.values()]
+}
+
+function ids(value: unknown): number[] {
+  return Array.isArray(value) ? value.map(num).filter((id) => id > 0) : []
 }
 
 function toMonster(unit: RawObject): Monster {

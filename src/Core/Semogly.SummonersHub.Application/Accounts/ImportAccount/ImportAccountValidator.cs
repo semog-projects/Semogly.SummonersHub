@@ -1,5 +1,6 @@
 using Semogly.SummonersHub.Application.Accounts;
 using Semogly.SummonersHub.Domain.Abstractions;
+using Semogly.SummonersHub.Domain.Accounts;
 using Semogly.SummonersHub.Domain.GameData;
 
 namespace Semogly.SummonersHub.Application.Accounts.ImportAccount;
@@ -15,6 +16,7 @@ internal static class ImportAccountValidator
     internal const int MaxRunes = 15_000;
     internal const int MaxArtifacts = 5_000;
     internal const int MaxCraftItems = 5_000;
+    internal const int MaxBuilds = 1_000;
 
     public static Error? Validate(ImportAccountCommand command)
     {
@@ -29,7 +31,8 @@ internal static class ImportAccountValidator
         }
 
         if (command.Monsters.Count > MaxMonsters || command.Runes.Count > MaxRunes
-            || command.Artifacts.Count > MaxArtifacts || command.CraftItems.Count > MaxCraftItems)
+            || command.Artifacts.Count > MaxArtifacts || command.CraftItems.Count > MaxCraftItems
+            || command.Builds?.Count > MaxBuilds)
         {
             return AccountErrors.TooLarge;
         }
@@ -62,6 +65,11 @@ internal static class ImportAccountValidator
             {
                 yield return $"atributo de runa {stat}";
             }
+        }
+
+        foreach (var build in (command.Builds ?? []).Where(b => !Enum.IsDefined((BuildKind)b.Kind)))
+        {
+            yield return $"modo de build {build.Kind}";
         }
 
         foreach (var artifact in command.Artifacts)

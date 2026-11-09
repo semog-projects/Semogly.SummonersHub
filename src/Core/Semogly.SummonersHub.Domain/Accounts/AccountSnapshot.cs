@@ -12,6 +12,7 @@ public sealed class AccountSnapshot
     private readonly List<Rune> _runes = [];
     private readonly List<Artifact> _artifacts = [];
     private readonly List<CraftItem> _craftItems = [];
+    private readonly List<AlternativeBuild> _builds = [];
 
     // Construtor do EF Core
     private AccountSnapshot()
@@ -68,6 +69,9 @@ public sealed class AccountSnapshot
 
     public IReadOnlyList<CraftItem> CraftItems => _craftItems;
 
+    /// <summary>Builds de RTA e das defesas de Siege e Arena (equipamento próprio de cada modo).</summary>
+    public IReadOnlyList<AlternativeBuild> Builds => _builds;
+
     public static AccountSnapshot Create(
         WizardProfile wizard,
         int version,
@@ -77,7 +81,8 @@ public sealed class AccountSnapshot
         IEnumerable<Monster> monsters,
         IEnumerable<Rune> runes,
         IEnumerable<Artifact> artifacts,
-        IEnumerable<CraftItem> craftItems)
+        IEnumerable<CraftItem> craftItems,
+        IEnumerable<AlternativeBuild>? builds = null)
     {
         if (wizard.GameId <= 0)
         {
@@ -108,6 +113,8 @@ public sealed class AccountSnapshot
             throw new DomainException("Há runas ou artefatos equipados em monstros que não estão no import.");
         }
 
+        snapshot._builds.AddRange(ValidateBuilds(builds ?? [], monsterIds, snapshot));
+
         return snapshot;
     }
 
@@ -124,7 +131,26 @@ public sealed class AccountSnapshot
         copy._artifacts.AddRange(_artifacts);
         copy._craftItems.AddRange(_craftItems);
         copy._craftItems.AddRange(manualCraftItems.Where(c => ManualItem.IsManual(c.GameId)));
+        copy._builds.AddRange(_builds);
         return copy;
+    }
+
+    private static List<AlternativeBuild> ValidateBuilds(IEnumerable<AlternativeBuild> builds, HashSet<long> monsterIds, AccountSnapshot snapshot)
+    {
+        var list = builds.ToList();
+        if (list.Select(b => (b.MonsterId, b.Kind, b.DeckId)).Distinct().Count() != list.Count)
+        {
+            throw new DomainException("O import contém builds alternativas duplicadas.");
+        }
+
+        var runeIds = snapshot._runes.Select(r => r.GameId).ToHashSet();
+        var artifactIds = snapshot._artifacts.Select(a => a.GameId).ToHashSet();
+        if (list.Any(b => !monsterIds.Contains(b.MonsterId) || !b.RuneIds.All(runeIds.Contains) || !b.ArtifactIds.All(artifactIds.Contains)))
+        {
+            throw new DomainException("Há builds alternativas com monstros, runas ou artefatos que não estão no import.");
+        }
+
+        return list;
     }
 
     private static List<T> EnsureUnique<T>(IEnumerable<T> items, Func<T, long> key, string description)

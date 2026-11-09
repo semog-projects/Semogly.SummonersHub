@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
+import { BuildSelector } from '@/features/accounts/builds/BuildSelector'
 import { MonsterIcon } from '@/features/accounts/monsters/MonsterIcon'
 import { initialForm, toRequest, type OptimizerForm } from '@/features/accounts/optimizer/optimizerOptions'
 import { OptimizerFormView } from '@/features/accounts/optimizer/OptimizerFormView'
@@ -36,6 +37,8 @@ export function RuneOptimizerPage() {
 
 function Optimizer({ wizardId, monster }: { wizardId: number; monster: MonsterDetail }) {
   const [form, setForm] = useState<OptimizerForm>(() => initialForm(monster))
+  // Fora do formulário: a build comparada é do monstro, não entra nos presets
+  const [compareWith, setCompareWith] = useState<string | null>(null)
   const optimize = useOptimizeRunes(wizardId, monster.monsterId)
   const { data: definitions } = useMonsterDefinitions([monster.masterId])
 
@@ -52,7 +55,13 @@ function Optimizer({ wizardId, monster }: { wizardId: number; monster: MonsterDe
       </div>
 
       <OptimizerPresetsBar form={form} initial={initialForm(monster)} onApply={setForm} />
-      <OptimizerFormView form={form} onChange={setForm} onSubmit={() => optimize.mutate(toRequest(form))} pending={optimize.isPending} />
+      <BuildSelector builds={monster.builds} value={compareWith} onChange={setCompareWith} label="Comparar com a build" />
+      <OptimizerFormView
+        form={form}
+        onChange={setForm}
+        onSubmit={() => optimize.mutate({ ...toRequest(form), compareWith })}
+        pending={optimize.isPending}
+      />
 
       {optimize.isError && (
         <p role="alert" className="text-sm text-destructive">

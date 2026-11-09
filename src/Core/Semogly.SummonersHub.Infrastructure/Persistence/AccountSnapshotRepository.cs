@@ -52,5 +52,6 @@ internal sealed class AccountSnapshotRepository(
             .Include(s => s.Runes)
             .Include(s => s.Artifacts)
             .Include(s => s.CraftItems)
+            .Include(s => s.Builds)
             .AsSplitQuery();
 }

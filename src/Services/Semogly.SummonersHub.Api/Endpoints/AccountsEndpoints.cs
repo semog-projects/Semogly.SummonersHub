@@ -234,10 +234,11 @@ internal static class AccountsEndpoints
     private static async Task<Results<Ok<MonsterDetailResponse>, ProblemHttpResult>> GetMonsterDetail(
         long wizardId,
         long monsterId,
+        string? build,
         IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.HandleAsync(new GetMonsterDetailQuery(wizardId, monsterId), cancellationToken);
+        var result = await handler.HandleAsync(new GetMonsterDetailQuery(wizardId, monsterId, build), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 
