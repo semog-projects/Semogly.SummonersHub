@@ -1,4 +1,4 @@
-import { useId, useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useLogin, useRegister } from './useAuth'
@@ -8,8 +8,11 @@ type Mode = 'login' | 'register'
 const inputClass =
   'h-9 w-full rounded-md border bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50'
 
-/** Formulário de login e cadastro (alterna entre os dois modos). */
-export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
+/**
+ * Formulário de login e cadastro (alterna entre os dois modos).
+ * @param extra Conteúdo abaixo do formulário (ex.: login com Google).
+ */
+export function AuthForm({ onSuccess, extra }: { onSuccess?: () => void; extra?: ReactNode }) {
   const emailId = useId()
   const passwordId = useId()
   const [mode, setMode] = useState<Mode>('login')
@@ -73,6 +76,8 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
             {mode === 'login' ? 'Entrar' : 'Criar conta'}
           </Button>
         </form>
+
+        {extra}
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           {mode === 'login' ? 'Ainda não tem conta? ' : 'Já tem conta? '}

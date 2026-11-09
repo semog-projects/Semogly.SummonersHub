@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Scalar.AspNetCore;
 using Semogly.SummonersHub.Api.Authentication;
 using Semogly.SummonersHub.Api.Endpoints;
@@ -29,7 +30,14 @@ builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 builder.Services.AddValidation();
 builder.Services.AddOpenApi();
 
+// Origem real do navegador vinda do proxy do Vite (só proxies em loopback são aceitos por padrão):
+// o redirect URI do Google fica na origem do front
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost);
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.UseExceptionHandler();
 

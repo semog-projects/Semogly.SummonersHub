@@ -22,7 +22,7 @@ public static class DependencyInjection
         builder.AddNpgsqlDbContext<SummonersHubDbContext>(DatabaseConnectionName);
 
         builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<SummonersHubDbContext>());
-        builder.Services.AddIdentityServices();
+        builder.Services.AddIdentityServices(builder.Configuration);
 
         builder.Services.AddScoped<IAccountSnapshotRepository, AccountSnapshotRepository>();
         builder.Services.AddScoped<IWizardAccountRepository, WizardAccountRepository>();

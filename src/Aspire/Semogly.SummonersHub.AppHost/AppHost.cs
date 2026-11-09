@@ -19,6 +19,8 @@ var api = builder.AddProject<Projects.Semogly_SummonersHub_Api>(ResourceNames.Ap
 builder.AddViteApp(ResourceNames.Web, "../../Apps/web")
     .WithNpm(install: true)
     .WithReference(api).WaitFor(api)
+    // Porta fixa: o redirect URI do login com Google é http://localhost:5173/api/auth/signin-google
+    .WithEndpoint("http", endpoint => endpoint.Port = 5173)
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();

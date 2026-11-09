@@ -83,3 +83,25 @@ async function login(credentials: Credentials) {
     throw error
   }
 }
+
+/** Provedores de login externo configurados na API (ex.: ["Google"]). Sem configuração, lista vazia. */
+export function useExternalProviders() {
+  return useQuery({
+    queryKey: ['auth', 'providers'],
+    queryFn: ({ signal }) => getJson<string[]>('/auth/providers', signal),
+    retry: false,
+    staleTime: Infinity,
+  })
+}
+
+/** Endereço que inicia o login externo (navegação completa: o provedor redireciona de volta para a API). */
+export function externalLoginUrl(provider: string, returnUrl: string): string {
+  return `/api/auth/external/${encodeURIComponent(provider.toLowerCase())}?returnUrl=${encodeURIComponent(returnUrl)}`
+}
+
+/** Mensagens para o ?erro= que a API devolve quando o login externo falha. */
+export const EXTERNAL_LOGIN_ERRORS: Record<string, string> = {
+  emailnotverified: 'O Google não confirmou o e-mail dessa conta.',
+  blocked: 'Conta bloqueada temporariamente. Tente de novo em alguns minutos.',
+  failed: 'Não foi possível entrar com o Google. Tente de novo.',
+}

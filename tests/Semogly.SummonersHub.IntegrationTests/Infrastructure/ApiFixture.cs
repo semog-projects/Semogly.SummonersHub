@@ -23,6 +23,10 @@ public sealed class ApiFixture : IAsyncLifetime
     /// <summary>Cliente sem login (o cookie de autenticação fica guardado no próprio cliente).</summary>
     public HttpClient CreateClient() => _factory.CreateClient();
 
+    /// <summary>Cliente que não segue redirecionamentos (para inspecionar o fluxo do login externo).</summary>
+    public HttpClient CreateNonRedirectingClient() =>
+        _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
     /// <summary>Cadastra um usuário novo e devolve um cliente já logado com o cookie dele.</summary>
     public async Task<HttpClient> CreateAuthenticatedClientAsync(CancellationToken cancellationToken)
     {
@@ -51,6 +55,10 @@ public sealed class ApiFixture : IAsyncLifetime
         {
             builder.UseEnvironment("Development");
             builder.UseSetting("ConnectionStrings:summonershub-db", _postgres.GetConnectionString());
+
+            // Credenciais falsas: só ligam o provedor, o Google nunca é chamado nos testes
+            builder.UseSetting("Authentication:Google:ClientId", "test-client.apps.googleusercontent.com");
+            builder.UseSetting("Authentication:Google:ClientSecret", "test-secret");
         });
 
         // Força a inicialização do host (aplica as migrations)

@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Semogly.SummonersHub.Infrastructure.Persistence;
 
@@ -12,7 +14,7 @@ internal static class IdentityExtensions
     /// ASP.NET Core Identity com os endpoints prontos (cadastro, login, refresh, gestão da conta).
     /// O front usa o cookie HttpOnly (mesma origem via proxy); o bearer token fica disponível para outros clientes.
     /// </summary>
-    public static IServiceCollection AddIdentityServices(this IServiceCollection services)
+    public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddIdentityApiEndpoints<ApplicationUser>(options =>
@@ -47,6 +49,8 @@ internal static class IdentityExtensions
             };
         });
 
+        AddGoogle(services, configuration);
+
         // Chaves que assinam cookies e tokens ficam no banco: sobrevivem a restarts e são compartilhadas entre instâncias
         services.AddDataProtection()
             .SetApplicationName("Semogly.SummonersHub")
@@ -55,5 +59,31 @@ internal static class IdentityExtensions
         services.AddAuthorization();
 
         return services;
+    }
+
+    /// <summary>
+    /// Login com Google só quando o client id/secret estão configurados (user secrets ou variáveis de ambiente
+    /// <c>Authentication__Google__ClientId</c> / <c>Authentication__Google__ClientSecret</c>).
+    /// </summary>
+    private static void AddGoogle(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(ExternalLogins.GoogleSection);
+        if (string.IsNullOrWhiteSpace(section["ClientId"]) || string.IsNullOrWhiteSpace(section["ClientSecret"]))
+        {
+            return;
+        }
+
+        services.AddAuthentication().AddGoogle(ExternalLogins.Google, options =>
+        {
+            options.ClientId = section["ClientId"]!;
+            options.ClientSecret = section["ClientSecret"]!;
+
+            // Resultado do Google vai para o cookie externo do Identity; o callback decide o login
+            options.SignInScheme = IdentityConstants.ExternalScheme;
+
+            // Sob /api para passar pelo proxy do Vite: o redirect URI fica na origem do front
+            options.CallbackPath = ExternalLogins.GoogleCallbackPath;
+            options.ClaimActions.MapJsonKey(ExternalLogins.EmailVerifiedClaim, "email_verified");
+        });
     }
 }
