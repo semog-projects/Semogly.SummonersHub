@@ -11,6 +11,8 @@ import {
 } from '@/features/accounts/monsters/monsterFilters'
 import { nextSort } from '@/features/accounts/shared/sorting'
 import { useMonsters } from '@/features/accounts/useAccounts'
+import { monstersCsv } from '@/features/accounts/export/listCsv'
+import { ExportCsvButton } from '@/features/accounts/shared/ExportCsvButton'
 import { QueryStatus } from './QueryStatus'
 
 export function MonsterListPage() {
@@ -50,9 +52,12 @@ function MonsterList({
   return (
     <div className="space-y-4">
       <MonsterFiltersBar filters={filters} onChange={onChange} />
-      <p className="text-xs text-muted-foreground" aria-live="polite">
-        {visible.length} de {monsters.length} monstros · atributos totais, sem bônus de líder, torres ou buffs
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground" aria-live="polite">
+          {visible.length} de {monsters.length} monstros · atributos totais, sem bônus de líder, torres ou buffs
+        </p>
+        <ExportCsvButton fileName="monstros.csv" build={() => monstersCsv(visible)} />
+      </div>
       <MonsterTable monsters={visible} filters={filters} onSort={onSort} />
     </div>
   )
