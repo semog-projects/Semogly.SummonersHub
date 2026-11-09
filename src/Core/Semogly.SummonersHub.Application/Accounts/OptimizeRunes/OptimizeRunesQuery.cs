@@ -23,6 +23,7 @@ public sealed record OptimizeRunesQuery(long WizardId, long MonsterId, OptimizeR
 /// <param name="Weights">Peso de cada atributo de foco (0,1 a 10); os ausentes valem 1.</param>
 /// <param name="SimulateGrinds">Considera o grind lendário máximo em cada sub grindável.</param>
 /// <param name="TeamSets">Sets de equipe do time (Fight, Determination, Enhance, Accuracy, Tolerance), um por set completo.</param>
+/// <param name="SimulateGems">Considera trocar uma sub de cada runa por uma gem lendária.</param>
 public sealed record OptimizeRunesRequest(
     IReadOnlyList<RuneSet> Sets,
     IReadOnlyDictionary<int, IReadOnlyList<int>>? MainStats,
@@ -34,7 +35,8 @@ public sealed record OptimizeRunesRequest(
     IReadOnlyList<StatCap>? Maximums = null,
     IReadOnlyDictionary<PveStat, decimal>? Weights = null,
     bool SimulateGrinds = false,
-    IReadOnlyList<RuneSet>? TeamSets = null)
+    IReadOnlyList<RuneSet>? TeamSets = null,
+    bool SimulateGems = false)
 {
     /// <summary>Sets de equipe informados (o time tem no máximo 5 monstros com até 3 sets cada).</summary>
     public const int MaxTeamSets = 15;
@@ -50,12 +52,17 @@ public sealed record OptimizeRunesResponse(OptimizedBuildResult Current, IReadOn
 /// <param name="Score">Soma dos atributos de foco relativos à base (ver <see cref="RuneOptimizer.Score"/>).</param>
 /// <param name="Runes">Uma runa por slot, com o monstro que a usa hoje (se alguma).</param>
 /// <param name="Artifacts">Artefatos da build, com o monstro que os usa hoje (se algum).</param>
+/// <param name="Gems">Gems simuladas na build (vazio sem simulação ou na build atual).</param>
 public sealed record OptimizedBuildResult(
     decimal Score,
     StatValues Total,
     IReadOnlyList<RuneSet> ActiveSets,
     IReadOnlyList<RuneListItem> Runes,
-    IReadOnlyList<ArtifactListItem> Artifacts);
+    IReadOnlyList<ArtifactListItem> Artifacts,
+    IReadOnlyList<SimulatedGemResult>? Gems = null);
+
+/// <summary>Gem simulada: na runa <paramref name="RuneId"/>, a sub <paramref name="From"/> vira <paramref name="To"/> (códigos do jogo).</summary>
+public sealed record SimulatedGemResult(long RuneId, int From, int To, int Value);
 
 internal sealed class OptimizeRunesQueryHandler(
     IAccountSnapshotRepository repository,
@@ -95,7 +102,8 @@ internal sealed class OptimizeRunesQueryHandler(
             Maximums: request.Maximums,
             Weights: request.Weights,
             SimulateGrinds: request.SimulateGrinds,
-            TeamSets: request.TeamSets);
+            TeamSets: request.TeamSets,
+            SimulateGems: request.SimulateGems);
 
         var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
 
@@ -141,7 +149,8 @@ internal sealed class OptimizeRunesQueryHandler(
                 b.Stats.Total,
                 b.Stats.ActiveSets,
                 [.. b.Runes.Select(r => ToItem(r, monsters, lookup))],
-                [.. artifacts.Select(a => ToItem(a, monsters, lookup))]))]);
+                [.. artifacts.Select(a => ToItem(a, monsters, lookup))],
+                [.. b.Gems.Select(g => new SimulatedGemResult(g.RuneId, (int)g.From, (int)g.To, g.Value))]))]);
     }
 
     private static RuneListItem ToItem(Rune rune, Dictionary<long, EquippedMonster> monsters, InventoryMarkLookup lookup) =>

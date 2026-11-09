@@ -220,6 +220,15 @@ export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) 
               Simular grinds
               <span className="text-xs text-muted-foreground">(lendário máximo)</span>
             </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.simulateGems}
+                onChange={(event) => update({ simulateGems: event.target.checked })}
+              />
+              Simular gems
+              <span className="text-xs text-muted-foreground">(uma por runa, lendária)</span>
+            </label>
             <Button type="submit" disabled={invalid || pending} className="sm:ml-auto">
               {pending ? 'Otimizando…' : 'Otimizar'}
             </Button>

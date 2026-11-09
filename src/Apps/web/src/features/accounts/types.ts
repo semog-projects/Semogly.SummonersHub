@@ -386,6 +386,16 @@ export interface OptimizeRunesRequest {
   simulateGrinds: boolean
   /** Sets de equipe do time (Fight, Determination...), um por set completo. */
   teamSets: string[]
+  /** Considera trocar uma sub de cada runa por uma gem lendária. */
+  simulateGems: boolean
+}
+
+/** Gem simulada: na runa, a sub `from` vira `to` (códigos do jogo) com `value`. */
+export interface SimulatedGem {
+  runeId: number
+  from: number
+  to: number
+  value: number
 }
 
 /** Preset do otimizador salvo pelo usuário (critérios no formato do formulário). */
@@ -402,6 +412,8 @@ export interface OptimizedBuild {
   activeSets: string[]
   runes: RuneListItem[]
   artifacts: ArtifactListItem[]
+  /** Gems simuladas (ausente ou vazio sem simulação). */
+  gems?: SimulatedGem[] | null
 }
 
 export interface OptimizeRunesResponse {

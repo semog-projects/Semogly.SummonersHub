@@ -22,6 +22,7 @@ describe('optimizerOptions', () => {
       assumeMaxLevel: false,
       optimizeArtifacts: false,
       simulateGrinds: false,
+      simulateGems: false,
       teamSets: {},
     })
   })
@@ -34,6 +35,7 @@ describe('optimizerOptions', () => {
       minimums: { Speed: '200', Accuracy: '', Hp: 'x' },
       maximums: { Speed: '230' },
       simulateGrinds: true,
+      simulateGems: true,
       teamSets: { Fight: 2, Accuracy: 1, Enhance: 0 },
     }
 
@@ -48,6 +50,7 @@ describe('optimizerOptions', () => {
       assumeMaxLevel: false,
       optimizeArtifacts: false,
       simulateGrinds: true,
+      simulateGems: true,
       teamSets: ['Fight', 'Fight', 'Accuracy'],
     })
   })

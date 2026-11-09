@@ -57,6 +57,7 @@ export interface OptimizerForm {
   assumeMaxLevel: boolean
   optimizeArtifacts: boolean
   simulateGrinds: boolean
+  simulateGems: boolean
   /** Quantos sets completos de cada set de equipe o time tem. */
   teamSets: Record<string, number>
 }
@@ -76,6 +77,7 @@ export function initialForm(monster: MonsterDetail): OptimizerForm {
     assumeMaxLevel: false,
     optimizeArtifacts: false,
     simulateGrinds: false,
+    simulateGems: false,
     teamSets: {},
   }
 }
@@ -118,6 +120,7 @@ export function toRequest(form: OptimizerForm): OptimizeRunesRequest {
     assumeMaxLevel: form.assumeMaxLevel,
     optimizeArtifacts: form.optimizeArtifacts,
     simulateGrinds: form.simulateGrinds,
+    simulateGems: form.simulateGems,
     teamSets: TEAM_SETS.flatMap(({ set }) => Array.from({ length: Math.min(MAX_TEAM_SET_COUNT, form.teamSets[set] ?? 0) }, () => set)),
   }
 }

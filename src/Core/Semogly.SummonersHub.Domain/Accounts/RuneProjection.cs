@@ -54,6 +54,51 @@ public static class RuneProjection
             rune.MainStat, rune.InnateStat, substats, rune.EquippedMonsterId);
     }
 
+    /// <summary>
+    /// Trocas possíveis com uma gem lendária (valor máximo da faixa): cada sub trocável por cada atributo que a
+    /// runa ainda não tem. Se a runa já tem uma sub gemada, só ela pode ser trocada de novo (regra do jogo). As
+    /// subs não repetem o principal nem a inata, o slot 1 não tem DEF e o slot 3 não tem ATK.
+    /// </summary>
+    public static IEnumerable<SimulatedGem> GemOptions(Rune rune)
+    {
+        var gemmed = rune.Substats.FirstOrDefault(s => s.IsGemmed);
+        var replaceable = gemmed is null ? rune.Substats : [gemmed];
+        var taken = rune.Substats.Select(s => s.Stat)
+            .Append(rune.MainStat.Stat)
+            .Concat(rune.InnateStat is { } innate ? [innate.Stat] : [])
+            .ToHashSet();
+
+        foreach (var sub in replaceable)
+        {
+            foreach (var stat in Enum.GetValues<RuneStat>().Where(s => !taken.Contains(s) && AllowedAsSubstat(s, rune.Slot)))
+            {
+                if (CraftItemRanges.For(CraftItemType.EnchantedGem, stat, rarity: 5) is { } range)
+                {
+                    yield return new SimulatedGem(rune.GameId, sub.Stat, stat, range.Max);
+                }
+            }
+        }
+    }
+
+    /// <summary>Cópia da runa com a sub <see cref="SimulatedGem.From"/> trocada pela gem (sem grind: a gem zera o grind).</summary>
+    public static Rune WithGem(Rune rune, SimulatedGem gem)
+    {
+        var substats = rune.Substats
+            .Select(sub => sub.Stat == gem.From ? new RuneSubstat(gem.To, gem.Value, IsGemmed: true, GrindValue: 0) : sub)
+            .ToList();
+
+        return new Rune(
+            rune.GameId, rune.Slot, rune.Stars, rune.IsAncient, rune.Set, rune.Level, rune.Rarity, rune.OriginalRarity,
+            rune.MainStat, rune.InnateStat, substats, rune.EquippedMonsterId);
+    }
+
+    private static bool AllowedAsSubstat(RuneStat stat, int slot) => slot switch
+    {
+        1 => stat is not (RuneStat.DefenseFlat or RuneStat.DefensePercent),
+        3 => stat is not (RuneStat.AttackFlat or RuneStat.AttackPercent),
+        _ => true,
+    };
+
     /// <summary>Cópia da runa em +15 (mesmo id e mesmo monstro), com o principal e as subs projetados.</summary>
     public static Rune ToMaxLevel(Rune rune, long? equippedMonsterId)
     {
@@ -83,3 +128,6 @@ public static class RuneProjection
             equippedMonsterId);
     }
 }
+
+/// <summary>Gem simulada numa runa: a sub <paramref name="From"/> vira <paramref name="To"/> com <paramref name="Value"/>.</summary>
+public sealed record SimulatedGem(long RuneId, RuneStat From, RuneStat To, int Value);

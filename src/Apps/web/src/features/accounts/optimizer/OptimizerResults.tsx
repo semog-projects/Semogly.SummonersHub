@@ -7,7 +7,7 @@ import { artifactKindLabel } from '../artifacts/artifactFilters'
 import { ELEMENT_TEXT_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
 import { efficiencyClass } from '../runes/efficiency'
 import type { OptimizedBuild, OptimizeRunesResponse } from '../types'
-import { OPTIMIZER_STATS } from './optimizerOptions'
+import { mainStatLabel, OPTIMIZER_STATS } from './optimizerOptions'
 
 interface Props {
   wizardId: number
@@ -132,37 +132,45 @@ function BuildCard({
         </table>
 
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="Runas da build">
-          {build.runes.map(({ rune, equippedOn }) => (
-            <li key={rune.runeId} className="rounded-lg border p-2 text-sm">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className={cn('font-medium', RARITY_TEXT_CLASSES[rune.originalRarity])}>
-                  {rune.set} ({rune.slot}) +{rune.level}
-                </span>
-                <span className={cn('text-xs', efficiencyClass(rune.efficiency))}>{formatPercent(rune.efficiency)}</span>
-              </div>
-              <p>{formatRuneStat(rune.mainStat.type, rune.mainStat.value)}</p>
-              <p className="text-xs text-muted-foreground">
-                {rune.substats.map((s) => formatRuneStat(s.type, s.value + s.grindValue)).join(' · ')}
-              </p>
-              <p className="mt-1 text-xs">
-                {!equippedOn ? (
-                  <span className="text-muted-foreground">Do inventário</span>
-                ) : equippedOn.monsterId === monsterId ? (
-                  <span className="text-muted-foreground">Já equipada</span>
-                ) : (
-                  <>
-                    <span className="text-amber-400">Tirar de </span>
-                    <Link
-                      to={`/contas/${wizardId}/monstros/${equippedOn.monsterId}`}
-                      className={cn('hover:underline', ELEMENT_TEXT_CLASSES[equippedOn.element])}
-                    >
-                      {equippedOn.name ?? `Monstro ${equippedOn.masterId}`}
-                    </Link>
-                  </>
+          {build.runes.map(({ rune, equippedOn }) => {
+            const gem = build.gems?.find((g) => g.runeId === rune.runeId)
+            return (
+              <li key={rune.runeId} className="rounded-lg border p-2 text-sm">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className={cn('font-medium', RARITY_TEXT_CLASSES[rune.originalRarity])}>
+                    {rune.set} ({rune.slot}) +{rune.level}
+                  </span>
+                  <span className={cn('text-xs', efficiencyClass(rune.efficiency))}>{formatPercent(rune.efficiency)}</span>
+                </div>
+                <p>{formatRuneStat(rune.mainStat.type, rune.mainStat.value)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {rune.substats.map((s) => formatRuneStat(s.type, s.value + s.grindValue)).join(' · ')}
+                </p>
+                {gem && (
+                  <p className="text-xs text-violet-400">
+                    Gem: {mainStatLabel(gem.from)} → {formatRuneStat(gem.to, gem.value)}
+                  </p>
                 )}
-              </p>
-            </li>
-          ))}
+                <p className="mt-1 text-xs">
+                  {!equippedOn ? (
+                    <span className="text-muted-foreground">Do inventário</span>
+                  ) : equippedOn.monsterId === monsterId ? (
+                    <span className="text-muted-foreground">Já equipada</span>
+                  ) : (
+                    <>
+                      <span className="text-amber-400">Tirar de </span>
+                      <Link
+                        to={`/contas/${wizardId}/monstros/${equippedOn.monsterId}`}
+                        className={cn('hover:underline', ELEMENT_TEXT_CLASSES[equippedOn.element])}
+                      >
+                        {equippedOn.name ?? `Monstro ${equippedOn.masterId}`}
+                      </Link>
+                    </>
+                  )}
+                </p>
+              </li>
+            )
+          })}
         </ul>
 
         <ul className="flex flex-wrap gap-x-6 gap-y-1 text-sm" aria-label="Artefatos da build">

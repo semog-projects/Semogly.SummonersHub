@@ -71,10 +71,12 @@ public static class RuneOptimizer
             }
         }
 
+        // Com gems simuladas, as mesmas 6 runas aparecem com gems diferentes: fica só a melhor variação
         return [.. beam
             .Select(p => Evaluate(monster, artifacts, p, request))
             .OfType<OptimizedBuild>()
             .OrderByDescending(b => b.Score)
+            .DistinctBy(b => string.Join(',', b.Runes.Select(r => r.GameId)))
             .Take(request.MaxResults)];
     }
 
@@ -192,7 +194,8 @@ public static class RuneOptimizer
         return new OptimizedBuild(
             [.. partial.Runes.Select(c => c.Original)],
             stats,
-            Score(stats.Total, monster.BaseStats, request.Focus, request.Weights));
+            Score(stats.Total, monster.BaseStats, request.Focus, request.Weights),
+            [.. partial.Runes.Select(c => c.Gem).OfType<SimulatedGem>()]);
     }
 
     private static Dictionary<int, List<Candidate>> Candidates(
@@ -207,7 +210,7 @@ public static class RuneOptimizer
         var ranked = pool
             .Where(r => !onlyRequiredSets || required.ContainsKey(r.Set))
             .Where(r => !request.MainStatsBySlot.TryGetValue(r.Slot, out var allowed) || allowed.Count == 0 || allowed.Contains(r.MainStat.Stat))
-            .Select(r => Candidate.From(r, monster, request.AssumeMaxLevel, request.SimulateGrinds))
+            .SelectMany(r => Variants(r, monster, request))
             .ToList();
 
         var criteria = new List<Func<Candidate, decimal>>
@@ -222,9 +225,36 @@ public static class RuneOptimizer
                 .Where(c => c.Original.Slot == slot)
                 // Sets fora dos pedidos competem juntos: só servem para preencher slots livres
                 .GroupBy(c => required.ContainsKey(c.Original.Set) ? c.Original.Set : (RuneSet?)null)
-                .SelectMany(group => criteria.SelectMany(criterion => group.OrderByDescending(criterion).Take(CandidatesPerGroup)))
-                .DistinctBy(c => c.Original.GameId)
+                // Por critério, cada runa entra com a sua melhor variação (sem gem ou com a gem que mais ajuda)
+                .SelectMany(group => criteria.SelectMany(criterion => group
+                    .GroupBy(c => c.Original.GameId)
+                    .Select(variants => variants.MaxBy(criterion)!)
+                    .OrderByDescending(criterion)
+                    .Take(CandidatesPerGroup)))
+                .DistinctBy(c => (c.Original.GameId, c.Gem))
                 .ToList());
+    }
+
+    /// <summary>A runa como está e, com gems simuladas, uma variação por troca de gem possível.</summary>
+    private static IEnumerable<Candidate> Variants(Rune rune, Monster monster, OptimizerRequest request)
+    {
+        var projected = request.AssumeMaxLevel
+            ? RuneProjection.ToMaxLevel(rune, monster.GameId)
+            : new Rune(
+                rune.GameId, rune.Slot, rune.Stars, rune.IsAncient, rune.Set, rune.Level,
+                rune.Rarity, rune.OriginalRarity, rune.MainStat, rune.InnateStat, rune.Substats, monster.GameId);
+
+        yield return Candidate.From(rune, projected, null, monster, request.SimulateGrinds);
+
+        if (!request.SimulateGems)
+        {
+            yield break;
+        }
+
+        foreach (var gem in RuneProjection.GemOptions(projected))
+        {
+            yield return Candidate.From(rune, RuneProjection.WithGem(projected, gem), gem, monster, request.SimulateGrinds);
+        }
     }
 
     /// <summary>Maior contribuição possível de cada atributo nos slots depois de <paramref name="slot"/>.</summary>
@@ -348,18 +378,15 @@ public static class RuneOptimizer
 
     /// <param name="Original">Runa como está na conta (vai na resposta).</param>
     /// <param name="Effective">
-    /// Cópia equipada no monstro alvo e, se pedido, projetada em +15 e com grinds simulados (vai no cálculo).
+    /// Cópia equipada no monstro alvo e, se pedido, projetada em +15 e com gem e grinds simulados (vai no cálculo).
     /// </param>
-    private sealed record Candidate(Rune Original, Rune Effective, decimal[] Vector)
+    /// <param name="Gem">Gem simulada nesta variação, se alguma.</param>
+    private sealed record Candidate(Rune Original, Rune Effective, decimal[] Vector, SimulatedGem? Gem)
     {
-        public static Candidate From(Rune rune, Monster monster, bool assumeMaxLevel, bool simulateGrinds)
+        /// <param name="projected">Runa já equipada no monstro alvo, projetada e com a gem aplicada.</param>
+        public static Candidate From(Rune rune, Rune projected, SimulatedGem? gem, Monster monster, bool simulateGrinds)
         {
-            var effective = assumeMaxLevel
-                ? RuneProjection.ToMaxLevel(rune, monster.GameId)
-                : new Rune(
-                    rune.GameId, rune.Slot, rune.Stars, rune.IsAncient, rune.Set, rune.Level,
-                    rune.Rarity, rune.OriginalRarity, rune.MainStat, rune.InnateStat, rune.Substats, monster.GameId);
-
+            var effective = projected;
             if (simulateGrinds)
             {
                 effective = RuneProjection.WithMaxGrinds(effective);
@@ -377,7 +404,7 @@ public static class RuneOptimizer
                 AddStat(vector, monster.BaseStats, sub.Stat, sub.Value + sub.GrindValue);
             }
 
-            return new Candidate(rune, effective, vector);
+            return new Candidate(rune, effective, vector, gem);
         }
     }
 
@@ -403,6 +430,7 @@ public static class RuneOptimizer
 /// <param name="Weights">Peso de cada atributo de foco; os ausentes valem 1.</param>
 /// <param name="SimulateGrinds">Considera o grind lendário máximo em cada sub grindável.</param>
 /// <param name="TeamSets">Sets de equipe do time (Fight, Determination...), um por set completo; somam em batalha.</param>
+/// <param name="SimulateGems">Considera trocar uma sub de cada runa por uma gem lendária (ver <see cref="RuneProjection.GemOptions"/>).</param>
 public sealed record OptimizerRequest(
     IReadOnlyList<RuneSet> RequiredSets,
     IReadOnlyDictionary<int, IReadOnlyList<RuneStat>> MainStatsBySlot,
@@ -413,10 +441,12 @@ public sealed record OptimizerRequest(
     IReadOnlyList<StatCap>? Maximums = null,
     IReadOnlyDictionary<PveStat, decimal>? Weights = null,
     bool SimulateGrinds = false,
-    IReadOnlyList<RuneSet>? TeamSets = null);
+    IReadOnlyList<RuneSet>? TeamSets = null,
+    bool SimulateGems = false);
 
 /// <summary>Atributo total máximo.</summary>
 public sealed record StatCap(PveStat Stat, int Max);
 
 /// <param name="Runes">Uma runa por slot, na ordem dos slots.</param>
-public sealed record OptimizedBuild(IReadOnlyList<Rune> Runes, MonsterStats Stats, decimal Score);
+/// <param name="Gems">Gems simuladas nas runas da build (vazio sem simulação).</param>
+public sealed record OptimizedBuild(IReadOnlyList<Rune> Runes, MonsterStats Stats, decimal Score, IReadOnlyList<SimulatedGem> Gems);
