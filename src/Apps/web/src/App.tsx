@@ -81,7 +81,6 @@ function Protected({ children }: { children: ReactNode }) {
 function MainNav() {
   const { pathname } = useLocation()
   const { data: user } = useCurrentUser()
-  if (!user) return null
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn('text-sm text-muted-foreground transition-colors hover:text-foreground', isActive && 'text-foreground')
@@ -89,18 +88,25 @@ function MainNav() {
   return (
     <nav aria-label="Principal" className="flex items-center gap-4">
       {/* "Painel" fica ativo em qualquer conta (/contas/...) */}
-      <NavLink to="/" end className={({ isActive }) => linkClass({ isActive: isActive || pathname.startsWith('/contas/') })}>
-        Painel
-      </NavLink>
+      {user && (
+        <NavLink to="/" end className={({ isActive }) => linkClass({ isActive: isActive || pathname.startsWith('/contas/') })}>
+          Painel
+        </NavLink>
+      )}
+      {/* Público: aparece também sem login */}
       <NavLink to="/bestiario" className={linkClass}>
         Bestiário
       </NavLink>
-      <NavLink to="/importar" className={linkClass}>
-        Importar
-      </NavLink>
-      <NavLink to="/configuracoes" className={linkClass}>
-        Configurações
-      </NavLink>
+      {user && (
+        <>
+          <NavLink to="/importar" className={linkClass}>
+            Importar
+          </NavLink>
+          <NavLink to="/configuracoes" className={linkClass}>
+            Configurações
+          </NavLink>
+        </>
+      )}
     </nav>
   )
 }
