@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { EQUIPPABLE_RUNE_SETS } from '@/lib/game/labels'
+import { MarkFilterControls } from '../marks/MarkFilterControls'
 import { Chip, SelectFilter } from '../shared/filterControls'
 import { DEFAULT_RUNE_FILTERS, RUNE_STAT_OPTIONS, type RuneFilters, type RuneLocation } from './runeFilters'
 
@@ -12,10 +13,12 @@ const LOCATION_OPTIONS: Array<{ value: RuneLocation; label: string }> = [
 
 interface Props {
   filters: RuneFilters
+  /** Tags existentes nas runas. */
+  tags: string[]
   onChange: (filters: RuneFilters) => void
 }
 
-export function RuneFiltersBar({ filters, onChange }: Props) {
+export function RuneFiltersBar({ filters, tags, onChange }: Props) {
   const update = (patch: Partial<RuneFilters>) => onChange({ ...filters, ...patch })
 
   return (
@@ -53,6 +56,8 @@ export function RuneFiltersBar({ filters, onChange }: Props) {
         options={LOCATION_OPTIONS}
         onChange={(location) => update({ location })}
       />
+
+      <MarkFilterControls filters={filters} tags={tags} onChange={update} />
 
       <Button
         variant="ghost"

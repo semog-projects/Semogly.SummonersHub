@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { useParams, useSearchParams } from 'react-router'
+import { availableTags } from '@/features/accounts/marks/markFilters'
+import { MarksBulkBar } from '@/features/accounts/marks/MarksBulkBar'
 import { RuneFiltersBar } from '@/features/accounts/runes/RuneFiltersBar'
 import {
   filterAndSortRunes,
@@ -55,14 +57,16 @@ function RuneList({
 }) {
   const visible = useMemo(() => filterAndSortRunes([...runes], filters), [runes, filters])
   const { limit, showMore } = usePaging(runeFiltersToParams(filters).toString(), RUNE_PAGE_SIZE)
+  const tags = useMemo(() => availableTags(runes), [runes])
 
   return (
     <div className="space-y-4">
-      <RuneFiltersBar filters={filters} onChange={onChange} />
+      <RuneFiltersBar filters={filters} tags={tags} onChange={onChange} />
       <p className="text-xs text-muted-foreground" aria-live="polite">
         {visible.length} de {runes.length} runas · eficiência no modelo do SW Exporter; a máxima supõe roll máximo nos
         upgrades que faltam até o +12
       </p>
+      <MarksBulkBar wizardId={wizardId} kind="Rune" itemIds={visible.map((item) => item.rune.runeId)} />
       <RuneTable wizardId={wizardId} runes={visible.slice(0, limit)} filters={filters} onSort={onSort} />
       <ShowMoreButton total={visible.length} limit={limit} onClick={showMore} />
     </div>

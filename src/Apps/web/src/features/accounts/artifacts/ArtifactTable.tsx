@@ -3,6 +3,7 @@ import { formatNumber } from '@/lib/format'
 import { ARTIFACT_MAIN_STAT_LABELS, formatArtifactEffect, RARITY_LABELS } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
+import { MarkCell } from '../marks/MarkCell'
 import { SortHeader } from '../shared/SortHeader'
 import type { ArtifactListItem } from '../types'
 import { artifactKindLabel, subValue, type ArtifactFilters, type ArtifactSortKey } from './artifactFilters'
@@ -43,11 +44,14 @@ export function ArtifactTable({ wizardId, artifacts, filters, onSort }: Props) {
             <th scope="col" className="py-2 pr-3 font-medium">
               Equipado em
             </th>
+            <th scope="col" className="py-2 pr-3 font-medium">
+              Bloqueio e tags
+            </th>
           </tr>
         </thead>
         <tbody>
           {artifacts.map((item) => {
-            const { artifact, equippedOn } = item
+            const { artifact, equippedOn, locked, tags } = item
             return (
               <tr key={artifact.artifactId} className="border-b align-top last:border-0 hover:bg-muted/40">
                 <td className={cn('py-2 pr-3 font-medium whitespace-nowrap', RARITY_TEXT_CLASSES[artifact.originalRarity])}>
@@ -83,6 +87,9 @@ export function ArtifactTable({ wizardId, artifacts, filters, onSort }: Props) {
                   ) : (
                     <span className="text-xs text-muted-foreground">Inventário</span>
                   )}
+                </td>
+                <td className="py-2 pr-3">
+                  <MarkCell wizardId={wizardId} kind="Artifact" itemId={artifact.artifactId} locked={locked} tags={tags} />
                 </td>
               </tr>
             )

@@ -22,6 +22,8 @@ function item(overrides: Partial<ArtifactDetail> & { artifactId: number }, equip
       ...overrides,
     },
     equippedOn: equipped ? { monsterId: 1, masterId: 19811, name: 'Lapis', element: 'Water' } : null,
+    locked: false,
+    tags: [],
   }
 }
 
@@ -76,6 +78,8 @@ describe('parâmetros da URL', () => {
       mainStat: 102,
       subEffect: SPEED_DAMAGE,
       location: 'equipped',
+      lock: 'unlocked',
+      tag: 'Siege',
       sort: 'subValue',
       direction: 'asc',
     }

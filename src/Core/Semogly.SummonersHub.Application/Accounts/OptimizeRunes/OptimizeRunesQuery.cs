@@ -45,7 +45,8 @@ internal sealed class OptimizeRunesQueryHandler(
     IAccountSnapshotRepository repository,
     IWizardAccountRepository wizardAccounts,
     IUserContext userContext,
-    IMonsterCatalog catalog) : IQueryHandler<OptimizeRunesQuery, OptimizeRunesResponse>
+    IMonsterCatalog catalog,
+    IInventoryMarkRepository marks) : IQueryHandler<OptimizeRunesQuery, OptimizeRunesResponse>
 {
     public async Task<Result<OptimizeRunesResponse>> HandleAsync(OptimizeRunesQuery query, CancellationToken cancellationToken)
     {
@@ -76,17 +77,21 @@ internal sealed class OptimizeRunesQueryHandler(
             request.Minimums ?? [],
             request.AssumeMaxLevel);
 
-        bool Available(long? equippedMonsterId) =>
-            equippedMonsterId is null || equippedMonsterId == monster.GameId || request.IncludeEquippedOnOthers;
+        var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
 
-        var pool = snapshot.Runes.Where(r => Available(r.EquippedMonsterId));
+        // Itens bloqueados ficam com quem os usa: só entram se já estiverem no próprio monstro
+        bool Available(long? equippedMonsterId, bool locked) =>
+            equippedMonsterId == monster.GameId
+            || (!locked && (equippedMonsterId is null || request.IncludeEquippedOnOthers));
+
+        var pool = snapshot.Runes.Where(r => Available(r.EquippedMonsterId, lookup.IsLocked(r)));
 
         var currentArtifacts = snapshot.Artifacts.Where(a => a.EquippedMonsterId == monster.GameId).ToList();
         var artifacts = request.OptimizeArtifacts
             ? RuneOptimizer.BestArtifacts(
                 monster,
                 catalog.Find(monster.MasterId)?.Archetype,
-                snapshot.Artifacts.Where(a => Available(a.EquippedMonsterId)),
+                snapshot.Artifacts.Where(a => Available(a.EquippedMonsterId, lookup.IsLocked(a))),
                 request.Focus)
             : currentArtifacts;
 
@@ -105,8 +110,8 @@ internal sealed class OptimizeRunesQueryHandler(
             RuneOptimizer.Score(currentStats.Total, monster.BaseStats, request.Focus),
             currentStats.Total,
             currentStats.ActiveSets,
-            [.. equipment.RunesOf(monster.GameId).OrderBy(r => r.Slot).Select(r => ToItem(r, monsters))],
-            [.. currentArtifacts.Select(a => ToItem(a, monsters))]);
+            [.. equipment.RunesOf(monster.GameId).OrderBy(r => r.Slot).Select(r => ToItem(r, monsters, lookup))],
+            [.. currentArtifacts.Select(a => ToItem(a, monsters, lookup))]);
 
         return new OptimizeRunesResponse(
             current,
@@ -114,15 +119,15 @@ internal sealed class OptimizeRunesQueryHandler(
                 b.Score,
                 b.Stats.Total,
                 b.Stats.ActiveSets,
-                [.. b.Runes.Select(r => ToItem(r, monsters))],
-                [.. artifacts.Select(a => ToItem(a, monsters))]))]);
+                [.. b.Runes.Select(r => ToItem(r, monsters, lookup))],
+                [.. artifacts.Select(a => ToItem(a, monsters, lookup))]))]);
     }
 
-    private static RuneListItem ToItem(Rune rune, Dictionary<long, EquippedMonster> monsters) =>
-        new(EquipmentDetails.ToDetail(rune), rune.EquippedMonsterId is { } id ? monsters[id] : null);
+    private static RuneListItem ToItem(Rune rune, Dictionary<long, EquippedMonster> monsters, InventoryMarkLookup lookup) =>
+        new(EquipmentDetails.ToDetail(rune), rune.EquippedMonsterId is { } id ? monsters[id] : null, lookup.IsLocked(rune), lookup.TagsOf(rune));
 
-    private static ArtifactListItem ToItem(Artifact artifact, Dictionary<long, EquippedMonster> monsters) =>
-        new(EquipmentDetails.ToDetail(artifact), artifact.EquippedMonsterId is { } id ? monsters[id] : null);
+    private static ArtifactListItem ToItem(Artifact artifact, Dictionary<long, EquippedMonster> monsters, InventoryMarkLookup lookup) =>
+        new(EquipmentDetails.ToDetail(artifact), artifact.EquippedMonsterId is { } id ? monsters[id] : null, lookup.IsLocked(artifact), lookup.TagsOf(artifact));
 
     private static Error? Validate(OptimizeRunesRequest request)
     {

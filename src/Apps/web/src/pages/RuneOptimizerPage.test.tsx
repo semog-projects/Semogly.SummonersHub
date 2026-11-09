@@ -53,9 +53,9 @@ const response: OptimizeRunesResponse = {
       total: { ...stats, speed: 180 },
       activeSets: ['Violent', 'Will'],
       runes: [
-        { rune: rune(1, 2, 'Violent'), equippedOn: lapis },
-        { rune: rune(2, 4, 'Violent'), equippedOn: tyron },
-        { rune: rune(3, 6, 'Will'), equippedOn: null },
+        { rune: rune(1, 2, 'Violent'), equippedOn: lapis, locked: false, tags: [] },
+        { rune: rune(2, 4, 'Violent'), equippedOn: tyron, locked: false, tags: [] },
+        { rune: rune(3, 6, 'Will'), equippedOn: null, locked: false, tags: [] },
       ],
       artifacts: [
         {
@@ -71,6 +71,8 @@ const response: OptimizeRunesResponse = {
             substats: [],
           },
           equippedOn: null,
+          locked: false,
+          tags: [],
         },
       ],
     },

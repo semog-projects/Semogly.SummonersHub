@@ -1,3 +1,4 @@
+import { availableTags } from '../marks/markFilters'
 import type { RuneDetail, RuneListItem } from '../types'
 import {
   DEFAULT_RUNE_FILTERS,
@@ -25,6 +26,8 @@ function item(overrides: Partial<RuneDetail> & { runeId: number }, equipped = tr
       ...overrides,
     },
     equippedOn: equipped ? { monsterId: 1, masterId: 19811, name: 'Lapis', element: 'Water' } : null,
+    locked: false,
+    tags: [],
   }
 }
 
@@ -67,6 +70,30 @@ describe('filterAndSortRunes', () => {
   })
 })
 
+describe('bloqueio e tags', () => {
+  const marked = [
+    { ...item({ runeId: 1 }), locked: true, tags: ['RTA'] },
+    { ...item({ runeId: 2 }), locked: false, tags: ['rta', 'Siege'] },
+    item({ runeId: 3 }),
+  ]
+  const markedIds = (filters: Partial<RuneFilters>) =>
+    filterAndSortRunes([...marked], { ...DEFAULT_RUNE_FILTERS, ...filters }).map((r) => r.rune.runeId)
+
+  it('filtra por bloqueio', () => {
+    expect(markedIds({ lock: 'locked' })).toEqual([1])
+    expect(markedIds({ lock: 'unlocked' })).toEqual([2, 3])
+  })
+
+  it('filtra por tag sem diferenciar maiúsculas', () => {
+    expect(markedIds({ tag: 'RTA' })).toEqual([1, 2])
+    expect(markedIds({ tag: 'siege' })).toEqual([2])
+  })
+
+  it('lista as tags existentes sem repetição', () => {
+    expect(availableTags(marked)).toEqual(['RTA', 'Siege'])
+  })
+})
+
 describe('parâmetros da URL', () => {
   it('ida e volta preservam os filtros', () => {
     const filters: RuneFilters = {
@@ -75,6 +102,8 @@ describe('parâmetros da URL', () => {
       mainStat: 8,
       subStat: 9,
       location: 'inventory',
+      lock: 'locked',
+      tag: 'RTA',
       sort: 'speed',
       direction: 'asc',
     }
