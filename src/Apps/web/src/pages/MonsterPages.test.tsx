@@ -64,7 +64,10 @@ const detail: MonsterDetail = {
 }
 
 function renderAt(path: string, routePath: string, element: React.ReactNode, body: unknown) {
-  vi.stubGlobal('fetch', vi.fn(async (url: string) => new Response(JSON.stringify(url.includes('game-data') ? [] : body), { status: 200 })))
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => new Response(JSON.stringify(url.includes('game-data') || url.endsWith('/shares') ? [] : body), { status: 200 })),
+  )
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={client}>
@@ -136,6 +139,9 @@ describe('MonsterDetailPage', () => {
     expect(within(rune).getByText('gem')).toBeInTheDocument()
     expect(rune).toHaveTextContent('Eficiência 85,71%')
     expect(screen.getAllByText(/Slot \d vazio/)).toHaveLength(5)
+
+    expect(screen.getByRole('link', { name: /Otimizar runas/ })).toBeInTheDocument()
+    expect(await screen.findByText('Nenhum link gerado.')).toBeInTheDocument()
 
     const artifact = screen.getByLabelText('Artefato de elemento água')
     expect(artifact).toHaveTextContent('ATK +100')

@@ -430,3 +430,17 @@ export interface MonsterSkills {
   total: StatValues
   skills: MonsterSkillDetail[]
 }
+
+/** Link público de uma build. */
+export interface ShareLink {
+  token: string
+  /** Versão do import mostrada pelo link. */
+  version: number
+  createdAt: string
+}
+
+/** GET /api/shared/{token} (público) */
+export interface SharedBuild {
+  monster: MonsterDetail
+  importedAt: string
+}

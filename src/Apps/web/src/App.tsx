@@ -18,6 +18,7 @@ import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
 import { MonsterListPage } from '@/pages/MonsterListPage'
 import { PveTeamsPage } from '@/pages/PveTeamsPage'
 import { RuneListPage } from '@/pages/RuneListPage'
+import { SharedBuildPage } from '@/pages/SharedBuildPage'
 import { RuneOptimizerPage } from '@/pages/RuneOptimizerPage'
 import { SpeedTunePage } from '@/pages/SpeedTunePage'
 
@@ -38,6 +39,8 @@ export function App() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          {/* Build compartilhada: pública, sem login */}
+          <Route path="/b/:token" element={<SharedBuildPage />} />
           <Route index element={<Protected><HomePage /></Protected>} />
           <Route path="/contas/:wizardId" element={<Protected><AccountLayout /></Protected>}>
             <Route index element={<AccountOverviewPage />} />
