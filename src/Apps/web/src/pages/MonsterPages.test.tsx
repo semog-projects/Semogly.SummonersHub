@@ -108,6 +108,21 @@ describe('MonsterListPage', () => {
     expect(rowNames()).toEqual(['Tyron', 'Lapis', 'Konamiya'])
   })
 
+  it('bloqueia um monstro pelo cadeado da lista', async () => {
+    renderAt('/contas/1/monstros', '/contas/:wizardId/monstros', <MonsterListPage />, list)
+    await screen.findByText('Lapis')
+    const fetchMock = vi.mocked(fetch)
+
+    const lapisRow = screen.getAllByRole('row').find((row) => row.textContent?.includes('Lapis'))!
+    fireEvent.click(within(lapisRow).getByRole('button', { name: 'Bloquear monstro' }))
+
+    await vi.waitFor(() => {
+      const patch = fetchMock.mock.calls.find(([, init]) => init?.method === 'PATCH')
+      expect(patch?.[0]).toBe('/api/accounts/1/inventory-marks')
+      expect(JSON.parse(patch![1]!.body as string)).toEqual({ kind: 'Monster', itemIds: [11], locked: true })
+    })
+  })
+
   it('filtra por set', async () => {
     renderAt('/contas/1/monstros', '/contas/:wizardId/monstros', <MonsterListPage />, list)
     await screen.findByText('Lapis')

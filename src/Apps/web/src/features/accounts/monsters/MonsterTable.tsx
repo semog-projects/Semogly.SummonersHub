@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { useMonsterDefinitions } from '@/features/game-data/useMonsterDefinitions'
 import { formatNumber, formatPercent } from '@/lib/format'
@@ -6,6 +6,7 @@ import { ELEMENT_NAME_LABELS } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES } from '../overview/elementStyles'
 import { efficiencyClass } from '../runes/efficiency'
+import { MonsterLockButton } from '../marks/MonsterLockButton'
 import { SortHeader } from '../shared/SortHeader'
 import type { MonsterListItem } from '../types'
 import { MonsterIcon } from './MonsterIcon'
@@ -21,6 +22,7 @@ interface Props {
 /** Tabela de monstros com atributos totais; o cabeçalho de cada coluna ordena por ela. */
 export function MonsterTable({ monsters, filters, onSort }: Props) {
   const { data: definitions } = useMonsterDefinitions(monsters.map((monster) => monster.masterId))
+  const wizardId = Number(useParams().wizardId)
 
   if (monsters.length === 0) {
     return <p className="py-8 text-center text-sm text-muted-foreground">Nenhum monstro com esses filtros.</p>
@@ -64,6 +66,7 @@ export function MonsterTable({ monsters, filters, onSort }: Props) {
                     <Link to={String(monster.monsterId)} className="font-medium hover:underline">
                       {monster.name ?? `Monstro ${monster.masterId}`}
                     </Link>
+                    <MonsterLockButton wizardId={wizardId} monsterId={monster.monsterId} locked={monster.locked ?? false} />
                     <p className="text-xs whitespace-nowrap text-muted-foreground">
                       <span className={ELEMENT_TEXT_CLASSES[monster.element]}>{ELEMENT_NAME_LABELS[monster.element]}</span>{' '}
                       · {monster.stars}★ · nv. {monster.level}

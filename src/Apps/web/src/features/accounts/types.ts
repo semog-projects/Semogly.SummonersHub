@@ -83,6 +83,8 @@ export interface MonsterListItem {
   artifacts: number
   /** Eficiência média das runas equipadas, ou nulo sem runas. */
   averageRuneEfficiency: number | null
+  /** Monstro bloqueado: o equipamento dele conta como bloqueado (ausente = falso). */
+  locked?: boolean
 }
 
 /** Atributo com o código numérico do jogo (mesma tabela de rótulos do import). */
@@ -206,6 +208,8 @@ export interface RuneListItem {
   /** Bloqueada pelo usuário: o otimizador não a tira de quem a usa. */
   locked: boolean
   tags: string[]
+  /** Equipada num monstro bloqueado. */
+  lockedByMonster?: boolean
 }
 
 /** GET /api/accounts/{wizardId}/artifacts */
@@ -216,9 +220,11 @@ export interface ArtifactListItem {
   /** Bloqueado pelo usuário: o otimizador não o tira de quem o usa. */
   locked: boolean
   tags: string[]
+  /** Equipado num monstro bloqueado. */
+  lockedByMonster?: boolean
 }
 
-export type InventoryItemKind = 'Rune' | 'Artifact'
+export type InventoryItemKind = 'Rune' | 'Artifact' | 'Monster'
 
 /** PATCH /api/accounts/{wizardId}/inventory-marks */
 export interface UpdateInventoryMarksRequest {

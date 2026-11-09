@@ -26,7 +26,7 @@ export function MonsterDetailPage() {
       <QueryStatus query={query} notFound="Monstro não encontrado no último import." loading="Carregando monstro…">
         {(monster) => (
           <div className="space-y-6">
-            <MonsterDetailView monster={monster} />
+            <MonsterDetailView monster={monster} wizardId={Number(params.wizardId)} />
             <ShareBuildPanel wizardId={Number(params.wizardId)} monsterId={monster.monsterId} />
           </div>
         )}

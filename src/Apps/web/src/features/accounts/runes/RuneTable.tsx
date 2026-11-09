@@ -52,7 +52,7 @@ export function RuneTable({ wizardId, runes, filters, onSort }: Props) {
           </tr>
         </thead>
         <tbody>
-          {runes.map(({ rune, equippedOn, locked, tags }) => (
+          {runes.map(({ rune, equippedOn, locked, tags, lockedByMonster }) => (
             <tr key={rune.runeId} className="border-b align-top last:border-0 hover:bg-muted/40">
               <td className="py-2 pr-3 whitespace-nowrap">
                 <p className={cn('font-medium', RARITY_TEXT_CLASSES[rune.originalRarity])}>
@@ -101,7 +101,7 @@ export function RuneTable({ wizardId, runes, filters, onSort }: Props) {
                 )}
               </td>
               <td className="py-2 pr-3">
-                <MarkCell wizardId={wizardId} kind="Rune" itemId={rune.runeId} locked={locked} tags={tags} />
+                <MarkCell wizardId={wizardId} kind="Rune" itemId={rune.runeId} locked={locked} tags={tags} lockedByMonster={lockedByMonster} />
               </td>
             </tr>
           ))}

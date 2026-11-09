@@ -15,7 +15,8 @@ public sealed record ListRunesQuery(long WizardId) : IQuery<IReadOnlyList<RuneLi
 /// <param name="EquippedOn">Nulo quando a runa está no inventário.</param>
 /// <param name="Locked">Bloqueada pelo usuário: o otimizador não a tira de quem a usa.</param>
 /// <param name="Tags">Tags do usuário.</param>
-public sealed record RuneListItem(RuneDetail Rune, EquippedMonster? EquippedOn, bool Locked, IReadOnlyList<string> Tags);
+/// <param name="LockedByMonster">Equipada num monstro bloqueado (conta como bloqueada para o otimizador).</param>
+public sealed record RuneListItem(RuneDetail Rune, EquippedMonster? EquippedOn, bool Locked, IReadOnlyList<string> Tags, bool LockedByMonster = false);
 
 internal sealed class ListRunesQueryHandler(
     IAccountSnapshotRepository repository,
@@ -40,7 +41,8 @@ internal sealed class ListRunesQueryHandler(
                 EquipmentDetails.ToDetail(rune),
                 rune.EquippedMonsterId is { } id ? monsters[id] : null,
                 lookup.IsLocked(rune),
-                lookup.TagsOf(rune)))
+                lookup.TagsOf(rune),
+                lookup.IsLockedByMonster(rune.EquippedMonsterId)))
             .OrderByDescending(r => r.Rune.Efficiency)
             .ThenBy(r => r.Rune.RuneId)
             .ToList();

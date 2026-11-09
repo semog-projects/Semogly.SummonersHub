@@ -3,7 +3,9 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { SelectFilter } from '@/features/accounts/shared/filterControls'
 import { cn } from '@/lib/utils'
+import { applyImportFilters, DEFAULT_IMPORT_FILTERS, type ImportFilters } from './importFilters'
 import { ExportParseError, MAX_EXPORT_SIZE_BYTES, parseExportText, SENSITIVE_FIELDS } from './parseExport'
 import type { AccountImport } from './types'
 import { useImportAccount } from './useImportAccount'
@@ -99,12 +101,15 @@ export function ImportCard() {
   )
 }
 
-function ImportSummary({ fileName, data }: { fileName: string; data: AccountImport }) {
+function ImportSummary({ fileName, data: original }: { fileName: string; data: AccountImport }) {
   const importAccount = useImportAccount()
+  const [filters, setFilters] = useState<ImportFilters>(DEFAULT_IMPORT_FILTERS)
+  const data = applyImportFilters(original, filters)
+  const skipped = original.monsters.length - data.monsters.length
   const equippedRunes = data.runes.filter((rune) => rune.equippedMonsterId !== null).length
 
   const items = [
-    { label: 'Monstros', value: data.monsters.length },
+    { label: 'Monstros', value: data.monsters.length, detail: skipped > 0 ? `${skipped} ignorados` : undefined },
     { label: 'Runas', value: data.runes.length, detail: `${equippedRunes} equipadas` },
     { label: 'Artefatos', value: data.artifacts.length },
     { label: 'Itens de craft', value: data.craftItems.length },
@@ -135,6 +140,27 @@ function ImportSummary({ fileName, data }: { fileName: string; data: AccountImpo
       <p className="text-xs text-muted-foreground">
         Removidos: {SENSITIVE_FIELDS.join(', ')} e todos os demais campos que o painel não usa.
       </p>
+
+      <fieldset className="flex flex-wrap items-center gap-3 text-sm" disabled={importAccount.isPending || importAccount.isSuccess}>
+        <legend className="sr-only">Opções do import</legend>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={filters.skipUnequipped}
+            onChange={(event) => setFilters({ ...filters, skipUnequipped: event.target.checked })}
+          />
+          Ignorar monstros sem runas nem artefatos
+        </label>
+        {filters.skipUnequipped && (
+          <SelectFilter
+            label="Estrelas dos ignorados"
+            allLabel="De qualquer estrela"
+            value={filters.belowStars}
+            options={[2, 3, 4, 5, 6].map((stars) => ({ value: stars, label: `Só abaixo de ${stars}★` }))}
+            onChange={(belowStars) => setFilters({ ...filters, belowStars })}
+          />
+        )}
+      </fieldset>
 
       <div className="flex flex-wrap items-center gap-3">
         <Button onClick={() => importAccount.mutate(data)} disabled={importAccount.isPending || importAccount.isSuccess}>

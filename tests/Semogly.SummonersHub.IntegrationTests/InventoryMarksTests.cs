@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
+using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
 using Semogly.SummonersHub.Application.Accounts.OptimizeRunes;
 using Semogly.SummonersHub.IntegrationTests.Infrastructure;
@@ -97,6 +98,40 @@ public sealed class InventoryMarksTests(ApiFixture fixture) : IAsyncLifetime
         Assert.NotNull(result);
         Assert.NotEmpty(result.Builds);
         Assert.All(result.Builds.SelectMany(b => b.Runes), r => Assert.DoesNotContain(r.Rune.RuneId, otherRunes));
+    }
+
+    [Fact]
+    public async Task LockedMonster_ShouldLockItsEquipmentAcrossImports()
+    {
+        var payload = ImportPayload.Create(out var wizardId);
+        (await _client.PostAsJsonAsync("/api/imports", payload, Ct)).EnsureSuccessStatusCode();
+        var lapisId = payload["monsters"]![0]!["id"]!.GetValue<long>();
+        var otherId = payload["monsters"]![1]!["id"]!.GetValue<long>();
+
+        await PatchAsync(wizardId, new { kind = "Monster", itemIds = new[] { otherId }, locked = true });
+
+        // Novo import: o bloqueio segue pelo id do monstro
+        payload["wizard"]!["level"] = 51;
+        (await _client.PostAsJsonAsync("/api/imports", payload, Ct)).EnsureSuccessStatusCode();
+
+        var monsters = await _client.GetFromJsonAsync<List<MonsterListItem>>($"/api/accounts/{wizardId}/monsters", ApiJson.Options, Ct);
+        Assert.True(monsters!.Single(m => m.MonsterId == otherId).Locked);
+        Assert.False(monsters!.Single(m => m.MonsterId == lapisId).Locked);
+
+        var runes = await GetRunesAsync(wizardId);
+        Assert.All(runes.Where(r => r.EquippedOn?.MonsterId == otherId), r => Assert.True(r.LockedByMonster));
+        Assert.All(runes.Where(r => r.EquippedOn?.MonsterId != otherId), r => Assert.False(r.LockedByMonster));
+
+        // O otimizador do Lapis não usa o equipamento do monstro bloqueado...
+        var request = new { sets = Array.Empty<string>(), focus = SpeedFocus, includeEquippedOnOthers = true };
+        var response = await _client.PostAsJsonAsync($"/api/accounts/{wizardId}/monsters/{lapisId}/optimize", request, ApiJson.Options, Ct);
+        var result = await response.Content.ReadFromJsonAsync<OptimizeRunesResponse>(ApiJson.Options, Ct);
+        Assert.All(result!.Builds.SelectMany(b => b.Runes), r => Assert.NotEqual(otherId, r.EquippedOn?.MonsterId));
+
+        // ...mas o do próprio monstro bloqueado continua disponível para ele
+        var own = await _client.PostAsJsonAsync($"/api/accounts/{wizardId}/monsters/{otherId}/optimize", request, ApiJson.Options, Ct);
+        var ownResult = await own.Content.ReadFromJsonAsync<OptimizeRunesResponse>(ApiJson.Options, Ct);
+        Assert.Contains(ownResult!.Builds.SelectMany(b => b.Runes), r => r.EquippedOn?.MonsterId == otherId);
     }
 
     [Fact]
