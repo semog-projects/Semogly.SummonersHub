@@ -37,6 +37,23 @@ public static class RuneProjection
     /// <summary>Roll médio de uma sub de runa 6★.</summary>
     public static decimal AverageRoll(RuneStat stat) => (SubstatRoll[stat].Min + SubstatRoll[stat].Max) / 2m;
 
+    /// <summary>
+    /// Cópia da runa com o grind lendário máximo em cada sub grindável (quando maior que o grind atual),
+    /// para simular a runa depois de usar os grinds.
+    /// </summary>
+    public static Rune WithMaxGrinds(Rune rune)
+    {
+        var substats = rune.Substats
+            .Select(sub => CraftItemRanges.For(CraftItemType.Grindstone, sub.Stat, rarity: 5) is { } range && range.Max > sub.GrindValue
+                ? sub with { GrindValue = range.Max }
+                : sub)
+            .ToList();
+
+        return new Rune(
+            rune.GameId, rune.Slot, rune.Stars, rune.IsAncient, rune.Set, rune.Level, rune.Rarity, rune.OriginalRarity,
+            rune.MainStat, rune.InnateStat, substats, rune.EquippedMonsterId);
+    }
+
     /// <summary>Cópia da runa em +15 (mesmo id e mesmo monstro), com o principal e as subs projetados.</summary>
     public static Rune ToMaxLevel(Rune rune, long? equippedMonsterId)
     {

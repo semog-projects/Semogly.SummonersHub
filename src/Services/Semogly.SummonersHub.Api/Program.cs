@@ -48,6 +48,7 @@ app.MapAuthEndpoints();
 app.MapSystemEndpoints();
 app.MapGameDataEndpoints();
 app.MapAccountsEndpoints();
+app.MapOptimizerPresetsEndpoints();
 
 await app.RunAsync();
 

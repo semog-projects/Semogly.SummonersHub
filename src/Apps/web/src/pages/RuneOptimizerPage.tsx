@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router'
 import { MonsterIcon } from '@/features/accounts/monsters/MonsterIcon'
 import { initialForm, toRequest, type OptimizerForm } from '@/features/accounts/optimizer/optimizerOptions'
 import { OptimizerFormView } from '@/features/accounts/optimizer/OptimizerFormView'
+import { OptimizerPresetsBar } from '@/features/accounts/optimizer/OptimizerPresetsBar'
 import { OptimizerResults } from '@/features/accounts/optimizer/OptimizerResults'
 import { useOptimizeRunes } from '@/features/accounts/optimizer/useOptimizeRunes'
 import type { MonsterDetail } from '@/features/accounts/types'
@@ -50,6 +51,7 @@ function Optimizer({ wizardId, monster }: { wizardId: number; monster: MonsterDe
         </div>
       </div>
 
+      <OptimizerPresetsBar form={form} initial={initialForm(monster)} onApply={setForm} />
       <OptimizerFormView form={form} onChange={setForm} onSubmit={() => optimize.mutate(toRequest(form))} pending={optimize.isPending} />
 
       {optimize.isError && (

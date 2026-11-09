@@ -21,6 +21,8 @@ public sealed class SummonersHubDbContext(DbContextOptions<SummonersHubDbContext
 
     public DbSet<InventoryMark> InventoryMarks => Set<InventoryMark>();
 
+    public DbSet<OptimizerPreset> OptimizerPresets => Set<OptimizerPreset>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)

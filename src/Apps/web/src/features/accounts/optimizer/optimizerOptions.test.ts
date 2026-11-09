@@ -1,5 +1,5 @@
 import type { MonsterDetail } from '../types'
-import { conflictingLimits, initialForm, requiredPieces, toRequest } from './optimizerOptions'
+import { conflictingLimits, formFromPreset, initialForm, requiredPieces, toRequest } from './optimizerOptions'
 
 const monster = {
   activeSets: ['Violent', 'Will'],
@@ -21,6 +21,8 @@ describe('optimizerOptions', () => {
       includeEquippedOnOthers: false,
       assumeMaxLevel: false,
       optimizeArtifacts: false,
+      simulateGrinds: false,
+      teamSets: {},
     })
   })
 
@@ -31,6 +33,8 @@ describe('optimizerOptions', () => {
       weights: { Speed: '3', EffectiveHp: '1', Hp: '5' },
       minimums: { Speed: '200', Accuracy: '', Hp: 'x' },
       maximums: { Speed: '230' },
+      simulateGrinds: true,
+      teamSets: { Fight: 2, Accuracy: 1, Enhance: 0 },
     }
 
     expect(toRequest(form)).toEqual({
@@ -43,7 +47,17 @@ describe('optimizerOptions', () => {
       includeEquippedOnOthers: false,
       assumeMaxLevel: false,
       optimizeArtifacts: false,
+      simulateGrinds: true,
+      teamSets: ['Fight', 'Fight', 'Accuracy'],
     })
+  })
+
+  it('aplica um preset sobre o formulário inicial, completando campos novos', () => {
+    const form = formFromPreset(initialForm(monster), { focus: ['Hp'], sets: ['Energy', null, null] })
+    expect(form.focus).toEqual(['Hp'])
+    expect(form.sets).toEqual(['Energy', null, null])
+    expect(form.teamSets).toEqual({})
+    expect(form.mainStats).toEqual({ 2: 8, 4: 10, 6: null })
   })
 
   it('aponta máximo menor que o mínimo', () => {

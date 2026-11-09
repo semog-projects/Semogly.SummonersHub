@@ -334,6 +334,34 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                     b.ToTable("Monsters", (string)null);
                 });
 
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.OptimizerPreset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Criteria")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("OptimizerPresets", (string)null);
+                });
+
             modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.Rune", b =>
                 {
                     b.Property<Guid>("SnapshotId")
@@ -673,6 +701,15 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Skills");
+                });
+
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.OptimizerPreset", b =>
+                {
+                    b.HasOne("Semogly.SummonersHub.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.Rune", b =>

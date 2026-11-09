@@ -44,7 +44,8 @@ interface ProblemDetails {
   errors?: Record<string, string[]>
 }
 
-async function request<T>(path: string, init: RequestInit): Promise<T> {
+/** Chamada genérica em /api (ex.: DELETE). */
+export async function request<T>(path: string, init: RequestInit): Promise<T> {
   const response = await fetch(`/api${path}`, {
     ...init,
     credentials: 'same-origin',
