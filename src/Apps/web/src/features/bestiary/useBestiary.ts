@@ -26,7 +26,10 @@ export interface BestiarySkill {
   id: number
   name: string
   slot: number
+  /** Descrição em pt-BR, ou em inglês enquanto não traduzida. */
   description: string | null
+  /** Texto original em inglês quando a descrição é tradução. */
+  originalDescription: string | null
   /** Recarga em turnos; nula sem recarga. */
   cooldown: number | null
   hits: number

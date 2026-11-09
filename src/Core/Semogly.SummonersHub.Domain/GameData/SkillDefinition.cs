@@ -10,6 +10,7 @@ namespace Semogly.SummonersHub.Domain.GameData;
 /// <param name="DamageUpgrades">Bônus de dano (%) de cada skill-up, na ordem; 0 nos que não são de dano.</param>
 /// <param name="Cooldown">Recarga em turnos; nula sem recarga (skill 1 ou passiva).</param>
 /// <param name="LevelProgress">Texto de cada skill-up (ex.: "Damage +10%"), na ordem.</param>
+/// <param name="DescriptionPt">Tradução da descrição para pt-BR; nula enquanto não traduzida.</param>
 public sealed record SkillDefinition(
     int Id,
     string Name,
@@ -24,7 +25,8 @@ public sealed record SkillDefinition(
     string? Description = null,
     int? Cooldown = null,
     string? IconFilename = null,
-    IReadOnlyList<string>? LevelProgress = null)
+    IReadOnlyList<string>? LevelProgress = null,
+    string? DescriptionPt = null)
 {
     /// <summary>Bônus de dano (%) acumulado no nível: o nível 1 não tem upgrade; o nível N tem os N − 1 primeiros.</summary>
     public int DamageBonusAt(int level) => DamageUpgrades.Take(Math.Clamp(level - 1, 0, DamageUpgrades.Count)).Sum();

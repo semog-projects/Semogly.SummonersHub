@@ -6,6 +6,7 @@ import {
   filterBestiary,
 } from './bestiaryFilters'
 import { leaderSkillText } from './leaderSkill'
+import { translateSkillUp } from './skillUps'
 
 function monster(overrides: Partial<MonsterDefinition> & { com2usId: number; name: string }): MonsterDefinition {
   return {
@@ -66,5 +67,18 @@ describe('leaderSkillText', () => {
 
   it('mostra atributos e áreas desconhecidos como vêm do bestiário', () => {
     expect(leaderSkillText({ attribute: 'Mana', amount: 10, area: 'Siege', element: null })).toBe('Aumenta Mana dos aliados em 10% (Siege)')
+  })
+})
+
+describe('translateSkillUp', () => {
+  it.each([
+    ['Damage +10%', 'Dano +10%'],
+    ['Effect Rate +15%\r', 'Chance de efeito +15%'],
+    ['Attack Bar Recovery +5%', 'Recuperação da Barra de Ataque +5%'],
+    ['Cooltime Turn -1', 'Recarga -1 turno'],
+    ['Harmful Effect Rate +1 Turns', 'Duração dos efeitos nocivos +1 turno'],
+    ['Something New +3', 'Something New +3'],
+  ])('%s → %s', (text, expected) => {
+    expect(translateSkillUp(text)).toBe(expected)
   })
 })

@@ -3,16 +3,29 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-// Uso: dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync [all|monsters|dungeons|skills]
+// Uso: dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync [all|monsters|dungeons|skills|translate]
 // Sobrescreve os JSONs embarcados na Infrastructure (GameData/monsters.json, dungeons.json e skills.json).
+// "translate" traduz as descrições novas das skills para pt-BR (Claude, exige ANTHROPIC_API_KEY); não entra em "all".
 var target = args.Length > 0 ? args[0].ToLowerInvariant() : "all";
-if (target is not ("all" or "monsters" or "dungeons" or "skills"))
+if (target is not ("all" or "monsters" or "dungeons" or "skills" or "translate"))
 {
-    Console.Error.WriteLine("Uso: GameDataSync [all|monsters|dungeons|skills]");
+    Console.Error.WriteLine("Uso: GameDataSync [all|monsters|dungeons|skills|translate]");
     return 1;
 }
 
 var gameDataDirectory = Path.Combine(FindRepositoryRoot(), "src", "Core", "Semogly.SummonersHub.Infrastructure", "GameData");
+
+var jsonOptionsForTranslation = new JsonSerializerOptions
+{
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    PropertyNameCaseInsensitive = true,
+    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+};
+
+if (target == "translate")
+{
+    return await SkillTranslator.RunAsync(gameDataDirectory, jsonOptionsForTranslation);
+}
 
 using var http = new HttpClient { BaseAddress = new Uri("https://swarfarm.com/api/v2/") };
 http.DefaultRequestHeaders.UserAgent.ParseAdd("Semogly.SummonersHub-GameDataSync/1.0");

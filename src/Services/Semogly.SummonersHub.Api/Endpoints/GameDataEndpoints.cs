@@ -100,7 +100,8 @@ internal static class GameDataEndpoints
                 skill.Id,
                 skill.Name,
                 skill.Slot,
-                skill.Description,
+                skill.DescriptionPt ?? skill.Description,
+                skill.DescriptionPt is null ? null : skill.Description,
                 skill.Cooldown,
                 skill.Hits,
                 skill.Passive,
@@ -155,13 +156,16 @@ internal sealed record BestiaryMonsterResponse(
     IReadOnlyList<BestiarySkillResponse> Skills,
     IReadOnlyList<MonsterResponse> Family);
 
+/// <param name="Description">Descrição em pt-BR, ou em inglês enquanto não traduzida.</param>
+/// <param name="OriginalDescription">Texto original em inglês quando <paramref name="Description"/> é tradução.</param>
 /// <param name="Cooldown">Recarga em turnos; nula sem recarga.</param>
-/// <param name="LevelProgress">Texto de cada skill-up, na ordem.</param>
+/// <param name="LevelProgress">Texto de cada skill-up, na ordem (em inglês; o front traduz).</param>
 internal sealed record BestiarySkillResponse(
     int Id,
     string Name,
     int Slot,
     string? Description,
+    string? OriginalDescription,
     int? Cooldown,
     int Hits,
     bool Passive,

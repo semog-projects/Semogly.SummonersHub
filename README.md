@@ -116,6 +116,18 @@ A mesma ferramenta grava `GameData/dungeons.json`, com o andar mais alto de cada
 do boss e dos demais inimigos, e `GameData/skills.json`, com as habilidades dos monstros (descrição, recarga, ícone,
 texto dos skill-ups, fórmula do multiplicador, golpes e bônus de dano) usadas no bestiário e na calculadora de dano.
 
+O SWARFARM só tem as descrições das skills em inglês. A tradução para pt-BR fica em
+`GameData/skill-descriptions-ptbr.json` (texto em inglês → português) e é gerada pela mesma ferramenta, com a
+Message Batches API do Claude (`claude-opus-5-5`, com glossário de termos do jogo):
+
+```bash
+ANTHROPIC_API_KEY=... dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync -- translate
+```
+
+É incremental: só descrições novas ou alteradas desde a última tradução vão para o lote, então rode depois de
+sincronizar as skills. Sem tradução, o bestiário mostra o texto em inglês. Os textos de skill-up ("Damage +10%")
+são traduzidos por regra no front (`features/bestiary/skillUps.ts`).
+
 Sets, atributos de runa, efeitos de artefato e itens de craft são enums do domínio
 (`Domain/GameData`), com rótulos em pt-BR no front (`src/Apps/web/src/lib/game/labels.ts`).
 Os ícones dos monstros são servidos pelo SWARFARM.

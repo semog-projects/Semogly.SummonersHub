@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MonsterIcon } from '@/features/accounts/monsters/MonsterIcon'
 import { ELEMENT_TEXT_CLASSES } from '@/features/accounts/overview/elementStyles'
 import { leaderSkillText } from '@/features/bestiary/leaderSkill'
+import { translateSkillUp } from '@/features/bestiary/skillUps'
 import { useBestiaryMonster, type BestiaryMonster, type BestiaryStats } from '@/features/bestiary/useBestiary'
 import { formatNumber } from '@/lib/format'
 import { ARCHETYPE_NAME_LABELS, AWAKEN_LABELS, ELEMENT_NAME_LABELS } from '@/lib/game/labels'
@@ -138,6 +139,14 @@ function BestiaryMonsterView({ data }: { data: BestiaryMonster }) {
                     {skill.cooldown !== null && <Badge variant="outline">Recarga: {skill.cooldown} turnos</Badge>}
                   </div>
                   {skill.description && <p className="text-sm">{skill.description}</p>}
+                  {skill.originalDescription && (
+                    <details className="text-xs text-muted-foreground">
+                      <summary className="cursor-pointer">Texto original</summary>
+                      <p lang="en" className="mt-1">
+                        {skill.originalDescription}
+                      </p>
+                    </details>
+                  )}
                   {skill.formulaText && (
                     <p className="text-xs text-muted-foreground">
                       Multiplicador: <code>{skill.formulaText}</code>
@@ -146,7 +155,7 @@ function BestiaryMonsterView({ data }: { data: BestiaryMonster }) {
                   )}
                   {skill.levelProgress.length > 0 && (
                     <p className="text-xs text-muted-foreground">
-                      Skill-ups ({skill.levelProgress.length}): {skill.levelProgress.join(' · ')}
+                      Skill-ups ({skill.levelProgress.length}): {skill.levelProgress.map(translateSkillUp).join(' · ')}
                     </p>
                   )}
                 </div>

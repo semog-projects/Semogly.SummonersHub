@@ -36,14 +36,15 @@ const detail: BestiaryMonster = {
       id: 1,
       name: 'Magic Arrow',
       slot: 1,
-      description: 'Attacks with a magic arrow.',
+      description: 'Ataca com uma flecha mágica.',
+      originalDescription: 'Attacks with a magic arrow.',
       cooldown: null,
       hits: 2,
       passive: false,
       aoe: false,
       maxLevel: 5,
       formulaText: '{ATK}*2.0',
-      levelProgress: ['Damage +10%'],
+      levelProgress: ['Damage +10%', 'Cooltime Turn -1\r'],
       iconUrl: null,
     },
     {
@@ -51,6 +52,7 @@ const detail: BestiaryMonster = {
       name: 'Water Bomb',
       slot: 3,
       description: null,
+      originalDescription: null,
       cooldown: 4,
       hits: 1,
       passive: false,
@@ -111,7 +113,9 @@ describe('BestiaryMonsterPage', () => {
 
     const first = screen.getByRole('region', { name: 'Skill 1: Magic Arrow' })
     expect(first).toHaveTextContent('{ATK}*2.0 × 2 golpes')
-    expect(first).toHaveTextContent('Skill-ups (1): Damage +10%')
+    expect(first).toHaveTextContent('Ataca com uma flecha mágica.')
+    expect(first).toHaveTextContent('Texto original')
+    expect(first).toHaveTextContent('Skill-ups (2): Dano +10% · Recarga -1 turno')
     const third = screen.getByRole('region', { name: 'Skill 3: Water Bomb' })
     expect(third).toHaveTextContent('Recarga: 4 turnos')
     expect(third).toHaveTextContent('Em área')
