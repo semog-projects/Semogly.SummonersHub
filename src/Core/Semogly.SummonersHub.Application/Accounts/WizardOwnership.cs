@@ -16,7 +16,10 @@ internal static class WizardOwnership
         CancellationToken cancellationToken) =>
         await repository.FindByWizardIdAsync(wizardId, cancellationToken) is { } link && link.IsOwnedBy(userId);
 
-    /// <summary>Último snapshot completo do invocador, se o usuário for o dono; senão, NotFound.</summary>
+    /// <summary>
+    /// Último snapshot completo do invocador, com os itens manuais, se o usuário for o dono; senão, NotFound.
+    /// É uma cópia para leitura: não altere nem grave.
+    /// </summary>
     public static async Task<Result<AccountSnapshot>> GetOwnedLatestAsync(
         this IAccountSnapshotRepository snapshots,
         IWizardAccountRepository wizardAccounts,
@@ -29,7 +32,7 @@ internal static class WizardOwnership
             return AccountErrors.NotFound(wizardId);
         }
 
-        var snapshot = await snapshots.GetLatestAsync(wizardId, cancellationToken);
+        var snapshot = await snapshots.GetLatestWithManualItemsAsync(wizardId, cancellationToken);
         return snapshot is null ? AccountErrors.NotFound(wizardId) : snapshot;
     }
 }

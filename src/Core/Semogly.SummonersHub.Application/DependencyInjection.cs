@@ -18,6 +18,7 @@ using Semogly.SummonersHub.Application.Accounts.OptimizerPresets;
 using Semogly.SummonersHub.Application.Accounts.SharedBuilds;
 using Semogly.SummonersHub.Application.Accounts.UpdateInventoryMarks;
 using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
+using Semogly.SummonersHub.Application.Accounts.ManualItems;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
 using Semogly.SummonersHub.Application.Settings;
 using Semogly.SummonersHub.Domain.GameData;
@@ -36,6 +37,10 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<ListOptimizerPresetsQuery, IReadOnlyList<OptimizerPresetResponse>>, ListOptimizerPresetsQueryHandler>();
         services.AddScoped<ICommandHandler<SaveOptimizerPresetCommand, OptimizerPresetResponse>, SaveOptimizerPresetCommandHandler>();
         services.AddScoped<ICommandHandler<DeleteOptimizerPresetCommand>, DeleteOptimizerPresetCommandHandler>();
+        services.AddScoped<IQueryHandler<ListManualItemsQuery, ManualItemsResponse>, ListManualItemsQueryHandler>();
+        services.AddScoped<ICommandHandler<CreateManualMonsterCommand, ManualMonsterResponse>, CreateManualMonsterCommandHandler>();
+        services.AddScoped<ICommandHandler<CreateManualCraftItemCommand, ManualCraftItemResponse>, CreateManualCraftItemCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteManualItemCommand>, DeleteManualItemCommandHandler>();
         services.AddScoped<IQueryHandler<GetPreferencesQuery, PreferencesResponse>, GetPreferencesQueryHandler>();
         services.AddScoped<ICommandHandler<UpdatePreferencesCommand, PreferencesResponse>, UpdatePreferencesCommandHandler>();
         services.AddScoped<IQueryHandler<ExportSettingsQuery, SettingsBackup>, ExportSettingsQueryHandler>();

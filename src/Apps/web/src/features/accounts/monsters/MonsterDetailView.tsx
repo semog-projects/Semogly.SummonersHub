@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
 import type { ArtifactDetail, MonsterDetail } from '../types'
 import { efficiencyClass } from '../runes/efficiency'
+import { ManualBadge } from '../manual/ManualBadge'
 import { MonsterLockButton } from '../marks/MonsterLockButton'
 import { RuneCard } from '../runes/RuneCard'
 import { MonsterIcon } from './MonsterIcon'
@@ -70,7 +71,8 @@ export function MonsterDetailView({
           ))}
           {!readOnly && (
             <>
-              {wizardId !== undefined && (
+              {monster.isManual && <ManualBadge />}
+              {wizardId !== undefined && !monster.isManual && (
                 <MonsterLockButton wizardId={wizardId} monsterId={monster.monsterId} locked={monster.locked ?? false} withLabel />
               )}
               <Link to="otimizar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>

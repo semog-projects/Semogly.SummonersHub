@@ -27,7 +27,7 @@ export function MonsterDetailPage() {
         {(monster) => (
           <div className="space-y-6">
             <MonsterDetailView monster={monster} wizardId={Number(params.wizardId)} />
-            <ShareBuildPanel wizardId={Number(params.wizardId)} monsterId={monster.monsterId} />
+            {!monster.isManual && <ShareBuildPanel wizardId={Number(params.wizardId)} monsterId={monster.monsterId} />}
           </div>
         )}
       </QueryStatus>

@@ -1,9 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Semogly.SummonersHub.Application.Accounts.ManualItems;
+using Semogly.SummonersHub.Application.GameData;
 using Semogly.SummonersHub.Domain.Accounts;
 
 namespace Semogly.SummonersHub.Infrastructure.Persistence;
 
-internal sealed class AccountSnapshotRepository(SummonersHubDbContext db) : IAccountSnapshotRepository
+internal sealed class AccountSnapshotRepository(
+    SummonersHubDbContext db,
+    IMonsterCatalog monsterCatalog,
+    ISkillCatalog skillCatalog) : IAccountSnapshotRepository
 {
     public Task<AccountSnapshot?> FindByContentHashAsync(long wizardGameId, string contentHash, CancellationToken cancellationToken) =>
         WithChildren().FirstOrDefaultAsync(s => s.WizardId == wizardGameId && s.ContentHash == contentHash, cancellationToken);
@@ -13,6 +18,19 @@ internal sealed class AccountSnapshotRepository(SummonersHubDbContext db) : IAcc
             .Where(s => s.WizardId == wizardGameId)
             .OrderByDescending(s => s.Version)
             .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<AccountSnapshot?> GetLatestWithManualItemsAsync(long wizardGameId, CancellationToken cancellationToken)
+    {
+        var snapshot = await GetLatestAsync(wizardGameId, cancellationToken);
+        if (snapshot is null)
+        {
+            return null;
+        }
+
+        var monsters = await db.ManualMonsters.Where(m => m.WizardId == wizardGameId).OrderBy(m => m.GameId).ToListAsync(cancellationToken);
+        var craftItems = await db.ManualCraftItems.Where(c => c.WizardId == wizardGameId).OrderBy(c => c.GameId).ToListAsync(cancellationToken);
+        return ManualItemsMerge.Merge(snapshot, monsters, craftItems, monsterCatalog, skillCatalog);
+    }
 
     public Task<AccountSnapshot?> GetByVersionAsync(long wizardGameId, int version, CancellationToken cancellationToken) =>
         WithChildren().FirstOrDefaultAsync(s => s.WizardId == wizardGameId && s.Version == version, cancellationToken);

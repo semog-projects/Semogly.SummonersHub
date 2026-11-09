@@ -15,6 +15,7 @@ import { HomePage } from '@/pages/HomePage'
 import { ImportPage } from '@/pages/ImportPage'
 import { InventoryPage } from '@/pages/InventoryPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { ManualItemsPage } from '@/pages/ManualItemsPage'
 import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
 import { MonsterListPage } from '@/pages/MonsterListPage'
 import { PveTeamsPage } from '@/pages/PveTeamsPage'
@@ -58,6 +59,7 @@ export function App() {
             <Route path="historico" element={<HistoryPage />} />
             <Route path="times" element={<PveTeamsPage />} />
             <Route path="speed-tune" element={<SpeedTunePage />} />
+            <Route path="manuais" element={<ManualItemsPage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />
           <Route path="/configuracoes" element={<Protected><SettingsPage /></Protected>} />

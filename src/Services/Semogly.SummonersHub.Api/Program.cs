@@ -50,6 +50,7 @@ app.MapGameDataEndpoints();
 app.MapAccountsEndpoints();
 app.MapOptimizerPresetsEndpoints();
 app.MapSettingsEndpoints();
+app.MapManualItemsEndpoints();
 app.MapSharedBuildsEndpoints();
 
 await app.RunAsync();

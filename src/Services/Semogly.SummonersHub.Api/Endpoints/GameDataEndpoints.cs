@@ -21,6 +21,11 @@ internal static class GameDataEndpoints
             .WithSummary("Monstros do bestiário pelos ids do jogo (unit_master_id)")
             .WithDescription($"Exemplo: /api/game-data/monsters?ids=19811&ids=21911. Até {GetMonstersQuery.MaxIds} ids; ids desconhecidos são ignorados.");
 
+        group.MapGet("/monsters/search", SearchMonsters)
+            .WithName("SearchMonsters")
+            .WithSummary("Monstros que dá para criar à mão, pelo nome (até 20)")
+            .WithDescription("Exemplo: /api/game-data/monsters/search?name=lapis. Só monstros com atributos no bestiário.");
+
         group.MapGet("/dungeons", (IDungeonCatalog dungeons) => TypedResults.Ok(dungeons.All()))
             .WithName("GetDungeons")
             .WithSummary("Andar mais alto de cada dungeon dos times PvE: RES e VEL do boss e dos demais inimigos (SWARFARM)");
@@ -41,6 +46,14 @@ internal static class GameDataEndpoints
         }
 
         IReadOnlyList<MonsterResponse> response = result.Value.Select(ToResponse).ToList();
+        return TypedResults.Ok(response);
+    }
+
+    private const int SearchLimit = 20;
+
+    private static Ok<IReadOnlyList<MonsterResponse>> SearchMonsters(string? name, IMonsterCatalog catalog)
+    {
+        IReadOnlyList<MonsterResponse> response = [.. catalog.Search(name ?? string.Empty, SearchLimit).Select(ToResponse)];
         return TypedResults.Ok(response);
     }
 

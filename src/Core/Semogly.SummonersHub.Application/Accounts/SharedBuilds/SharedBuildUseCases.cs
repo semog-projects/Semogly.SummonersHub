@@ -50,6 +50,11 @@ internal sealed class CreateShareLinkCommandHandler(
             return AccountErrors.MonsterNotFound(command.MonsterId);
         }
 
+        if (ManualItem.IsManual(command.MonsterId))
+        {
+            return Error.Validation("SharedBuilds.ManualMonster", "Monstros criados à mão não podem ser compartilhados.");
+        }
+
         // Um link por monstro e versão: clicar de novo devolve o mesmo
         var existing = (await builds.ListAsync(userContext.UserId, command.WizardId, command.MonsterId, cancellationToken))
             .FirstOrDefault(b => b.SnapshotId == snapshot.Id);
