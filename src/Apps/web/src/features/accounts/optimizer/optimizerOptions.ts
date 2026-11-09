@@ -14,6 +14,17 @@ export const OPTIMIZER_STATS: Array<{ stat: OptimizerStat; key: keyof StatValues
   { stat: 'EffectiveHp', key: 'effectiveHp', label: 'HP Efet.', percent: false },
 ]
 
+/** Sets de equipe e o bônus que dão a todo o time em batalha. */
+export const TEAM_SETS: Array<{ set: string; bonus: string }> = [
+  { set: 'Fight', bonus: '+8% ATK' },
+  { set: 'Determination', bonus: '+8% DEF' },
+  { set: 'Enhance', bonus: '+8% HP' },
+  { set: 'Accuracy', bonus: '+10% PRE' },
+  { set: 'Tolerance', bonus: '+10% RES' },
+]
+
+export const MAX_TEAM_SET_COUNT = 5
+
 export const MIN_WEIGHT = 0.1
 export const MAX_WEIGHT = 10
 
@@ -45,6 +56,9 @@ export interface OptimizerForm {
   includeEquippedOnOthers: boolean
   assumeMaxLevel: boolean
   optimizeArtifacts: boolean
+  simulateGrinds: boolean
+  /** Quantos sets completos de cada set de equipe o time tem. */
+  teamSets: Record<string, number>
 }
 
 /** Formulário inicial a partir da build atual: mesmos sets, mesmos principais e foco em VEL. */
@@ -61,7 +75,17 @@ export function initialForm(monster: MonsterDetail): OptimizerForm {
     includeEquippedOnOthers: false,
     assumeMaxLevel: false,
     optimizeArtifacts: false,
+    simulateGrinds: false,
+    teamSets: {},
   }
+}
+
+/**
+ * Aplica os critérios de um preset sobre o formulário inicial: campos que não existiam quando o preset foi salvo
+ * ficam com o valor padrão.
+ */
+export function formFromPreset(initial: OptimizerForm, criteria: Record<string, unknown>): OptimizerForm {
+  return { ...initial, ...(criteria as Partial<OptimizerForm>) }
 }
 
 export function toRequest(form: OptimizerForm): OptimizeRunesRequest {
@@ -93,6 +117,8 @@ export function toRequest(form: OptimizerForm): OptimizeRunesRequest {
     includeEquippedOnOthers: form.includeEquippedOnOthers,
     assumeMaxLevel: form.assumeMaxLevel,
     optimizeArtifacts: form.optimizeArtifacts,
+    simulateGrinds: form.simulateGrinds,
+    teamSets: TEAM_SETS.flatMap(({ set }) => Array.from({ length: Math.min(MAX_TEAM_SET_COUNT, form.teamSets[set] ?? 0) }, () => set)),
   }
 }
 

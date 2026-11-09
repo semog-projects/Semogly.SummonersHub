@@ -21,6 +21,8 @@ public sealed record OptimizeRunesQuery(long WizardId, long MonsterId, OptimizeR
 /// <param name="OptimizeArtifacts">Troca os artefatos pelos compatíveis cujo principal mais ajuda o foco.</param>
 /// <param name="Maximums">Atributos totais máximos.</param>
 /// <param name="Weights">Peso de cada atributo de foco (0,1 a 10); os ausentes valem 1.</param>
+/// <param name="SimulateGrinds">Considera o grind lendário máximo em cada sub grindável.</param>
+/// <param name="TeamSets">Sets de equipe do time (Fight, Determination, Enhance, Accuracy, Tolerance), um por set completo.</param>
 public sealed record OptimizeRunesRequest(
     IReadOnlyList<RuneSet> Sets,
     IReadOnlyDictionary<int, IReadOnlyList<int>>? MainStats,
@@ -30,8 +32,13 @@ public sealed record OptimizeRunesRequest(
     bool AssumeMaxLevel,
     bool OptimizeArtifacts = false,
     IReadOnlyList<StatCap>? Maximums = null,
-    IReadOnlyDictionary<PveStat, decimal>? Weights = null)
+    IReadOnlyDictionary<PveStat, decimal>? Weights = null,
+    bool SimulateGrinds = false,
+    IReadOnlyList<RuneSet>? TeamSets = null)
 {
+    /// <summary>Sets de equipe informados (o time tem no máximo 5 monstros com até 3 sets cada).</summary>
+    public const int MaxTeamSets = 15;
+
     public const decimal MinWeight = 0.1m;
 
     public const decimal MaxWeight = 10;
@@ -86,7 +93,9 @@ internal sealed class OptimizeRunesQueryHandler(
             request.Minimums ?? [],
             request.AssumeMaxLevel,
             Maximums: request.Maximums,
-            Weights: request.Weights);
+            Weights: request.Weights,
+            SimulateGrinds: request.SimulateGrinds,
+            TeamSets: request.TeamSets);
 
         var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
 
@@ -169,6 +178,12 @@ internal sealed class OptimizeRunesQueryHandler(
             && maximums.Any(max => (request.Minimums ?? []).Any(min => min.Stat == max.Stat && min.Min > max.Max)))
         {
             return AccountErrors.InvalidOptimization("O máximo de um atributo não pode ser menor que o mínimo.");
+        }
+
+        if (request.TeamSets is { } teamSets && (teamSets.Count > OptimizeRunesRequest.MaxTeamSets || teamSets.Any(s => !s.IsTeamSet())))
+        {
+            return AccountErrors.InvalidOptimization(
+                $"Sets de equipe: até {OptimizeRunesRequest.MaxTeamSets}, só Fight, Determination, Enhance, Accuracy e Tolerance.");
         }
 
         if (request.MainStats is { } mainStats

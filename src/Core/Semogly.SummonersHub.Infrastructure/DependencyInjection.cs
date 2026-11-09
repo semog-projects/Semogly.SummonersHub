@@ -26,6 +26,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IAccountSnapshotRepository, AccountSnapshotRepository>();
         builder.Services.AddScoped<IWizardAccountRepository, WizardAccountRepository>();
         builder.Services.AddScoped<IInventoryMarkRepository, InventoryMarkRepository>();
+        builder.Services.AddScoped<IOptimizerPresetRepository, OptimizerPresetRepository>();
         builder.Services.AddScoped<IAccountReadService, AccountReadService>();
         builder.Services.AddSingleton<IMonsterCatalog, EmbeddedMonsterCatalog>();
         builder.Services.AddSingleton<IPveTeamCatalog, EmbeddedPveTeamCatalog>();

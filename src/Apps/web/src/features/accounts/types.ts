@@ -376,6 +376,18 @@ export interface OptimizeRunesRequest {
   assumeMaxLevel: boolean
   /** Troca os artefatos pelos compatíveis cujo principal mais ajuda o foco. */
   optimizeArtifacts: boolean
+  /** Grind lendário máximo em cada sub grindável. */
+  simulateGrinds: boolean
+  /** Sets de equipe do time (Fight, Determination...), um por set completo. */
+  teamSets: string[]
+}
+
+/** Preset do otimizador salvo pelo usuário (critérios no formato do formulário). */
+export interface OptimizerPreset {
+  id: string
+  name: string
+  criteria: Record<string, unknown>
+  updatedAt: string
 }
 
 export interface OptimizedBuild {

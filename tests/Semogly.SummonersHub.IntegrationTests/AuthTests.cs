@@ -23,6 +23,7 @@ public class AuthTests(ApiFixture fixture)
     [InlineData("/api/accounts/1/snapshots")]
     [InlineData("/api/accounts/1/pve-teams")]
     [InlineData("/api/accounts/1/craft-suggestions")]
+    [InlineData("/api/optimizer-presets")]
     [InlineData("/api/accounts/1/snapshots/compare?from=1&to=2")]
     public async Task AccountEndpoints_ShouldRequireLogin(string url)
     {

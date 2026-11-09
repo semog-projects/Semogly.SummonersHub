@@ -43,7 +43,11 @@ public static class RuneOptimizer
         }
 
         var @base = monster.BaseStats;
-        var constant = ConstantVector(@base, artifacts.Where(a => a.EquippedMonsterId == monster.GameId), request.RequiredSets);
+        var constant = ConstantVector(
+            @base,
+            artifacts.Where(a => a.EquippedMonsterId == monster.GameId),
+            request.RequiredSets,
+            request.TeamSets ?? []);
         var candidates = Candidates(monster, pool, request, required);
 
         var beam = new List<Partial> { Partial.Empty };
@@ -173,7 +177,12 @@ public static class RuneOptimizer
 
     private static OptimizedBuild? Evaluate(Monster monster, IReadOnlyCollection<Artifact> artifacts, Partial partial, OptimizerRequest request)
     {
-        var stats = MonsterStatsCalculator.Calculate(monster, partial.Runes.Select(c => c.Effective), artifacts);
+        var calculated = MonsterStatsCalculator.Calculate(monster, partial.Runes.Select(c => c.Effective), artifacts);
+
+        // Sets de equipe do time (em batalha): somados por cima do cálculo da tela do monstro
+        var stats = request.TeamSets is { Count: > 0 } teamSets
+            ? calculated with { Total = TeamSetBuffs.Apply(calculated.Total, monster.BaseStats, teamSets) }
+            : calculated;
         if (request.Minimums.Any(m => PveTeamEvaluator.ValueOf(stats.Total, m.Stat) < m.Min)
             || (request.Maximums ?? []).Any(m => PveTeamEvaluator.ValueOf(stats.Total, m.Stat) > m.Max))
         {
@@ -198,7 +207,7 @@ public static class RuneOptimizer
         var ranked = pool
             .Where(r => !onlyRequiredSets || required.ContainsKey(r.Set))
             .Where(r => !request.MainStatsBySlot.TryGetValue(r.Slot, out var allowed) || allowed.Count == 0 || allowed.Contains(r.MainStat.Stat))
-            .Select(r => Candidate.From(r, monster, request.AssumeMaxLevel))
+            .Select(r => Candidate.From(r, monster, request.AssumeMaxLevel, request.SimulateGrinds))
             .ToList();
 
         var criteria = new List<Func<Candidate, decimal>>
@@ -260,8 +269,12 @@ public static class RuneOptimizer
         return maximums.All(m => ValueOf(current, m.Stat) <= m.Max);
     }
 
-    /// <summary>Base + artefatos + bônus dos sets obrigatórios (que toda build completa terá).</summary>
-    private static decimal[] ConstantVector(BaseStats b, IEnumerable<Artifact> artifacts, IEnumerable<RuneSet> requiredSets)
+    /// <summary>Base + artefatos + bônus dos sets obrigatórios (que toda build completa terá) + sets de equipe do time.</summary>
+    private static decimal[] ConstantVector(
+        BaseStats b,
+        IEnumerable<Artifact> artifacts,
+        IEnumerable<RuneSet> requiredSets,
+        IEnumerable<RuneSet> teamSets)
     {
         var vector = new decimal[VectorStats.Length];
         vector[(int)PveStat.Hp] = b.Hp;
@@ -293,6 +306,11 @@ public static class RuneOptimizer
             {
                 AddStat(vector, b, bonus.Stat, bonus.Value);
             }
+        }
+
+        foreach (var bonus in teamSets.Select(s => s.AllyBonus()).OfType<RuneStatValue>())
+        {
+            AddStat(vector, b, bonus.Stat, bonus.Value);
         }
 
         return vector;
@@ -329,16 +347,23 @@ public static class RuneOptimizer
     }
 
     /// <param name="Original">Runa como está na conta (vai na resposta).</param>
-    /// <param name="Effective">Cópia equipada no monstro alvo e, se pedido, projetada em +15 (vai no cálculo).</param>
+    /// <param name="Effective">
+    /// Cópia equipada no monstro alvo e, se pedido, projetada em +15 e com grinds simulados (vai no cálculo).
+    /// </param>
     private sealed record Candidate(Rune Original, Rune Effective, decimal[] Vector)
     {
-        public static Candidate From(Rune rune, Monster monster, bool assumeMaxLevel)
+        public static Candidate From(Rune rune, Monster monster, bool assumeMaxLevel, bool simulateGrinds)
         {
             var effective = assumeMaxLevel
                 ? RuneProjection.ToMaxLevel(rune, monster.GameId)
                 : new Rune(
                     rune.GameId, rune.Slot, rune.Stars, rune.IsAncient, rune.Set, rune.Level,
                     rune.Rarity, rune.OriginalRarity, rune.MainStat, rune.InnateStat, rune.Substats, monster.GameId);
+
+            if (simulateGrinds)
+            {
+                effective = RuneProjection.WithMaxGrinds(effective);
+            }
 
             var vector = new decimal[VectorStats.Length];
             AddStat(vector, monster.BaseStats, effective.MainStat.Stat, effective.MainStat.Value);
@@ -376,6 +401,8 @@ public static class RuneOptimizer
 /// <param name="AssumeMaxLevel">Calcula cada runa como se estivesse em +15 (ver <see cref="RuneProjection"/>).</param>
 /// <param name="Maximums">Atributos totais máximos (ex.: VEL até 200 para não passar outro monstro do time).</param>
 /// <param name="Weights">Peso de cada atributo de foco; os ausentes valem 1.</param>
+/// <param name="SimulateGrinds">Considera o grind lendário máximo em cada sub grindável.</param>
+/// <param name="TeamSets">Sets de equipe do time (Fight, Determination...), um por set completo; somam em batalha.</param>
 public sealed record OptimizerRequest(
     IReadOnlyList<RuneSet> RequiredSets,
     IReadOnlyDictionary<int, IReadOnlyList<RuneStat>> MainStatsBySlot,
@@ -384,7 +411,9 @@ public sealed record OptimizerRequest(
     bool AssumeMaxLevel,
     int MaxResults = 10,
     IReadOnlyList<StatCap>? Maximums = null,
-    IReadOnlyDictionary<PveStat, decimal>? Weights = null);
+    IReadOnlyDictionary<PveStat, decimal>? Weights = null,
+    bool SimulateGrinds = false,
+    IReadOnlyList<RuneSet>? TeamSets = null);
 
 /// <summary>Atributo total máximo.</summary>
 public sealed record StatCap(PveStat Stat, int Max);

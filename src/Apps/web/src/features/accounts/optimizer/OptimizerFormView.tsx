@@ -9,11 +9,13 @@ import {
   MAIN_STATS_BY_SLOT,
   mainStatLabel,
   MAX_FOCUS,
+  MAX_TEAM_SET_COUNT,
   MAX_WEIGHT,
   MIN_WEIGHT,
   OPTIMIZER_SETS,
   OPTIMIZER_STATS,
   requiredPieces,
+  TEAM_SETS,
   type OptimizerForm,
 } from './optimizerOptions'
 
@@ -155,6 +157,33 @@ export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) 
             )}
           </fieldset>
 
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">
+              Sets de equipe do time <span className="font-normal text-muted-foreground">(em batalha; quantos sets completos)</span>
+            </legend>
+            <div className="flex flex-wrap gap-3">
+              {TEAM_SETS.map(({ set, bonus }) => (
+                <label key={set} className="flex items-center gap-2 text-sm">
+                  <span>
+                    {set} <span className="text-xs text-muted-foreground">{bonus}</span>
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={MAX_TEAM_SET_COUNT}
+                    inputMode="numeric"
+                    aria-label={`Sets ${set} no time`}
+                    value={form.teamSets[set] ?? 0}
+                    onChange={(event) =>
+                      update({ teamSets: { ...form.teamSets, [set]: Math.max(0, Math.min(MAX_TEAM_SET_COUNT, Number(event.target.value) || 0)) } })
+                    }
+                    className={cn(controlClass, 'w-14')}
+                  />
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
             <label className="flex items-center gap-2">
               <input
@@ -181,6 +210,15 @@ export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) 
               />
               Trocar artefatos
               <span className="text-xs text-muted-foreground">(pelo principal)</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.simulateGrinds}
+                onChange={(event) => update({ simulateGrinds: event.target.checked })}
+              />
+              Simular grinds
+              <span className="text-xs text-muted-foreground">(lendário máximo)</span>
             </label>
             <Button type="submit" disabled={invalid || pending} className="sm:ml-auto">
               {pending ? 'Otimizando…' : 'Otimizar'}

@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, vi } from 'vitest'
-import type { MonsterDetail, OptimizeRunesResponse, RuneDetail } from '@/features/accounts/types'
+import type { MonsterDetail, OptimizeRunesResponse, OptimizerPreset, RuneDetail } from '@/features/accounts/types'
 import { RuneOptimizerPage } from './RuneOptimizerPage'
 
 const stats = { hp: 10000, attack: 700, defense: 600, speed: 150, criticalRate: 15, criticalDamage: 50, resistance: 15, accuracy: 0, effectiveHp: 27400 }
@@ -79,9 +79,21 @@ const response: OptimizeRunesResponse = {
   ],
 }
 
+const presets: OptimizerPreset[] = [
+  { id: 'p1', name: 'Tanque', criteria: { focus: ['Hp', 'Defense'], teamSets: { Determination: 1 } }, updatedAt: '2026-11-08T00:00:00Z' },
+]
+
 function renderPage() {
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
-    const body = url.includes('game-data') ? [] : init?.method === 'POST' ? response : detail
+    const body = url.includes('game-data')
+      ? []
+      : url.includes('optimizer-presets')
+        ? init?.method === 'POST'
+          ? { ...presets[0], id: 'novo', name: JSON.parse(init.body as string).name }
+          : presets
+        : init?.method === 'POST'
+          ? response
+          : detail
     return new Response(JSON.stringify(body), { status: 200 })
   })
   vi.stubGlobal('fetch', fetchMock)
@@ -117,7 +129,7 @@ describe('RuneOptimizerPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Otimizar' }))
 
     const build = await screen.findByLabelText('Build 1')
-    const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')!
+    const post = fetchMock.mock.calls.find(([url, init]) => init?.method === 'POST' && String(url).includes('optimize'))!
     expect(post[0]).toBe('/api/accounts/1/monsters/11/optimize')
     expect(JSON.parse(post[1]!.body as string)).toMatchObject({
       sets: ['Violent', 'Will'],
@@ -136,6 +148,30 @@ describe('RuneOptimizerPage', () => {
     expect(runes).toHaveTextContent('Do inventário')
     expect(within(runes).getByRole('link', { name: 'Tyron' })).toHaveAttribute('href', '/contas/1/monstros/12')
     expect(within(build).getByRole('list', { name: 'Artefatos da build' })).toHaveTextContent('Elemento Água ATK +100 · do inventário')
+  })
+
+  it('aplica um preset salvo e salva os critérios atuais com um nome', async () => {
+    const fetchMock = renderPage()
+    await screen.findByLabelText('Set 1')
+
+    await vi.waitFor(() => expect(screen.getByLabelText('Preset')).toHaveTextContent('Tanque'))
+    fireEvent.change(screen.getByLabelText('Preset'), { target: { value: 'p1' } })
+
+    expect(screen.getByRole('button', { name: 'HP' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'VEL' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByLabelText('Sets Determination no time')).toHaveValue(1)
+    expect(screen.getByLabelText('Nome do preset')).toHaveValue('Tanque')
+
+    fireEvent.change(screen.getByLabelText('Nome do preset'), { target: { value: 'Tanque 2' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar preset' }))
+
+    await vi.waitFor(() => {
+      const save = fetchMock.mock.calls.find(([url, init]) => init?.method === 'POST' && String(url).includes('optimizer-presets'))
+      expect(save).toBeDefined()
+      const body = JSON.parse(save![1]!.body as string)
+      expect(body.name).toBe('Tanque 2')
+      expect(body.criteria.focus).toEqual(['Hp', 'Defense'])
+    })
   })
 
   it('bloqueia máximo menor que o mínimo', async () => {
