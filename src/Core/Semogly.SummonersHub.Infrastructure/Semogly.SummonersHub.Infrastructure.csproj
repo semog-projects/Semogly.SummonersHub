@@ -20,6 +20,7 @@
   <ItemGroup>
     <!-- Bestiário gerado por src/Tools/Semogly.SummonersHub.GameDataSync -->
     <EmbeddedResource Include="GameData\monsters.json" LogicalName="Semogly.SummonersHub.GameData.monsters.json" />
+    <EmbeddedResource Include="GameData\dungeons.json" LogicalName="Semogly.SummonersHub.GameData.dungeons.json" />
     <EmbeddedResource Include="GameData\pve-teams.json" LogicalName="Semogly.SummonersHub.GameData.pve-teams.json" />
   </ItemGroup>
 

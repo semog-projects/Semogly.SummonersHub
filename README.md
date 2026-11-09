@@ -29,7 +29,7 @@ src/Core/Semogly.SummonersHub.Domain          Entidades e regras do jogo (sem de
 src/Core/Semogly.SummonersHub.Application     Casos de uso (ICommandHandler / IQueryHandler, Result)
 src/Core/Semogly.SummonersHub.Infrastructure  EF Core / PostgreSQL / Identity
 src/Services/Semogly.SummonersHub.Api         Endpoints HTTP e composição
-src/Tools/Semogly.SummonersHub.GameDataSync  Sincroniza o bestiário com o SWARFARM
+src/Tools/Semogly.SummonersHub.GameDataSync  Sincroniza bestiário e dungeons com o SWARFARM
 tests/Semogly.SummonersHub.ArchitectureTests  Regra de dependência da Clean Architecture
 tests/Semogly.SummonersHub.UnitTests       Testes de domínio e aplicação
 tests/Semogly.SummonersHub.IntegrationTests  API em memória + PostgreSQL em container (Testcontainers)
@@ -83,8 +83,12 @@ O bestiário (nome, elemento, arquétipo, estrelas e ícone de cada monstro) fic
 Ele é gerado a partir da [API do SWARFARM](https://swarfarm.com/api/v2/). Para atualizar depois de um patch do jogo:
 
 ```bash
-dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync
+dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync            # tudo
+dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync -- dungeons  # só monsters ou dungeons
 ```
+
+A mesma ferramenta grava `GameData/dungeons.json`, com o andar mais alto de cada dungeon dos times PvE e a RES e a VEL
+do boss e dos demais inimigos.
 
 Sets, atributos de runa, efeitos de artefato e itens de craft são enums do domínio
 (`Domain/GameData`), com rótulos em pt-BR no front (`src/Apps/web/src/lib/game/labels.ts`).
@@ -96,7 +100,8 @@ A eficiência de runa (`Domain/Accounts/RuneEfficiency.cs`) segue o modelo do SW
 
 Os times de referência da aba **Times PvE** ficam em
 `src/Core/Semogly.SummonersHub.Infrastructure/GameData/pve-teams.json`. Cada vaga indica o monstro (nome desperto e
-elemento, como no bestiário), o papel e os atributos totais mínimos. É um ponto de partida editável: revise depois
+elemento, como no bestiário), o papel e os atributos totais mínimos. Nas vagas com `"debuffer": true`, a PRE mínima
+é calculada como RES do boss − 15, porque a resistência efetiva do alvo nunca fica abaixo de 15%. É um ponto de partida editável: revise depois
 dos patches. Um teste de unidade garante que todo monstro do arquivo existe no bestiário.
 
 ## Testes

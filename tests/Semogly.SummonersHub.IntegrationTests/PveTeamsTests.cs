@@ -50,6 +50,11 @@ public sealed class PveTeamsTests(ApiFixture fixture) : IAsyncLifetime
         Assert.Equal(99_100_001L, bernardSlot.Monster?.MonsterId);
         Assert.Equal([new UnmetRequirement(PveStat.Speed, 180, 111)], bernardSlot.Unmet);
 
-        Assert.Equal(PveSlotStatus.Missing, giants.Slots.Single(s => s.MonsterName == "Belladeon").Status);
+        // PRE do debuffer vem da RES do boss do GB12 (70 − 15)
+        Assert.Equal(70, giants.DungeonStats?.BossResistance);
+        var belladeon = giants.Slots.Single(s => s.MonsterName == "Belladeon");
+        Assert.Equal(PveSlotStatus.Missing, belladeon.Status);
+        Assert.True(belladeon.Debuffer);
+        Assert.Equal([new StatRequirement(PveStat.Accuracy, 55)], belladeon.Requirements);
     }
 }

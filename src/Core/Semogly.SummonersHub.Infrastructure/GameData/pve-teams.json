@@ -6,8 +6,8 @@
     "notes": "O Giant é de Fogo. Bernard abre o turno; os debuffers precisam acertar.",
     "slots": [
       { "monster": "Bernard", "element": "Wind", "role": "Barra de ataque e aumento de VEL", "min": { "speed": 180 } },
-      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": { "accuracy": 45 } },
-      { "monster": "Shannon", "element": "Wind", "role": "Quebra de ATK e lentidão", "min": { "accuracy": 45 } },
+      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": {}, "debuffer": true },
+      { "monster": "Shannon", "element": "Wind", "role": "Quebra de ATK e lentidão", "min": {}, "debuffer": true },
       { "monster": "Veromos", "element": "Dark", "role": "Cleanse passivo e líder de HP", "min": {} },
       { "monster": "Sigmarus", "element": "Water", "role": "Dano em área (vantagem sobre Fogo)", "min": {} }
     ]
@@ -19,7 +19,7 @@
     "notes": "Só o núcleo: complete com dano e cura. O Dragon tem mais RES, então a PRE pesa mais que no Giant.",
     "slots": [
       { "monster": "Bernard", "element": "Wind", "role": "Barra de ataque e aumento de VEL", "min": { "speed": 180 } },
-      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": { "accuracy": 55 } },
+      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": {}, "debuffer": true },
       { "monster": "Veromos", "element": "Dark", "role": "Cleanse passivo e líder de HP", "min": {} }
     ]
   },
@@ -30,9 +30,9 @@
     "notes": "Só o núcleo: complete com dano e cura. Tyron dá dano por debuffs e controla a barra.",
     "slots": [
       { "monster": "Bernard", "element": "Wind", "role": "Barra de ataque e aumento de VEL", "min": { "speed": 180 } },
-      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": { "accuracy": 55 } },
+      { "monster": "Belladeon", "element": "Light", "role": "Quebra de DEF e remoção de buffs", "min": {}, "debuffer": true },
       { "monster": "Veromos", "element": "Dark", "role": "Cleanse passivo e líder de HP", "min": {} },
-      { "monster": "Tyron", "element": "Water", "role": "Dano por debuffs e controle de barra", "min": { "accuracy": 55 } }
+      { "monster": "Tyron", "element": "Water", "role": "Dano por debuffs e controle de barra", "min": {}, "debuffer": true }
     ]
   },
   {

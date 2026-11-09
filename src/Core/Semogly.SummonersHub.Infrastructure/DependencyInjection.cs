@@ -28,6 +28,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IAccountReadService, AccountReadService>();
         builder.Services.AddSingleton<IMonsterCatalog, EmbeddedMonsterCatalog>();
         builder.Services.AddSingleton<IPveTeamCatalog, EmbeddedPveTeamCatalog>();
+        builder.Services.AddSingleton<IDungeonCatalog, EmbeddedDungeonCatalog>();
 
         return builder;
     }

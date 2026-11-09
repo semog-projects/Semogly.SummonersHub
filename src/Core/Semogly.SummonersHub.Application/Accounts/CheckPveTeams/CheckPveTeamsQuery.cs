@@ -10,9 +10,11 @@ namespace Semogly.SummonersHub.Application.Accounts.CheckPveTeams;
 /// <summary>Times de referência de cada dungeon conferidos contra os monstros do último import.</summary>
 public sealed record CheckPveTeamsQuery(long WizardId) : IQuery<IReadOnlyList<PveTeamCheck>>;
 
+/// <param name="DungeonStats">Andar mais alto da dungeon (SWARFARM), de onde vem a PRE mínima dos debuffers.</param>
 public sealed record PveTeamCheck(
     string Id,
     Dungeon Dungeon,
+    DungeonStats? DungeonStats,
     string Name,
     string? Notes,
     int ReadySlots,
@@ -21,10 +23,12 @@ public sealed record PveTeamCheck(
 
 /// <param name="Monster">Melhor candidato da conta para a vaga, ou nulo se a conta não tem o monstro.</param>
 /// <param name="Unmet">Mínimos que o candidato ainda não atinge.</param>
+/// <param name="Debuffer">A PRE mínima da vaga vem da RES do boss.</param>
 public sealed record PveSlotCheck(
     string MonsterName,
     Element Element,
     string Role,
+    bool Debuffer,
     IReadOnlyList<StatRequirement> Requirements,
     PveSlotStatus Status,
     PveCandidate? Monster,
@@ -35,7 +39,8 @@ internal sealed class CheckPveTeamsQueryHandler(
     IWizardAccountRepository wizardAccounts,
     IUserContext userContext,
     IMonsterCatalog monsterCatalog,
-    IPveTeamCatalog teamCatalog) : IQueryHandler<CheckPveTeamsQuery, IReadOnlyList<PveTeamCheck>>
+    IPveTeamCatalog teamCatalog,
+    IDungeonCatalog dungeonCatalog) : IQueryHandler<CheckPveTeamsQuery, IReadOnlyList<PveTeamCheck>>
 {
     public async Task<Result<IReadOnlyList<PveTeamCheck>>> HandleAsync(CheckPveTeamsQuery query, CancellationToken cancellationToken)
     {
@@ -60,13 +65,19 @@ internal sealed class CheckPveTeamsQueryHandler(
 
         return teamCatalog.All()
             .OrderBy(team => team.Dungeon)
-            .Select(team => ToCheck(PveTeamEvaluator.Evaluate(team, candidates)))
+            .Select(team =>
+            {
+                var dungeon = dungeonCatalog.Find(team.Dungeon);
+                var evaluation = PveTeamEvaluator.Evaluate(PveTeamEvaluator.WithDungeonAccuracy(team, dungeon), candidates);
+                return ToCheck(evaluation, dungeon);
+            })
             .ToList();
     }
 
-    private static PveTeamCheck ToCheck(PveTeamEvaluation evaluation) => new(
+    private static PveTeamCheck ToCheck(PveTeamEvaluation evaluation, DungeonStats? dungeon) => new(
         evaluation.Team.Id,
         evaluation.Team.Dungeon,
+        dungeon,
         evaluation.Team.Name,
         evaluation.Team.Notes,
         evaluation.ReadySlots,
@@ -75,6 +86,7 @@ internal sealed class CheckPveTeamsQueryHandler(
             s.Slot.MonsterName,
             s.Slot.Element,
             s.Slot.Role,
+            s.Slot.Debuffer,
             s.Slot.Requirements,
             s.Status,
             s.Candidate,

@@ -30,6 +30,12 @@ export function PveTeamCard({ wizardId, team, iconOf }: Props) {
             </Badge>
           )}
         </div>
+        {team.dungeonStats && (
+          <p className="text-xs text-muted-foreground">
+            B{team.dungeonStats.floor}: RES do boss {team.dungeonStats.bossResistance}% · VEL máx. dos inimigos{' '}
+            {team.dungeonStats.maxSpeed}
+          </p>
+        )}
         {team.notes && <p className="text-xs text-muted-foreground">{team.notes}</p>}
       </CardHeader>
       <CardContent>
@@ -70,6 +76,7 @@ function SlotRow({ wizardId, slot, imageUrl }: { wizardId: number; slot: PveSlot
           {slot.role}
           {slot.requirements.length > 0 &&
             ` · mín. ${slot.requirements.map((r) => formatPveStat(r.stat, r.min)).join(', ')}`}
+          {slot.debuffer && slot.requirements.some((r) => r.stat === 'Accuracy') && ' (PRE = RES do boss − 15)'}
         </p>
         {slot.status === 'BelowRequirements' && (
           <p className="text-xs text-amber-400">

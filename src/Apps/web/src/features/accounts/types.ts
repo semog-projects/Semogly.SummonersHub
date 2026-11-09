@@ -270,6 +270,8 @@ export interface PveSlotCheck {
   monsterName: string
   element: ElementName
   role: string
+  /** A PRE mínima vem da RES do boss da dungeon. */
+  debuffer: boolean
   requirements: Array<{ stat: PveStatName; min: number }>
   status: 'Missing' | 'BelowRequirements' | 'Ready'
   /** Melhor candidato da conta para a vaga. */
@@ -289,6 +291,14 @@ export interface PveSlotCheck {
 export interface PveTeamCheck {
   id: string
   dungeon: DungeonName
+  /** Andar mais alto da dungeon, com dados do SWARFARM. */
+  dungeonStats: {
+    floor: number
+    bossResistance: number
+    maxResistance: number
+    bossSpeed: number
+    maxSpeed: number
+  } | null
   name: string
   notes: string | null
   readySlots: number

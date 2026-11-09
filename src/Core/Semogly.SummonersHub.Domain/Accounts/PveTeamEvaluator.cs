@@ -43,6 +43,30 @@ public static class PveTeamEvaluator
         return new PveTeamEvaluation(team, slots);
     }
 
+    /// <summary>
+    /// Troca a PRE mínima das vagas de debuffer pela PRE que a RES do boss pede. Sem dados da dungeon,
+    /// ou com o boss já no piso de resistência, o time fica como está.
+    /// </summary>
+    public static PveTeam WithDungeonAccuracy(PveTeam team, DungeonStats? dungeon)
+    {
+        if (dungeon is null)
+        {
+            return team;
+        }
+
+        return team with
+        {
+            Slots = [.. team.Slots.Select(slot => !slot.Debuffer ? slot : slot with
+            {
+                Requirements =
+                [
+                    .. slot.Requirements.Where(r => r.Stat != PveStat.Accuracy),
+                    .. dungeon.AccuracyTarget > 0 ? [new StatRequirement(PveStat.Accuracy, dungeon.AccuracyTarget)] : Array.Empty<StatRequirement>(),
+                ],
+            })],
+        };
+    }
+
     private static List<UnmetRequirement> Unmet(PveTeamSlot slot, StatValues total) =>
         [.. slot.Requirements
             .Select(r => new UnmetRequirement(r.Stat, r.Min, ValueOf(total, r.Stat)))
