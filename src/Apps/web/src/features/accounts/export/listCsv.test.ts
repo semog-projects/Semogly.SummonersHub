@@ -49,10 +49,12 @@ describe('listCsv', () => {
         maxEfficiency: 92.86,
       },
       equippedOn: lapis,
+      locked: true,
+      tags: ['RTA', 'Siege'],
     }
 
     const row = runesCsv([rune]).split('\r\n')[1]
-    expect(row).toBe('1;Swift;2;6;Sim;15;Lendária;VEL +42;Taxa Crít. +6%;ATK +13% (grind 5);Dano Crít. +7% (gem);;;0;92,86;92,86;Lapis')
+    expect(row).toBe('1;Swift;2;6;Sim;15;Lendária;VEL +42;Taxa Crít. +6%;ATK +13% (grind 5);Dano Crít. +7% (gem);;;0;92,86;92,86;Lapis;Sim;RTA, Siege')
   })
 
   it('artefatos: principal, subs e inventário', () => {
@@ -69,8 +71,10 @@ describe('listCsv', () => {
         substats: [{ type: 221, value: 31, upgrades: 2 }],
       },
       equippedOn: null,
+      locked: false,
+      tags: [],
     }
 
-    expect(artifactsCsv([artifact]).split('\r\n')[1]).toBe('7;Elemento Água;15;Lendária;ATK +100;Dano adicional de 31% da VEL;;;;Inventário')
+    expect(artifactsCsv([artifact]).split('\r\n')[1]).toBe('7;Elemento Água;15;Lendária;ATK +100;Dano adicional de 31% da VEL;;;;Inventário;Não;')
   })
 })

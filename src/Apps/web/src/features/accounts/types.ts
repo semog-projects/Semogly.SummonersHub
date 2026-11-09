@@ -203,6 +203,9 @@ export interface RuneListItem {
   rune: RuneDetail
   /** Nulo quando a runa está no inventário. */
   equippedOn: EquippedMonster | null
+  /** Bloqueada pelo usuário: o otimizador não a tira de quem a usa. */
+  locked: boolean
+  tags: string[]
 }
 
 /** GET /api/accounts/{wizardId}/artifacts */
@@ -210,6 +213,20 @@ export interface ArtifactListItem {
   artifact: ArtifactDetail
   /** Nulo quando o artefato está no inventário. */
   equippedOn: EquippedMonster | null
+  /** Bloqueado pelo usuário: o otimizador não o tira de quem o usa. */
+  locked: boolean
+  tags: string[]
+}
+
+export type InventoryItemKind = 'Rune' | 'Artifact'
+
+/** PATCH /api/accounts/{wizardId}/inventory-marks */
+export interface UpdateInventoryMarksRequest {
+  kind: InventoryItemKind
+  itemIds: number[]
+  locked?: boolean
+  addTags?: string[]
+  removeTags?: string[]
 }
 
 /** Valor na versão de referência e na comparada. */

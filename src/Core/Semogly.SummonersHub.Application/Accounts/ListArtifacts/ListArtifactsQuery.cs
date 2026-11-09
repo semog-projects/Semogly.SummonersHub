@@ -10,13 +10,16 @@ namespace Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 public sealed record ListArtifactsQuery(long WizardId) : IQuery<IReadOnlyList<ArtifactListItem>>;
 
 /// <param name="EquippedOn">Nulo quando o artefato está no inventário.</param>
-public sealed record ArtifactListItem(ArtifactDetail Artifact, EquippedMonster? EquippedOn);
+/// <param name="Locked">Bloqueado pelo usuário: o otimizador não o tira de quem o usa.</param>
+/// <param name="Tags">Tags do usuário.</param>
+public sealed record ArtifactListItem(ArtifactDetail Artifact, EquippedMonster? EquippedOn, bool Locked, IReadOnlyList<string> Tags);
 
 internal sealed class ListArtifactsQueryHandler(
     IAccountSnapshotRepository repository,
     IWizardAccountRepository wizardAccounts,
     IUserContext userContext,
-    IMonsterCatalog catalog) : IQueryHandler<ListArtifactsQuery, IReadOnlyList<ArtifactListItem>>
+    IMonsterCatalog catalog,
+    IInventoryMarkRepository marks) : IQueryHandler<ListArtifactsQuery, IReadOnlyList<ArtifactListItem>>
 {
     public async Task<Result<IReadOnlyList<ArtifactListItem>>> HandleAsync(ListArtifactsQuery query, CancellationToken cancellationToken)
     {
@@ -27,6 +30,7 @@ internal sealed class ListArtifactsQueryHandler(
         }
 
         var monsters = EquipmentDetails.MonstersById(result.Value, catalog);
+        var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
 
         return result.Value.Artifacts
             .OrderBy(a => a.Type)
@@ -35,7 +39,9 @@ internal sealed class ListArtifactsQueryHandler(
             .ThenBy(a => a.GameId)
             .Select(artifact => new ArtifactListItem(
                 EquipmentDetails.ToDetail(artifact),
-                artifact.EquippedMonsterId is { } id ? monsters[id] : null))
+                artifact.EquippedMonsterId is { } id ? monsters[id] : null,
+                lookup.IsLocked(artifact),
+                lookup.TagsOf(artifact)))
             .ToList();
     }
 }

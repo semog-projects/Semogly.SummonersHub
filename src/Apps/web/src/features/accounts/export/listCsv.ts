@@ -68,8 +68,10 @@ export function runesCsv(runes: RuneListItem[]): string {
       'Eficiência (%)',
       'Eficiência máx. (%)',
       'Equipada em',
+      'Bloqueada',
+      'Tags',
     ],
-    runes.map(({ rune, equippedOn }) => [
+    runes.map(({ rune, equippedOn, locked, tags }) => [
       rune.runeId,
       rune.set,
       rune.slot,
@@ -84,14 +86,16 @@ export function runesCsv(runes: RuneListItem[]): string {
       rune.efficiency,
       rune.maxEfficiency,
       monsterName(equippedOn),
+      locked,
+      tags.join(', '),
     ]),
   )
 }
 
 export function artifactsCsv(artifacts: ArtifactListItem[]): string {
   return toCsv(
-    ['Id', 'Artefato', 'Nível', 'Raridade', 'Principal', 'Sub 1', 'Sub 2', 'Sub 3', 'Sub 4', 'Equipado em'],
-    artifacts.map(({ artifact, equippedOn }) => [
+    ['Id', 'Artefato', 'Nível', 'Raridade', 'Principal', 'Sub 1', 'Sub 2', 'Sub 3', 'Sub 4', 'Equipado em', 'Bloqueado', 'Tags'],
+    artifacts.map(({ artifact, equippedOn, locked, tags }) => [
       artifact.artifactId,
       artifactKindLabel(artifact),
       artifact.level,
@@ -102,6 +106,8 @@ export function artifactsCsv(artifacts: ArtifactListItem[]): string {
         return sub && formatArtifactEffect(sub.type, sub.value)
       }),
       monsterName(equippedOn),
+      locked,
+      tags.join(', '),
     ]),
   )
 }

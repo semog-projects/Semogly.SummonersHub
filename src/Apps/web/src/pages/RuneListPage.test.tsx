@@ -24,11 +24,16 @@ function rune(runeId: number, efficiency: number, equipped: boolean): RuneListIt
       maxEfficiency: efficiency,
     },
     equippedOn: equipped ? { monsterId: 11, masterId: 19811, name: 'Lapis', element: 'Water' } : null,
+    locked: false,
+    tags: [],
   }
 }
 
 function renderPage(path: string, runes: RuneListItem[]) {
-  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(runes), { status: 200 })))
+  const fetchMock = vi.fn(async (_url: string, init?: RequestInit) =>
+    init?.method === 'PATCH' ? new Response(null, { status: 204 }) : new Response(JSON.stringify(runes), { status: 200 }),
+  )
+  vi.stubGlobal('fetch', fetchMock)
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={client}>
@@ -39,6 +44,7 @@ function renderPage(path: string, runes: RuneListItem[]) {
       </MemoryRouter>
     </QueryClientProvider>,
   )
+  return fetchMock
 }
 
 const bodyRows = () => screen.getAllByRole('row').slice(1)
@@ -66,6 +72,22 @@ describe('RuneListPage', () => {
 
     fireEvent.change(screen.getByLabelText('Set'), { target: { value: 'Swift' } })
     expect(screen.getByText('Nenhuma runa com esses filtros.')).toBeInTheDocument()
+  })
+
+  it('bloqueia uma runa pelo cadeado e as filtradas em lote', async () => {
+    const fetchMock = renderPage('/contas/1/runas?local=equipada', [rune(1, 70, true), rune(2, 90, false), rune(3, 80, true)])
+    await screen.findByText(/2 de 3 runas/)
+    const patches = () =>
+      fetchMock.mock.calls.filter(([, init]) => init?.method === 'PATCH').map(([url, init]) => [url, JSON.parse(init!.body as string)])
+
+    fireEvent.click(within(bodyRows()[0]).getByRole('button', { name: 'Bloquear runa' }))
+    await vi.waitFor(() => expect(patches()).toHaveLength(1))
+    expect(patches()[0]).toEqual(['/api/accounts/1/inventory-marks', { kind: 'Rune', itemIds: [3], locked: true }])
+
+    fireEvent.change(screen.getByLabelText('Tag'), { target: { value: ' RTA ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar tag' }))
+    await vi.waitFor(() => expect(patches()).toHaveLength(2))
+    expect(patches()[1][1]).toEqual({ kind: 'Rune', itemIds: [3, 1], addTags: ['RTA'] })
   })
 
   it('exporta em CSV todas as runas filtradas, não só a página', async () => {

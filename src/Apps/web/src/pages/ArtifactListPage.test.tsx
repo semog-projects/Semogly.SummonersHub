@@ -19,6 +19,8 @@ const artifacts: ArtifactListItem[] = [
       substats: [{ type: 221, value: 25, upgrades: 1 }],
     },
     equippedOn: { monsterId: 11, masterId: 19811, name: 'Lapis', element: 'Water' },
+    locked: false,
+    tags: [],
   },
   {
     artifact: {
@@ -33,6 +35,8 @@ const artifacts: ArtifactListItem[] = [
       substats: [{ type: 221, value: 31, upgrades: 2 }],
     },
     equippedOn: null,
+    locked: false,
+    tags: [],
   },
 ]
 

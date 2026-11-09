@@ -27,6 +27,16 @@ export function postJson<T>(path: string, body?: unknown, signal?: AbortSignal):
   })
 }
 
+/** PATCH com corpo JSON em /api (respostas 204 resolvem como undefined). */
+export function patchJson<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  return request<T>(path, {
+    method: 'PATCH',
+    signal,
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 interface ProblemDetails {
   title?: string
   detail?: string

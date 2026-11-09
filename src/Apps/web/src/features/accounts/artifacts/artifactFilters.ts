@@ -6,6 +6,7 @@ import {
   type ArchetypeName,
   type ElementName,
 } from '@/lib/game/labels'
+import { markFiltersFromParams, markFiltersToParams, matchesMarks, type MarkFilters } from '../marks/markFilters'
 import type { SortDirection } from '../shared/sorting'
 import type { ArtifactDetail, ArtifactListItem } from '../types'
 
@@ -15,7 +16,7 @@ export type ArtifactSortKey = 'rarity' | 'level' | 'subValue'
 
 export type ArtifactLocation = 'equipped' | 'inventory'
 
-export interface ArtifactFilters {
+export interface ArtifactFilters extends MarkFilters {
   type: ArtifactKind | null
   element: ElementName | null
   archetype: ArchetypeName | null
@@ -35,6 +36,8 @@ export const DEFAULT_ARTIFACT_FILTERS: ArtifactFilters = {
   mainStat: null,
   subEffect: null,
   location: null,
+  lock: null,
+  tag: null,
   sort: 'rarity',
   direction: 'desc',
 }
@@ -72,6 +75,7 @@ export function artifactFiltersFromParams(params: URLSearchParams): ArtifactFilt
     mainStat: ARTIFACT_MAIN_STAT_LABELS[mainStat] ? mainStat : null,
     subEffect: ARTIFACT_EFFECT_LABELS[subEffect] ? subEffect : null,
     location: keyOf(LOCATION_PARAMS, params.get('local')),
+    ...markFiltersFromParams(params),
     sort: sort && SORT_KEYS.includes(sort) ? sort : DEFAULT_ARTIFACT_FILTERS.sort,
     direction: params.get('dir') === 'asc' ? 'asc' : 'desc',
   }
@@ -85,6 +89,7 @@ export function artifactFiltersToParams(filters: ArtifactFilters): URLSearchPara
   if (filters.mainStat) params.set('principal', String(filters.mainStat))
   if (filters.subEffect) params.set('sub', String(filters.subEffect))
   if (filters.location) params.set('local', LOCATION_PARAMS[filters.location])
+  markFiltersToParams(filters, params)
   if (filters.sort !== DEFAULT_ARTIFACT_FILTERS.sort) params.set('ordem', filters.sort)
   if (filters.direction !== DEFAULT_ARTIFACT_FILTERS.direction) params.set('dir', filters.direction)
   return params
@@ -103,7 +108,9 @@ export function subValue({ artifact }: ArtifactListItem, effect: number | null):
 }
 
 export function filterAndSortArtifacts(items: ArtifactListItem[], filters: ArtifactFilters): ArtifactListItem[] {
-  const filtered = items.filter(({ artifact, equippedOn }) => {
+  const filtered = items.filter((item) => {
+    const { artifact, equippedOn } = item
+    if (!matchesMarks(item, filters)) return false
     if (filters.type !== null && artifact.type !== filters.type) return false
     if (filters.element !== null && artifact.element !== filters.element) return false
     if (filters.archetype !== null && artifact.archetype !== filters.archetype) return false
