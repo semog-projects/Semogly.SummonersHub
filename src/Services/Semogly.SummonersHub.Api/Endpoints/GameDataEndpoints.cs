@@ -29,12 +29,10 @@ internal static class GameDataEndpoints
             .WithDescription("Exemplo: /api/game-data/monsters/search?name=lapis. Só monstros com atributos no bestiário.");
 
         group.MapGet("/bestiary", ListBestiary)
-            .RequireAuthorization()
             .WithName("ListBestiary")
             .WithSummary("Bestiário: todos os monstros obteníveis (sem NPCs e bosses)");
 
         group.MapGet("/bestiary/{com2usId:int}", GetBestiaryMonster)
-            .RequireAuthorization()
             .WithName("GetBestiaryMonster")
             .WithSummary("Monstro do bestiário: atributos 6★ nv. 40, skills, líder, despertar, família e onde obter");
 

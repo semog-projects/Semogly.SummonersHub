@@ -47,8 +47,9 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           {/* Build compartilhada: pública, sem login */}
           <Route path="/b/:token" element={<SharedBuildPage />} />
-          <Route path="/bestiario" element={<Protected><BestiaryPage /></Protected>} />
-          <Route path="/bestiario/:com2usId" element={<Protected><BestiaryMonsterPage /></Protected>} />
+          {/* Dado público do jogo: não exige login */}
+          <Route path="/bestiario" element={<BestiaryPage />} />
+          <Route path="/bestiario/:com2usId" element={<BestiaryMonsterPage />} />
           <Route index element={<Protected><HomePage /></Protected>} />
           <Route path="/contas/:wizardId" element={<Protected><AccountLayout /></Protected>}>
             <Route index element={<AccountOverviewPage />} />
