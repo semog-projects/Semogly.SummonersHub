@@ -1,5 +1,6 @@
 using Semogly.SummonersHub.Application.Abstractions;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
 using Semogly.SummonersHub.Application.GameData;
 using Semogly.SummonersHub.Domain.Abstractions;
@@ -16,25 +17,29 @@ public sealed record OptimizeRunesQuery(long WizardId, long MonsterId, OptimizeR
 /// <param name="Focus">Até 5 atributos a maximizar.</param>
 /// <param name="Minimums">Atributos totais mínimos.</param>
 /// <param name="IncludeEquippedOnOthers">Também usa runas equipadas em outros monstros.</param>
-/// <param name="AssumeMaxLevel">Calcula o principal como se a runa estivesse em +15.</param>
+/// <param name="AssumeMaxLevel">Calcula cada runa em +15: principal no máximo e subs pelo ganho médio esperado.</param>
+/// <param name="OptimizeArtifacts">Troca os artefatos pelos compatíveis cujo principal mais ajuda o foco.</param>
 public sealed record OptimizeRunesRequest(
     IReadOnlyList<RuneSet> Sets,
     IReadOnlyDictionary<int, IReadOnlyList<int>>? MainStats,
     IReadOnlyList<PveStat> Focus,
     IReadOnlyList<StatRequirement>? Minimums,
     bool IncludeEquippedOnOthers,
-    bool AssumeMaxLevel);
+    bool AssumeMaxLevel,
+    bool OptimizeArtifacts = false);
 
 /// <param name="Current">Build atual do monstro, para comparação.</param>
 public sealed record OptimizeRunesResponse(OptimizedBuildResult Current, IReadOnlyList<OptimizedBuildResult> Builds);
 
 /// <param name="Score">Soma dos atributos de foco relativos à base (ver <see cref="RuneOptimizer.Score"/>).</param>
 /// <param name="Runes">Uma runa por slot, com o monstro que a usa hoje (se alguma).</param>
+/// <param name="Artifacts">Artefatos da build, com o monstro que os usa hoje (se algum).</param>
 public sealed record OptimizedBuildResult(
     decimal Score,
     StatValues Total,
     IReadOnlyList<RuneSet> ActiveSets,
-    IReadOnlyList<RuneListItem> Runes);
+    IReadOnlyList<RuneListItem> Runes,
+    IReadOnlyList<ArtifactListItem> Artifacts);
 
 internal sealed class OptimizeRunesQueryHandler(
     IAccountSnapshotRepository repository,
@@ -71,10 +76,26 @@ internal sealed class OptimizeRunesQueryHandler(
             request.Minimums ?? [],
             request.AssumeMaxLevel);
 
-        var pool = snapshot.Runes.Where(r =>
-            r.EquippedMonsterId is null || r.EquippedMonsterId == monster.GameId || request.IncludeEquippedOnOthers);
+        bool Available(long? equippedMonsterId) =>
+            equippedMonsterId is null || equippedMonsterId == monster.GameId || request.IncludeEquippedOnOthers;
 
-        var builds = RuneOptimizer.Optimize(monster, snapshot.Artifacts, pool, optimizerRequest);
+        var pool = snapshot.Runes.Where(r => Available(r.EquippedMonsterId));
+
+        var currentArtifacts = snapshot.Artifacts.Where(a => a.EquippedMonsterId == monster.GameId).ToList();
+        var artifacts = request.OptimizeArtifacts
+            ? RuneOptimizer.BestArtifacts(
+                monster,
+                catalog.Find(monster.MasterId)?.Archetype,
+                snapshot.Artifacts.Where(a => Available(a.EquippedMonsterId)),
+                request.Focus)
+            : currentArtifacts;
+
+        // O cálculo só considera artefatos equipados no monstro: os escolhidos entram como cópias equipadas nele
+        var equippedArtifacts = artifacts
+            .Select(a => new Artifact(a.GameId, a.Type, a.Element, a.Archetype, a.Rarity, a.OriginalRarity, a.Level, a.MainStat, a.Substats, monster.GameId))
+            .ToList();
+
+        var builds = RuneOptimizer.Optimize(monster, equippedArtifacts, pool, optimizerRequest);
 
         var monsters = EquipmentDetails.MonstersById(snapshot, catalog);
         var equipment = new EquipmentIndex(snapshot);
@@ -84,7 +105,8 @@ internal sealed class OptimizeRunesQueryHandler(
             RuneOptimizer.Score(currentStats.Total, monster.BaseStats, request.Focus),
             currentStats.Total,
             currentStats.ActiveSets,
-            [.. equipment.RunesOf(monster.GameId).OrderBy(r => r.Slot).Select(r => ToItem(r, monsters))]);
+            [.. equipment.RunesOf(monster.GameId).OrderBy(r => r.Slot).Select(r => ToItem(r, monsters))],
+            [.. currentArtifacts.Select(a => ToItem(a, monsters))]);
 
         return new OptimizeRunesResponse(
             current,
@@ -92,11 +114,15 @@ internal sealed class OptimizeRunesQueryHandler(
                 b.Score,
                 b.Stats.Total,
                 b.Stats.ActiveSets,
-                [.. b.Runes.Select(r => ToItem(r, monsters))]))]);
+                [.. b.Runes.Select(r => ToItem(r, monsters))],
+                [.. artifacts.Select(a => ToItem(a, monsters))]))]);
     }
 
     private static RuneListItem ToItem(Rune rune, Dictionary<long, EquippedMonster> monsters) =>
         new(EquipmentDetails.ToDetail(rune), rune.EquippedMonsterId is { } id ? monsters[id] : null);
+
+    private static ArtifactListItem ToItem(Artifact artifact, Dictionary<long, EquippedMonster> monsters) =>
+        new(EquipmentDetails.ToDetail(artifact), artifact.EquippedMonsterId is { } id ? monsters[id] : null);
 
     private static Error? Validate(OptimizeRunesRequest request)
     {

@@ -18,6 +18,7 @@ describe('optimizerOptions', () => {
       minimums: {},
       includeEquippedOnOthers: false,
       assumeMaxLevel: false,
+      optimizeArtifacts: false,
     })
   })
 
@@ -31,6 +32,7 @@ describe('optimizerOptions', () => {
       minimums: [{ stat: 'Speed', min: 200 }],
       includeEquippedOnOthers: false,
       assumeMaxLevel: false,
+      optimizeArtifacts: false,
     })
   })
 

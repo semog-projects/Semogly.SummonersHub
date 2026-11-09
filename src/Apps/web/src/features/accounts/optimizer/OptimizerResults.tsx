@@ -1,8 +1,9 @@
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { formatNumber, formatPercent } from '@/lib/format'
-import { formatRuneStat } from '@/lib/game/labels'
+import { ARTIFACT_MAIN_STAT_LABELS, formatRuneStat } from '@/lib/game/labels'
 import { cn } from '@/lib/utils'
+import { artifactKindLabel } from '../artifacts/artifactFilters'
 import { ELEMENT_TEXT_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
 import { efficiencyClass } from '../runes/efficiency'
 import type { OptimizedBuild, OptimizeRunesResponse } from '../types'
@@ -28,7 +29,7 @@ export function OptimizerResults({ wizardId, monsterId, result }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
         {result.builds.length} builds, da melhor para a pior. Pontuação = soma dos atributos de foco em relação à base do
-        monstro (atual: {formatNumber(result.current.score)}). Os artefatos atuais foram mantidos.
+        monstro (atual: {formatNumber(result.current.score)}).
       </p>
       {result.builds.map((build, i) => (
         <BuildCard
@@ -160,6 +161,18 @@ function BuildCard({
                   </>
                 )}
               </p>
+            </li>
+          ))}
+        </ul>
+
+        <ul className="flex flex-wrap gap-x-6 gap-y-1 text-sm" aria-label="Artefatos da build">
+          {build.artifacts.map(({ artifact, equippedOn }) => (
+            <li key={artifact.artifactId}>
+              <span className={cn('font-medium', RARITY_TEXT_CLASSES[artifact.originalRarity])}>{artifactKindLabel(artifact)}</span>{' '}
+              {ARTIFACT_MAIN_STAT_LABELS[artifact.mainStat.type] ?? 'Atributo'} +{formatNumber(artifact.mainStat.value)}{' '}
+              <span className="text-xs text-muted-foreground">
+                {!equippedOn ? '· do inventário' : equippedOn.monsterId === monsterId ? '· já equipado' : `· tirar de ${equippedOn.name ?? 'outro monstro'}`}
+              </span>
             </li>
           ))}
         </ul>

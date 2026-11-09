@@ -333,7 +333,10 @@ export interface OptimizeRunesRequest {
   focus: OptimizerStat[]
   minimums: Array<{ stat: OptimizerStat; min: number }>
   includeEquippedOnOthers: boolean
+  /** Runas em +15: principal no máximo e subs pelo ganho médio esperado. */
   assumeMaxLevel: boolean
+  /** Troca os artefatos pelos compatíveis cujo principal mais ajuda o foco. */
+  optimizeArtifacts: boolean
 }
 
 export interface OptimizedBuild {
@@ -341,6 +344,7 @@ export interface OptimizedBuild {
   total: StatValues
   activeSets: string[]
   runes: RuneListItem[]
+  artifacts: ArtifactListItem[]
 }
 
 export interface OptimizeRunesResponse {

@@ -130,7 +130,17 @@ export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) 
                 checked={form.assumeMaxLevel}
                 onChange={(event) => update({ assumeMaxLevel: event.target.checked })}
               />
-              Considerar o principal em +15
+              Considerar runas em +15
+              <span className="text-xs text-muted-foreground">(principal no máximo, subs pela média)</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.optimizeArtifacts}
+                onChange={(event) => update({ optimizeArtifacts: event.target.checked })}
+              />
+              Trocar artefatos
+              <span className="text-xs text-muted-foreground">(pelo principal)</span>
             </label>
             <Button type="submit" disabled={invalid || pending} className="sm:ml-auto">
               {pending ? 'Otimizando…' : 'Otimizar'}
