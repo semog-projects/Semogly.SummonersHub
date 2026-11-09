@@ -47,7 +47,16 @@ internal sealed class GetMonsterDetailQueryHandler(
             return AccountErrors.MonsterNotFound(query.MonsterId);
         }
 
-        var equipment = new EquipmentIndex(result.Value);
+        return MonsterDetailBuilder.Build(result.Value, monster, catalog);
+    }
+}
+
+/// <summary>Detalhe de um monstro a partir de qualquer snapshot (último import ou o de uma build compartilhada).</summary>
+internal static class MonsterDetailBuilder
+{
+    public static MonsterDetailResponse Build(AccountSnapshot snapshot, Monster monster, IMonsterCatalog catalog)
+    {
+        var equipment = new EquipmentIndex(snapshot);
         var stats = equipment.StatsOf(monster);
         var definition = catalog.Find(monster.MasterId);
 

@@ -15,6 +15,7 @@ using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
 using Semogly.SummonersHub.Application.Accounts.OptimizeRunes;
 using Semogly.SummonersHub.Application.Accounts.OptimizerPresets;
+using Semogly.SummonersHub.Application.Accounts.SharedBuilds;
 using Semogly.SummonersHub.Application.Accounts.UpdateInventoryMarks;
 using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
@@ -34,6 +35,10 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<ListOptimizerPresetsQuery, IReadOnlyList<OptimizerPresetResponse>>, ListOptimizerPresetsQueryHandler>();
         services.AddScoped<ICommandHandler<SaveOptimizerPresetCommand, OptimizerPresetResponse>, SaveOptimizerPresetCommandHandler>();
         services.AddScoped<ICommandHandler<DeleteOptimizerPresetCommand>, DeleteOptimizerPresetCommandHandler>();
+        services.AddScoped<ICommandHandler<CreateShareLinkCommand, ShareLinkResponse>, CreateShareLinkCommandHandler>();
+        services.AddScoped<IQueryHandler<ListShareLinksQuery, IReadOnlyList<ShareLinkResponse>>, ListShareLinksQueryHandler>();
+        services.AddScoped<ICommandHandler<RevokeShareLinkCommand>, RevokeShareLinkCommandHandler>();
+        services.AddScoped<IQueryHandler<GetSharedBuildQuery, SharedBuildResponse>, GetSharedBuildQueryHandler>();
         services.AddScoped<IQueryHandler<GetAccountSummaryQuery, AccountSummaryResponse>, GetAccountSummaryQueryHandler>();
         services.AddScoped<IQueryHandler<GetAccountOverviewQuery, AccountOverviewResponse>, GetAccountOverviewQueryHandler>();
         services.AddScoped<IQueryHandler<ListAccountsQuery, IReadOnlyList<AccountSummaryResponse>>, ListAccountsQueryHandler>();

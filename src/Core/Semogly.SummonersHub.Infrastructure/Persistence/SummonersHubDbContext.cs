@@ -23,6 +23,8 @@ public sealed class SummonersHubDbContext(DbContextOptions<SummonersHubDbContext
 
     public DbSet<OptimizerPreset> OptimizerPresets => Set<OptimizerPreset>();
 
+    public DbSet<SharedBuild> SharedBuilds => Set<SharedBuild>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Semogly.SummonersHub.Application.Abstractions;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
+using Semogly.SummonersHub.Application.Accounts.SharedBuilds;
 using Semogly.SummonersHub.Application.GameData;
 using Semogly.SummonersHub.Domain.Accounts;
 using Semogly.SummonersHub.Infrastructure.GameData;
@@ -27,7 +28,9 @@ public static class DependencyInjection
         builder.Services.AddScoped<IWizardAccountRepository, WizardAccountRepository>();
         builder.Services.AddScoped<IInventoryMarkRepository, InventoryMarkRepository>();
         builder.Services.AddScoped<IOptimizerPresetRepository, OptimizerPresetRepository>();
+        builder.Services.AddScoped<ISharedBuildRepository, SharedBuildRepository>();
         builder.Services.AddScoped<IAccountReadService, AccountReadService>();
+        builder.Services.AddScoped<IAccountReadServiceForShares, AccountReadService>();
         builder.Services.AddSingleton<IMonsterCatalog, EmbeddedMonsterCatalog>();
         builder.Services.AddSingleton<IPveTeamCatalog, EmbeddedPveTeamCatalog>();
         builder.Services.AddSingleton<IDungeonCatalog, EmbeddedDungeonCatalog>();

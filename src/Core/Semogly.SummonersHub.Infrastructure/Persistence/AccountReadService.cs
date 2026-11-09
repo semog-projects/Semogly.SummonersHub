@@ -1,11 +1,12 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
+using Semogly.SummonersHub.Application.Accounts.SharedBuilds;
 using Semogly.SummonersHub.Domain.Accounts;
 
 namespace Semogly.SummonersHub.Infrastructure.Persistence;
 
-internal sealed class AccountReadService(SummonersHubDbContext db) : IAccountReadService
+internal sealed class AccountReadService(SummonersHubDbContext db) : IAccountReadService, IAccountReadServiceForShares
 {
     private static readonly Expression<Func<AccountSnapshot, AccountSummaryResponse>> ToSummary = s => new AccountSummaryResponse(
         s.WizardId,
@@ -36,6 +37,12 @@ internal sealed class AccountReadService(SummonersHubDbContext db) : IAccountRea
             .OrderByDescending(s => s.ImportedAt)
             .Select(ToSummary)
             .ToListAsync(cancellationToken);
+
+    public Task<Dictionary<Guid, int>> VersionsOfAsync(IReadOnlyCollection<Guid> snapshotIds, CancellationToken cancellationToken) =>
+        db.AccountSnapshots
+            .AsNoTracking()
+            .Where(s => snapshotIds.Contains(s.Id))
+            .ToDictionaryAsync(s => s.Id, s => s.Version, cancellationToken);
 
     public async Task<IReadOnlyList<AccountSummaryResponse>> ListSummariesAsync(long wizardId, CancellationToken cancellationToken) =>
         await db.AccountSnapshots
