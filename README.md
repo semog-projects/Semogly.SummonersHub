@@ -62,6 +62,29 @@ do login sem cookie.
 - As chaves de Data Protection (que assinam cookie e tokens) ficam no PostgreSQL, então a sessão sobrevive a
   restarts e funciona com mais de uma instância.
 
+### Login com Google
+
+Opcional: o botão "Entrar com Google" só aparece quando o client id/secret estão configurados
+(`GET /api/auth/providers`).
+
+1. No [Google Cloud Console](https://console.cloud.google.com/apis/credentials), crie um **ID do cliente OAuth**
+   do tipo **Aplicativo da Web** (a tela de consentimento pode ficar em modo de teste, com seu e-mail como testador).
+2. Em **URIs de redirecionamento autorizados**, adicione `http://localhost:5173/api/auth/signin-google`.
+   O front roda sempre na porta 5173 (fixa no Vite e no AppHost) e repassa a origem para a API (`xfwd`).
+3. Grave as credenciais em user secrets da API (nunca no repositório):
+
+   ```bash
+   dotnet user-secrets set "Authentication:Google:ClientId" "<client id>" --project src/Services/Semogly.SummonersHub.Api
+   dotnet user-secrets set "Authentication:Google:ClientSecret" "<client secret>" --project src/Services/Semogly.SummonersHub.Api
+   ```
+
+   Em outros ambientes, use as variáveis `Authentication__Google__ClientId` e `Authentication__Google__ClientSecret`.
+
+Fluxo: `GET /api/auth/external/google?returnUrl=/...` redireciona para o Google, que volta em
+`/api/auth/signin-google` → `/api/auth/external/callback`. Se o login Google já está vinculado, entra; senão,
+vincula ao usuário com o mesmo e-mail (só se o Google confirmou o e-mail) ou cria um usuário novo sem senha. Em
+caso de falha, volta para `/login?erro=...`. O `returnUrl` só aceita caminhos locais.
+
 ## Import da conta
 
 O front lê o JSON do SW Exporter no navegador, remove os dados sensíveis e envia o resultado para
