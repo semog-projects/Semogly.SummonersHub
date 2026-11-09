@@ -42,6 +42,8 @@ return 0;
 
 async Task SyncMonstersAsync()
 {
+    // O monstro lista as skills pelo id interno do SWARFARM: traduz para o id do jogo, na ordem do slot
+    var skillMap = await LoadSkillMapAsync();
     var monsters = new List<MonsterEntry>();
     var url = "monsters/?page_size=100";
 
@@ -60,7 +62,15 @@ async Task SyncMonstersAsync()
             m.AwakenLevel,
             m.ImageFilename,
             m.Homunculus,
-            m.Obtainable)));
+            m.Obtainable,
+            m.MaxLvlHp is > 0
+                ? new MonsterStatsEntry(m.MaxLvlHp.Value, m.MaxLvlAttack ?? 0, m.MaxLvlDefense ?? 0, m.Speed ?? 0, m.Resistance ?? 0, m.Accuracy ?? 0, m.CritRate ?? 0, m.CritDamage ?? 0)
+                : null,
+            [.. (m.Skills ?? [])
+                .Where(skillMap.ContainsKey)
+                .Select(id => skillMap[id])
+                .OrderBy(s => s.Slot)
+                .Select(s => s.Com2usId)])));
 
         Console.WriteLine($"{monsters.Count}/{page.Count} monstros");
         url = page.Next;
@@ -71,6 +81,28 @@ async Task SyncMonstersAsync()
     var ordered = monsters.DistinctBy(m => m.Com2usId).OrderBy(m => m.Com2usId).ToList();
     await WriteAsync("monsters.json", ordered);
     Console.WriteLine($"{ordered.Count} monstros gravados");
+}
+
+// Id interno do SWARFARM → (id do jogo, slot) de todas as skills
+async Task<Dictionary<int, (int Com2usId, int Slot)>> LoadSkillMapAsync()
+{
+    var map = new Dictionary<int, (int, int)>();
+    var url = "skills/?page_size=100";
+    while (url is not null)
+    {
+        var page = await http.GetFromJsonAsync<SwarfarmPage<SwarfarmSkill>>(url)
+            ?? throw new InvalidOperationException($"Resposta vazia do SWARFARM em {url}");
+        foreach (var skill in page.Results)
+        {
+            map[skill.Id] = (skill.Com2usId, skill.Slot);
+        }
+
+        Console.WriteLine($"{map.Count}/{page.Count} habilidades (mapa)");
+        url = page.Next;
+        await PauseAsync();
+    }
+
+    return map;
 }
 
 // Dungeons cobertas pelos times PvE: id do SWARFARM → nome do enum Dungeon do domínio
@@ -186,8 +218,19 @@ internal sealed record SwarfarmMonster(
     [property: JsonPropertyName("awaken_level")] int AwakenLevel,
     [property: JsonPropertyName("image_filename")] string? ImageFilename,
     bool Homunculus,
-    bool Obtainable);
+    bool Obtainable,
+    [property: JsonPropertyName("max_lvl_hp")] int? MaxLvlHp,
+    [property: JsonPropertyName("max_lvl_attack")] int? MaxLvlAttack,
+    [property: JsonPropertyName("max_lvl_defense")] int? MaxLvlDefense,
+    int? Speed,
+    int? Resistance,
+    int? Accuracy,
+    [property: JsonPropertyName("crit_rate")] int? CritRate,
+    [property: JsonPropertyName("crit_damage")] int? CritDamage,
+    IReadOnlyList<int>? Skills);
 
+/// <param name="MaxLevelStats">Atributos base em 6★ nível 40 (sem runas); nulo quando o SWARFARM não informa.</param>
+/// <param name="SkillIds">Habilidades (id do jogo), na ordem do slot.</param>
 internal sealed record MonsterEntry(
     int Com2usId,
     int FamilyId,
@@ -198,7 +241,19 @@ internal sealed record MonsterEntry(
     int AwakenLevel,
     string? ImageFilename,
     bool IsHomunculus,
-    bool Obtainable);
+    bool Obtainable,
+    MonsterStatsEntry? MaxLevelStats,
+    IReadOnlyList<int> SkillIds);
+
+internal sealed record MonsterStatsEntry(
+    int Hp,
+    int Attack,
+    int Defense,
+    int Speed,
+    int Resistance,
+    int Accuracy,
+    int CriticalRate,
+    int CriticalDamage);
 
 internal sealed record SwarfarmDungeon(int Id, string Name, IReadOnlyList<int> Levels);
 
@@ -209,6 +264,7 @@ internal sealed record SwarfarmWave(IReadOnlyList<SwarfarmEnemy> Enemies);
 internal sealed record SwarfarmEnemy(int Speed, int Resist, int Hp);
 
 internal sealed record SwarfarmSkill(
+    int Id,
     [property: JsonPropertyName("com2us_id")] int Com2usId,
     string Name,
     int Slot,

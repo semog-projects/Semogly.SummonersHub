@@ -11,6 +11,11 @@ public interface IAccountSnapshotRepository
     /// <summary>Último snapshot do invocador com monstros, runas, artefatos e itens de craft.</summary>
     Task<AccountSnapshot?> GetLatestAsync(long wizardGameId, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Último snapshot com os monstros e gems/grinds manuais do invocador somados (cópia não rastreada, só para leitura).
+    /// </summary>
+    Task<AccountSnapshot?> GetLatestWithManualItemsAsync(long wizardGameId, CancellationToken cancellationToken);
+
     /// <summary>Snapshot completo de uma versão do invocador.</summary>
     Task<AccountSnapshot?> GetByVersionAsync(long wizardGameId, int version, CancellationToken cancellationToken);
 

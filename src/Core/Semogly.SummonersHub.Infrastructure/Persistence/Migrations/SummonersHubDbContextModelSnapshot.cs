@@ -303,6 +303,62 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                     b.ToTable("InventoryMarks", (string)null);
                 });
 
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.ManualCraftItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Code")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("WizardId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WizardId", "GameId")
+                        .IsUnique();
+
+                    b.ToTable("ManualCraftItems", (string)null);
+                });
+
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.ManualMonster", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("MasterId")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("WizardId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WizardId", "GameId")
+                        .IsUnique();
+
+                    b.ToTable("ManualMonsters", (string)null);
+                });
+
             modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.Monster", b =>
                 {
                     b.Property<Guid>("SnapshotId")

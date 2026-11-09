@@ -111,6 +111,22 @@ public sealed class AccountSnapshot
         return snapshot;
     }
 
+    /// <summary>
+    /// Cópia somente leitura do snapshot (mesmo id e versão) com os monstros e gems/grinds manuais somados. A
+    /// cópia não é rastreada pelo EF Core: nunca é gravada, então os itens manuais não entram nas versões do import.
+    /// </summary>
+    public AccountSnapshot WithManualItems(IEnumerable<Monster> manualMonsters, IEnumerable<CraftItem> manualCraftItems)
+    {
+        var copy = new AccountSnapshot(Id, new WizardProfile(WizardId, WizardName, WizardLevel, WizardServerId), Version, ContentHash, ExportedAt, ImportedAt);
+        copy._monsters.AddRange(_monsters);
+        copy._monsters.AddRange(manualMonsters.Where(m => ManualItem.IsManual(m.GameId)));
+        copy._runes.AddRange(_runes);
+        copy._artifacts.AddRange(_artifacts);
+        copy._craftItems.AddRange(_craftItems);
+        copy._craftItems.AddRange(manualCraftItems.Where(c => ManualItem.IsManual(c.GameId)));
+        return copy;
+    }
+
     private static List<T> EnsureUnique<T>(IEnumerable<T> items, Func<T, long> key, string description)
     {
         var list = items.ToList();

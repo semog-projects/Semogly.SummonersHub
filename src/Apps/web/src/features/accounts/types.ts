@@ -85,6 +85,8 @@ export interface MonsterListItem {
   averageRuneEfficiency: number | null
   /** Monstro bloqueado: o equipamento dele conta como bloqueado (ausente = falso). */
   locked?: boolean
+  /** Criado à mão (id negativo), fora do import. */
+  isManual?: boolean
 }
 
 /** Atributo com o código numérico do jogo (mesma tabela de rótulos do import). */

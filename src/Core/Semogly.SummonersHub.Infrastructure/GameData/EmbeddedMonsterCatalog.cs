@@ -1,6 +1,7 @@
 using System.Collections.Frozen;
 using System.Text.Json;
 using Semogly.SummonersHub.Application.GameData;
+using Semogly.SummonersHub.Domain.Accounts;
 using Semogly.SummonersHub.Domain.GameData;
 
 namespace Semogly.SummonersHub.Infrastructure.GameData;
@@ -18,6 +19,24 @@ internal sealed class EmbeddedMonsterCatalog : IMonsterCatalog
     private readonly Lazy<FrozenDictionary<int, MonsterDefinition>> _monsters = new(Load);
 
     public MonsterDefinition? Find(int com2usId) => _monsters.Value.GetValueOrDefault(com2usId);
+
+    public IReadOnlyList<MonsterDefinition> Search(string name, int limit)
+    {
+        var term = name.Trim();
+        if (term.Length == 0)
+        {
+            return [];
+        }
+
+        // Só monstros com atributos (os que dá para criar à mão); nome que começa com o termo vem primeiro
+        return [.. _monsters.Value.Values
+            .Where(m => m.MaxLevelStats is not null && !m.IsHomunculus && m.Name.Contains(term, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(m => m.Name.StartsWith(term, StringComparison.OrdinalIgnoreCase))
+            .ThenBy(m => m.Name, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(m => m.AwakenLevel)
+            .ThenBy(m => m.Element)
+            .Take(limit)];
+    }
 
     internal int Count => _monsters.Value.Count;
 
@@ -43,7 +62,9 @@ internal sealed class EmbeddedMonsterCatalog : IMonsterCatalog
         entry.NaturalStars,
         entry.AwakenLevel,
         entry.ImageFilename ?? string.Empty,
-        entry.IsHomunculus);
+        entry.IsHomunculus,
+        entry.MaxLevelStats,
+        entry.SkillIds ?? []);
 
     private sealed record MonsterEntry(
         int Com2usId,
@@ -54,5 +75,8 @@ internal sealed class EmbeddedMonsterCatalog : IMonsterCatalog
         int NaturalStars,
         int AwakenLevel,
         string? ImageFilename,
-        bool IsHomunculus);
+        bool IsHomunculus,
+        bool Obtainable = true,
+        BaseStats? MaxLevelStats = null,
+        IReadOnlyList<int>? SkillIds = null);
 }

@@ -27,6 +27,10 @@ public sealed class SummonersHubDbContext(DbContextOptions<SummonersHubDbContext
 
     public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
 
+    public DbSet<ManualMonster> ManualMonsters => Set<ManualMonster>();
+
+    public DbSet<ManualCraftItem> ManualCraftItems => Set<ManualCraftItem>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)

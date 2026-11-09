@@ -26,7 +26,8 @@ public sealed record MonsterDetailResponse(
     IReadOnlyList<RuneDetail> Runes,
     IReadOnlyList<ArtifactDetail> Artifacts,
     decimal? AverageRuneEfficiency,
-    bool Locked = false);
+    bool Locked = false,
+    bool IsManual = false);
 
 internal sealed class GetMonsterDetailQueryHandler(
     IAccountSnapshotRepository repository,
@@ -50,7 +51,11 @@ internal sealed class GetMonsterDetailQueryHandler(
         }
 
         var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
-        return MonsterDetailBuilder.Build(result.Value, monster, catalog) with { Locked = lookup.IsMonsterLocked(monster.GameId) };
+        return MonsterDetailBuilder.Build(result.Value, monster, catalog) with
+        {
+            Locked = lookup.IsMonsterLocked(monster.GameId),
+            IsManual = ManualItem.IsManual(monster.GameId),
+        };
     }
 }
 
