@@ -46,7 +46,7 @@ const lapis = { monsterId: 11, masterId: 19811, name: 'Lapis', element: 'Water' 
 const tyron = { monsterId: 12, masterId: 11811, name: 'Tyron', element: 'Water' as const }
 
 const response: OptimizeRunesResponse = {
-  current: { score: 150, total: stats, activeSets: ['Violent', 'Will'], runes: [] },
+  current: { score: 150, total: stats, activeSets: ['Violent', 'Will'], runes: [], artifacts: [] },
   builds: [
     {
       score: 180,
@@ -56,6 +56,22 @@ const response: OptimizeRunesResponse = {
         { rune: rune(1, 2, 'Violent'), equippedOn: lapis },
         { rune: rune(2, 4, 'Violent'), equippedOn: tyron },
         { rune: rune(3, 6, 'Will'), equippedOn: null },
+      ],
+      artifacts: [
+        {
+          artifact: {
+            artifactId: 9,
+            type: 'Element',
+            element: 'Water',
+            archetype: null,
+            level: 15,
+            rarity: 5,
+            originalRarity: 5,
+            mainStat: { type: 101, value: 100 },
+            substats: [],
+          },
+          equippedOn: null,
+        },
       ],
     },
   ],
@@ -93,6 +109,7 @@ describe('RuneOptimizerPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'HP' }))
     fireEvent.change(screen.getByLabelText('Mínimo de PRE'), { target: { value: '45' } })
+    fireEvent.click(screen.getByLabelText(/Trocar artefatos/))
     fireEvent.click(screen.getByRole('button', { name: 'Otimizar' }))
 
     const build = await screen.findByLabelText('Build 1')
@@ -103,6 +120,7 @@ describe('RuneOptimizerPage', () => {
       mainStats: { 2: [8] },
       focus: ['Speed', 'Hp'],
       minimums: [{ stat: 'Accuracy', min: 45 }],
+      optimizeArtifacts: true,
     })
 
     expect(build).toHaveTextContent('180(+30)')
@@ -111,6 +129,7 @@ describe('RuneOptimizerPage', () => {
     expect(runes).toHaveTextContent('Já equipada')
     expect(runes).toHaveTextContent('Do inventário')
     expect(within(runes).getByRole('link', { name: 'Tyron' })).toHaveAttribute('href', '/contas/1/monstros/12')
+    expect(within(build).getByRole('list', { name: 'Artefatos da build' })).toHaveTextContent('Elemento Água ATK +100 · do inventário')
   })
 
   it('bloqueia sets que passam de 6 peças', async () => {

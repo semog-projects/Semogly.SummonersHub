@@ -161,6 +161,32 @@ public class RuneOptimizerTests
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(10), $"Levou {stopwatch.Elapsed}");
     }
 
+    [Fact]
+    public void BestArtifacts_ShouldPickCompatibleArtifactsByFocusAndKeepCurrentOnTies()
+    {
+        Artifact[] pool =
+        [
+            Artifact(1, ArtifactType.Element, Element.Water, null, ArtifactEffect.HpFlat, 1500, equippedOn: MonsterId),
+            Artifact(2, ArtifactType.Element, Element.Water, null, ArtifactEffect.AttackFlat, 100),
+            Artifact(3, ArtifactType.Element, Element.Fire, null, ArtifactEffect.AttackFlat, 160), // outro elemento
+            Artifact(4, ArtifactType.Archetype, null, Archetype.Attack, ArtifactEffect.DefenseFlat, 100, equippedOn: MonsterId),
+            Artifact(5, ArtifactType.Archetype, null, Archetype.Attack, ArtifactEffect.HpFlat, 1500),
+            Artifact(6, ArtifactType.Archetype, null, Archetype.Support, ArtifactEffect.AttackFlat, 100), // outro arquétipo
+        ];
+
+        var forAttack = RuneOptimizer.BestArtifacts(Monster, Archetype.Attack, pool, [PveStat.Attack]);
+        var forSpeed = RuneOptimizer.BestArtifacts(Monster, Archetype.Attack, pool, [PveStat.Speed]);
+
+        // ATK: o de elemento com ATK; no de arquétipo nenhum tem ATK compatível, fica o atual
+        Assert.Equal([2L, 4L], forAttack.Select(a => a.GameId));
+
+        // VEL não depende do principal: mantém os dois atuais
+        Assert.Equal([1L, 4L], forSpeed.Select(a => a.GameId));
+    }
+
+    private static Artifact Artifact(long id, ArtifactType type, Element? element, Archetype? archetype, ArtifactEffect main, int value, long? equippedOn = null) =>
+        new(id, type, element, archetype, 5, 5, 15, new ArtifactStatValue(main, value), [], equippedOn);
+
     private static OptimizerRequest Request(RuneSet[] sets, PveStat[] focus) =>
         new(sets, new Dictionary<int, IReadOnlyList<RuneStat>>(), focus, [], AssumeMaxLevel: false);
 

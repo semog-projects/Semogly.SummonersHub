@@ -57,6 +57,33 @@ public sealed class OptimizeRunesTests(ApiFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Optimize_WithArtifacts_ShouldOnlyUseCompatibleOnes()
+    {
+        var (wizardId, monsterId) = await ImportAsync();
+        var request = new
+        {
+            sets = new[] { "Vampire" },
+            focus = new[] { "Attack" },
+            includeEquippedOnOthers = false,
+            assumeMaxLevel = true,
+            optimizeArtifacts = true,
+        };
+
+        var response = await _client.PostAsJsonAsync($"/api/accounts/{wizardId}/monsters/{monsterId}/optimize", request, ApiJson.Options, Ct);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<OptimizeRunesResponse>(ApiJson.Options, Ct);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Current.Artifacts.Count);
+
+        // Os artefatos do inventário são de Vento e de arquétipo Defesa: o Lapis (Água, Ataque) fica com os dele
+        var best = result.Builds[0];
+        Assert.Equal(
+            result.Current.Artifacts.Select(a => a.Artifact.ArtifactId).Order(),
+            best.Artifacts.Select(a => a.Artifact.ArtifactId).Order());
+    }
+
+    [Fact]
     public async Task Optimize_ShouldValidateTheRequest()
     {
         var (wizardId, monsterId) = await ImportAsync();

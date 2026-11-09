@@ -38,6 +38,7 @@ export interface OptimizerForm {
   minimums: Partial<Record<OptimizerStat, string>>
   includeEquippedOnOthers: boolean
   assumeMaxLevel: boolean
+  optimizeArtifacts: boolean
 }
 
 /** Formulário inicial a partir da build atual: mesmos sets, mesmos principais e foco em VEL. */
@@ -51,6 +52,7 @@ export function initialForm(monster: MonsterDetail): OptimizerForm {
     minimums: {},
     includeEquippedOnOthers: false,
     assumeMaxLevel: false,
+    optimizeArtifacts: false,
   }
 }
 
@@ -71,6 +73,7 @@ export function toRequest(form: OptimizerForm): OptimizeRunesRequest {
     }),
     includeEquippedOnOthers: form.includeEquippedOnOthers,
     assumeMaxLevel: form.assumeMaxLevel,
+    optimizeArtifacts: form.optimizeArtifacts,
   }
 }
 
