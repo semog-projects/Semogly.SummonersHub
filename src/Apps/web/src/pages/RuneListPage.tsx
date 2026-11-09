@@ -17,6 +17,8 @@ import { nextSort } from '@/features/accounts/shared/sorting'
 import { usePaging } from '@/features/accounts/shared/usePaging'
 import type { RuneListItem } from '@/features/accounts/types'
 import { useRunes } from '@/features/accounts/useAccounts'
+import { runesCsv } from '@/features/accounts/export/listCsv'
+import { ExportCsvButton } from '@/features/accounts/shared/ExportCsvButton'
 import { QueryStatus } from './QueryStatus'
 
 export function RuneListPage() {
@@ -62,10 +64,13 @@ function RuneList({
   return (
     <div className="space-y-4">
       <RuneFiltersBar filters={filters} tags={tags} onChange={onChange} />
-      <p className="text-xs text-muted-foreground" aria-live="polite">
-        {visible.length} de {runes.length} runas · eficiência no modelo do SW Exporter; a máxima supõe roll máximo nos
-        upgrades que faltam até o +12
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground" aria-live="polite">
+          {visible.length} de {runes.length} runas · eficiência no modelo do SW Exporter; a máxima supõe roll máximo nos
+          upgrades que faltam até o +12
+        </p>
+        <ExportCsvButton fileName="runas.csv" build={() => runesCsv(visible)} />
+      </div>
       <MarksBulkBar wizardId={wizardId} kind="Rune" itemIds={visible.map((item) => item.rune.runeId)} />
       <RuneTable wizardId={wizardId} runes={visible.slice(0, limit)} filters={filters} onSort={onSort} />
       <ShowMoreButton total={visible.length} limit={limit} onClick={showMore} />

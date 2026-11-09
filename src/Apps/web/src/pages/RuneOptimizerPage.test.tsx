@@ -111,6 +111,8 @@ describe('RuneOptimizerPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'HP' }))
     fireEvent.change(screen.getByLabelText('Mínimo de PRE'), { target: { value: '45' } })
+    fireEvent.change(screen.getByLabelText('Máximo de VEL'), { target: { value: '220' } })
+    fireEvent.change(screen.getByLabelText('Peso de VEL'), { target: { value: '2' } })
     fireEvent.click(screen.getByLabelText(/Trocar artefatos/))
     fireEvent.click(screen.getByRole('button', { name: 'Otimizar' }))
 
@@ -122,6 +124,8 @@ describe('RuneOptimizerPage', () => {
       mainStats: { 2: [8] },
       focus: ['Speed', 'Hp'],
       minimums: [{ stat: 'Accuracy', min: 45 }],
+      maximums: [{ stat: 'Speed', max: 220 }],
+      weights: { Speed: 2 },
       optimizeArtifacts: true,
     })
 
@@ -132,6 +136,17 @@ describe('RuneOptimizerPage', () => {
     expect(runes).toHaveTextContent('Do inventário')
     expect(within(runes).getByRole('link', { name: 'Tyron' })).toHaveAttribute('href', '/contas/1/monstros/12')
     expect(within(build).getByRole('list', { name: 'Artefatos da build' })).toHaveTextContent('Elemento Água ATK +100 · do inventário')
+  })
+
+  it('bloqueia máximo menor que o mínimo', async () => {
+    renderPage()
+    await screen.findByLabelText('Set 1')
+
+    fireEvent.change(screen.getByLabelText('Mínimo de VEL'), { target: { value: '200' } })
+    fireEvent.change(screen.getByLabelText('Máximo de VEL'), { target: { value: '180' } })
+
+    expect(screen.getByRole('alert')).toHaveTextContent('O máximo não pode ser menor que o mínimo.')
+    expect(screen.getByRole('button', { name: 'Otimizar' })).toBeDisabled()
   })
 
   it('bloqueia sets que passam de 6 peças', async () => {

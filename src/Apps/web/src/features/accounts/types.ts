@@ -281,7 +281,16 @@ export interface SnapshotComparison {
 export type DungeonName = 'GiantsKeep' | 'DragonsLair' | 'Necropolis' | 'SpiritualRealm' | 'PunishersCrypt'
 
 /** Atributo de requisito, como a API devolve (enum pelo nome). */
-export type PveStatName = 'Hp' | 'Attack' | 'Defense' | 'Speed' | 'CriticalRate' | 'CriticalDamage' | 'Resistance' | 'Accuracy'
+export type PveStatName =
+  | 'Hp'
+  | 'Attack'
+  | 'Defense'
+  | 'Speed'
+  | 'CriticalRate'
+  | 'CriticalDamage'
+  | 'Resistance'
+  | 'Accuracy'
+  | 'EffectiveHp'
 
 export interface PveSlotCheck {
   monsterName: string
@@ -349,7 +358,7 @@ export interface CraftSuggestionGroup {
 }
 
 /** Atributo usado como foco ou mínimo no otimizador (mesmo enum dos times PvE). */
-export type OptimizerStat = 'Hp' | 'Attack' | 'Defense' | 'Speed' | 'CriticalRate' | 'CriticalDamage' | 'Resistance' | 'Accuracy'
+export type OptimizerStat = PveStatName
 
 /** POST /api/accounts/{wizardId}/monsters/{monsterId}/optimize */
 export interface OptimizeRunesRequest {
@@ -359,6 +368,9 @@ export interface OptimizeRunesRequest {
   mainStats: Record<string, number[]>
   focus: OptimizerStat[]
   minimums: Array<{ stat: OptimizerStat; min: number }>
+  maximums: Array<{ stat: OptimizerStat; max: number }>
+  /** Peso de cada atributo de foco (0,1 a 10); os ausentes valem 1. */
+  weights: Partial<Record<OptimizerStat, number>>
   includeEquippedOnOthers: boolean
   /** Runas em +15: principal no máximo e subs pelo ganho médio esperado. */
   assumeMaxLevel: boolean

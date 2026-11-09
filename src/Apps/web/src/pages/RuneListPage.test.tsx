@@ -90,6 +90,25 @@ describe('RuneListPage', () => {
     expect(patches()[1][1]).toEqual({ kind: 'Rune', itemIds: [3, 1], addTags: ['RTA'] })
   })
 
+  it('exporta em CSV todas as runas filtradas, não só a página', async () => {
+    const many = Array.from({ length: RUNE_PAGE_SIZE + 5 }, (_, i) => rune(i + 1, 50, i % 2 === 0))
+    renderPage('/contas/1/runas?local=equipada', many)
+    await screen.findByText(/53 de 105 runas/)
+
+    let exported: Blob | undefined
+    vi.stubGlobal('URL', { ...URL, createObjectURL: (blob: Blob) => ((exported = blob), 'blob:csv'), revokeObjectURL: () => {} })
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+    fireEvent.click(screen.getByRole('button', { name: /Exportar CSV/ }))
+
+    expect(click).toHaveBeenCalled()
+    // As linhas são separadas por CRLF (o BOM some na decodificação do Blob, mas é removido por garantia)
+    const lines = (await exported!.text()).replace(String.fromCharCode(0xfeff), '').split(String.fromCharCode(13, 10))
+    expect(lines[0]).toMatch(/^Id;Set;Slot/)
+    expect(lines).toHaveLength(53 + 1)
+    click.mockRestore()
+  })
+
   it('pagina a tabela', async () => {
     const many = Array.from({ length: RUNE_PAGE_SIZE + 5 }, (_, i) => rune(i + 1, 50, false))
     renderPage('/contas/1/runas', many)

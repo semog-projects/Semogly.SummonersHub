@@ -17,6 +17,8 @@ import { nextSort } from '@/features/accounts/shared/sorting'
 import { usePaging } from '@/features/accounts/shared/usePaging'
 import type { ArtifactListItem } from '@/features/accounts/types'
 import { useArtifacts } from '@/features/accounts/useAccounts'
+import { artifactsCsv } from '@/features/accounts/export/listCsv'
+import { ExportCsvButton } from '@/features/accounts/shared/ExportCsvButton'
 import { QueryStatus } from './QueryStatus'
 
 export function ArtifactListPage() {
@@ -62,9 +64,12 @@ function ArtifactList({
   return (
     <div className="space-y-4">
       <ArtifactFiltersBar filters={filters} tags={tags} onChange={onChange} />
-      <p className="text-xs text-muted-foreground" aria-live="polite">
-        {visible.length} de {artifacts.length} artefatos · escolha uma sub para ordenar pelo valor dela
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground" aria-live="polite">
+          {visible.length} de {artifacts.length} artefatos · escolha uma sub para ordenar pelo valor dela
+        </p>
+        <ExportCsvButton fileName="artefatos.csv" build={() => artifactsCsv(visible)} />
+      </div>
       <MarksBulkBar wizardId={wizardId} kind="Artifact" itemIds={visible.map((item) => item.artifact.artifactId)} />
       <ArtifactTable wizardId={wizardId} artifacts={visible.slice(0, limit)} filters={filters} onSort={onSort} />
       <ShowMoreButton total={visible.length} limit={limit} onClick={showMore} />

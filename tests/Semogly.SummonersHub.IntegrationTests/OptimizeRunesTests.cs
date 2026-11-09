@@ -95,6 +95,48 @@ public sealed class OptimizeRunesTests(ApiFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Optimize_ShouldValidateWeightsAndMaximums()
+    {
+        var (wizardId, monsterId) = await ImportAsync();
+        var url = $"/api/accounts/{wizardId}/monsters/{monsterId}/optimize";
+
+        // Peso de um atributo fora do foco
+        var weightOutsideFocus = new { sets = Array.Empty<string>(), focus = new[] { "Speed" }, weights = new Dictionary<string, decimal> { ["Hp"] = 2 } };
+
+        // Máximo menor que o mínimo
+        var maxBelowMin = new
+        {
+            sets = Array.Empty<string>(),
+            focus = new[] { "Speed" },
+            minimums = new[] { new { stat = "Speed", min = 200 } },
+            maximums = new[] { new { stat = "Speed", max = 150 } },
+        };
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await _client.PostAsJsonAsync(url, weightOutsideFocus, ApiJson.Options, Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await _client.PostAsJsonAsync(url, maxBelowMin, ApiJson.Options, Ct)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Optimize_WithWeightsAndMaximum_ShouldRespectTheCap()
+    {
+        var (wizardId, monsterId) = await ImportAsync();
+        var request = new
+        {
+            sets = new[] { "Vampire" },
+            focus = new[] { "Speed", "EffectiveHp" },
+            weights = new Dictionary<string, decimal> { ["Speed"] = 3 },
+            maximums = new[] { new { stat = "Speed", max = 140 } },
+        };
+
+        var response = await _client.PostAsJsonAsync($"/api/accounts/{wizardId}/monsters/{monsterId}/optimize", request, ApiJson.Options, Ct);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<OptimizeRunesResponse>(ApiJson.Options, Ct);
+
+        Assert.NotNull(result);
+        Assert.All(result.Builds, b => Assert.True(b.Total.Speed <= 140, $"VEL {b.Total.Speed}"));
+    }
+
+    [Fact]
     public async Task Optimize_ShouldHideOtherUsersAndUnknownMonsters()
     {
         var (wizardId, monsterId) = await ImportAsync();
