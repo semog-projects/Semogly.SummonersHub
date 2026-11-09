@@ -11,6 +11,7 @@ const teams: PveTeamCheck[] = [
   {
     id: 'gb',
     dungeon: 'GiantsKeep',
+    dungeonStats: { floor: 12, bossResistance: 70, maxResistance: 70, bossSpeed: 121, maxSpeed: 169 },
     name: 'Clássico F2P',
     notes: 'O Giant é de Fogo.',
     readySlots: 1,
@@ -20,6 +21,7 @@ const teams: PveTeamCheck[] = [
         monsterName: 'Bernard',
         element: 'Wind',
         role: 'Barra de ataque',
+        debuffer: false,
         requirements: [{ stat: 'Speed', min: 180 }],
         status: 'BelowRequirements',
         monster: { monsterId: 5, masterId: 11513, name: 'Bernard', element: 'Wind', stars: 6, level: 40, total },
@@ -29,6 +31,7 @@ const teams: PveTeamCheck[] = [
         monsterName: 'Veromos',
         element: 'Dark',
         role: 'Cleanse',
+        debuffer: false,
         requirements: [],
         status: 'Ready',
         monster: { monsterId: 6, masterId: 17115, name: 'Veromos', element: 'Dark', stars: 6, level: 40, total },
@@ -38,7 +41,8 @@ const teams: PveTeamCheck[] = [
         monsterName: 'Belladeon',
         element: 'Light',
         role: 'Quebra de DEF',
-        requirements: [{ stat: 'Accuracy', min: 45 }],
+        debuffer: true,
+        requirements: [{ stat: 'Accuracy', min: 55 }],
         status: 'Missing',
         monster: null,
         unmet: [],
@@ -48,6 +52,7 @@ const teams: PveTeamCheck[] = [
   {
     id: 'pc',
     dungeon: 'PunishersCrypt',
+    dungeonStats: null,
     name: 'Núcleo Verdehile',
     notes: null,
     readySlots: 1,
@@ -57,6 +62,7 @@ const teams: PveTeamCheck[] = [
         monsterName: 'Verdehile',
         element: 'Fire',
         role: 'Barra em crítico',
+        debuffer: false,
         requirements: [{ stat: 'CriticalRate', min: 85 }],
         status: 'Ready',
         monster: { monsterId: 7, masterId: 14712, name: 'Verdehile', element: 'Fire', stars: 6, level: 40, total },
@@ -101,7 +107,8 @@ describe('PveTeamsPage', () => {
     expect(within(bernard).getByRole('link', { name: 'Bernard' })).toHaveAttribute('href', '/contas/1/monstros/5')
 
     const belladeon = within(giants).getByRole('listitem', { name: 'Belladeon (Luz)' })
-    expect(belladeon).toHaveTextContent('mín. PRE 45%')
+    expect(belladeon).toHaveTextContent('mín. PRE 55% (PRE = RES do boss − 15)')
+    expect(giants).toHaveTextContent('B12: RES do boss 70%')
     expect(belladeon).toHaveTextContent('Não tem')
     expect(within(belladeon).queryByRole('link')).not.toBeInTheDocument()
   })

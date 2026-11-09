@@ -85,6 +85,44 @@ public class PveTeamEvaluatorTests
         Assert.True(PveTeamEvaluator.Evaluate(Team, monsters).IsReady);
     }
 
+    [Theory]
+    [InlineData(70, 55)]
+    [InlineData(80, 65)]
+    [InlineData(15, 0)]
+    [InlineData(10, 0)]
+    public void AccuracyTarget_ShouldBringBossResistanceToTheFloor(int bossResistance, int accuracy) =>
+        Assert.Equal(accuracy, DungeonWith(bossResistance).AccuracyTarget);
+
+    [Fact]
+    public void WithDungeonAccuracy_ShouldReplaceAccuracyOnlyOnDebuffers()
+    {
+        var team = Team with
+        {
+            Slots =
+            [
+                new PveTeamSlot("Belladeon", Element.Light, "Quebra de DEF", [new StatRequirement(PveStat.Accuracy, 45)], Debuffer: true),
+                new PveTeamSlot("Bernard", Element.Wind, "Barra", [new StatRequirement(PveStat.Speed, 180), new StatRequirement(PveStat.Accuracy, 10)]),
+            ],
+        };
+
+        var adjusted = PveTeamEvaluator.WithDungeonAccuracy(team, DungeonWith(80));
+
+        Assert.Equal([new StatRequirement(PveStat.Accuracy, 65)], adjusted.Slots[0].Requirements);
+        Assert.Equal(team.Slots[1].Requirements, adjusted.Slots[1].Requirements);
+    }
+
+    [Fact]
+    public void WithDungeonAccuracy_ShouldDropAccuracyWhenTheBossIsAtTheFloor()
+    {
+        var team = Team with { Slots = [new PveTeamSlot("Belladeon", Element.Light, "Quebra de DEF", [new StatRequirement(PveStat.Accuracy, 45)], Debuffer: true)] };
+
+        Assert.Empty(PveTeamEvaluator.WithDungeonAccuracy(team, DungeonWith(15)).Slots[0].Requirements);
+        Assert.Same(team, PveTeamEvaluator.WithDungeonAccuracy(team, null));
+    }
+
+    private static DungeonStats DungeonWith(int bossResistance) =>
+        new(Dungeon.GiantsKeep, "Giant's Keep", 12, bossResistance, bossResistance, 121, 169);
+
     private static PveCandidate Candidate(long id, string name, Element element, int speed = 100, int accuracy = 0, int stars = 6) =>
         new(id, 1, name, element, stars, 40, new StatValues(10000, 800, 600, speed, 15, 50, 15, accuracy));
 }

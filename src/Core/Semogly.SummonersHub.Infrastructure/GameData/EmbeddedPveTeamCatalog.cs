@@ -39,10 +39,11 @@ internal sealed class EmbeddedPveTeamCatalog : IPveTeamCatalog
                 slot.Monster,
                 slot.Element,
                 slot.Role,
-                [.. (slot.Min ?? []).Select(min => new StatRequirement(Enum.Parse<PveStat>(min.Key, ignoreCase: true), min.Value))]))]))];
+                [.. (slot.Min ?? []).Select(min => new StatRequirement(Enum.Parse<PveStat>(min.Key, ignoreCase: true), min.Value))],
+                slot.Debuffer))]))];
     }
 
     private sealed record TeamEntry(string Id, Dungeon Dungeon, string Name, string? Notes, List<SlotEntry> Slots);
 
-    private sealed record SlotEntry(string Monster, Element Element, string Role, Dictionary<string, int>? Min);
+    private sealed record SlotEntry(string Monster, Element Element, string Role, Dictionary<string, int>? Min, bool Debuffer);
 }

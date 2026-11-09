@@ -33,8 +33,9 @@ function PveTeams({ wizardId, teams }: { wizardId: number; teams: PveTeamCheck[]
   return (
     <div className="space-y-8">
       <p className="text-sm text-muted-foreground">
-        {ready} de {teams.length} times prontos. Times de referência (núcleos clássicos F2P) com mínimos de atributo como ponto de
-        partida: o meta muda com os patches, e qualidade de runa e ordem de turnos ainda decidem a dungeon.
+        {ready} de {teams.length} times prontos. Times de referência (núcleos clássicos F2P). A PRE dos debuffers vem da RES
+        do boss no andar mais alto (dados do SWARFARM); os demais mínimos são pontos de partida. Qualidade de runa e ordem de
+        turnos ainda decidem a dungeon.
       </p>
 
       {[...byDungeon].map(([dungeon, dungeonTeams]) => (
