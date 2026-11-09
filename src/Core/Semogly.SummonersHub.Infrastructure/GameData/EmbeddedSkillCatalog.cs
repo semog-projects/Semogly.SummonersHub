@@ -10,6 +10,9 @@ internal sealed class EmbeddedSkillCatalog : ISkillCatalog
 {
     internal const string ResourceName = "Semogly.SummonersHub.GameData.skills.json";
 
+    /// <summary>Descrições traduzidas (texto em inglês → pt-BR), geradas pelo GameDataSync com o comando translate.</summary>
+    internal const string TranslationsResourceName = "Semogly.SummonersHub.GameData.skill-descriptions-ptbr.json";
+
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly Lazy<FrozenDictionary<int, SkillDefinition>> _skills = new(Load);
@@ -26,6 +29,12 @@ internal sealed class EmbeddedSkillCatalog : ISkillCatalog
         var skills = JsonSerializer.Deserialize<List<SkillDefinition>>(stream, JsonOptions)
             ?? throw new InvalidOperationException("skills.json vazio ou inválido.");
 
-        return skills.ToFrozenDictionary(s => s.Id);
+        using var translationsStream = typeof(EmbeddedSkillCatalog).Assembly.GetManifestResourceStream(TranslationsResourceName)
+            ?? throw new InvalidOperationException($"Recurso embarcado '{TranslationsResourceName}' não encontrado.");
+        var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(translationsStream) ?? [];
+
+        return skills.ToFrozenDictionary(
+            s => s.Id,
+            s => s.Description is { } description && translations.TryGetValue(description, out var pt) ? s with { DescriptionPt = pt } : s);
     }
 }

@@ -40,7 +40,7 @@ internal sealed class EmbeddedMonsterCatalog : IMonsterCatalog
 
     internal int Count => _monsters.Value.Count;
 
-    internal IEnumerable<MonsterDefinition> All() => _monsters.Value.Values;
+    public IReadOnlyList<MonsterDefinition> All() => [.. _monsters.Value.Values];
 
     private static FrozenDictionary<int, MonsterDefinition> Load()
     {
@@ -64,7 +64,11 @@ internal sealed class EmbeddedMonsterCatalog : IMonsterCatalog
         entry.ImageFilename ?? string.Empty,
         entry.IsHomunculus,
         entry.MaxLevelStats,
-        entry.SkillIds ?? []);
+        entry.SkillIds ?? [],
+        entry.Obtainable,
+        entry.LeaderSkill,
+        entry.AwakenBonus,
+        entry.Sources ?? []);
 
     private sealed record MonsterEntry(
         int Com2usId,
@@ -78,5 +82,8 @@ internal sealed class EmbeddedMonsterCatalog : IMonsterCatalog
         bool IsHomunculus,
         bool Obtainable = true,
         BaseStats? MaxLevelStats = null,
-        IReadOnlyList<int>? SkillIds = null);
+        IReadOnlyList<int>? SkillIds = null,
+        LeaderSkill? LeaderSkill = null,
+        string? AwakenBonus = null,
+        IReadOnlyList<string>? Sources = null);
 }
