@@ -51,7 +51,7 @@ export function ArtifactTable({ wizardId, artifacts, filters, onSort }: Props) {
         </thead>
         <tbody>
           {artifacts.map((item) => {
-            const { artifact, equippedOn, locked, tags } = item
+            const { artifact, equippedOn, locked, tags, lockedByMonster } = item
             return (
               <tr key={artifact.artifactId} className="border-b align-top last:border-0 hover:bg-muted/40">
                 <td className={cn('py-2 pr-3 font-medium whitespace-nowrap', RARITY_TEXT_CLASSES[artifact.originalRarity])}>
@@ -89,7 +89,14 @@ export function ArtifactTable({ wizardId, artifacts, filters, onSort }: Props) {
                   )}
                 </td>
                 <td className="py-2 pr-3">
-                  <MarkCell wizardId={wizardId} kind="Artifact" itemId={artifact.artifactId} locked={locked} tags={tags} />
+                  <MarkCell
+                    wizardId={wizardId}
+                    kind="Artifact"
+                    itemId={artifact.artifactId}
+                    locked={locked}
+                    tags={tags}
+                    lockedByMonster={lockedByMonster}
+                  />
                 </td>
               </tr>
             )

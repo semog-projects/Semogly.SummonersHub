@@ -65,6 +65,20 @@ describe('ImportCard', () => {
     expect(JSON.parse(init.body).wizard.id).toBe(12345678)
   })
 
+  it('opção de ignorar monstros sem equipamento mantém os equipados no envio', async () => {
+    const fetchMock = mockFetch(201, { snapshotId: 'x', wizardId: 12345678, version: 1, created: true })
+    renderCard()
+    selectFile(sampleText)
+
+    fireEvent.click(await screen.findByLabelText('Ignorar monstros sem runas nem artefatos'))
+    expect(screen.getByLabelText('Estrelas dos ignorados')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }))
+
+    await screen.findByRole('status')
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string)
+    expect(body.monsters).toHaveLength(2)
+  })
+
   it('avisa quando o conteúdo já tinha sido importado', async () => {
     mockFetch(200, { snapshotId: 'x', wizardId: 12345678, version: 3, created: false })
     renderCard()

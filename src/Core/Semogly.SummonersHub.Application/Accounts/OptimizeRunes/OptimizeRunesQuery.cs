@@ -104,14 +104,14 @@ internal sealed class OptimizeRunesQueryHandler(
             equippedMonsterId == monster.GameId
             || (!locked && (equippedMonsterId is null || request.IncludeEquippedOnOthers));
 
-        var pool = snapshot.Runes.Where(r => Available(r.EquippedMonsterId, lookup.IsLocked(r)));
+        var pool = snapshot.Runes.Where(r => Available(r.EquippedMonsterId, lookup.IsEffectivelyLocked(r)));
 
         var currentArtifacts = snapshot.Artifacts.Where(a => a.EquippedMonsterId == monster.GameId).ToList();
         var artifacts = request.OptimizeArtifacts
             ? RuneOptimizer.BestArtifacts(
                 monster,
                 catalog.Find(monster.MasterId)?.Archetype,
-                snapshot.Artifacts.Where(a => Available(a.EquippedMonsterId, lookup.IsLocked(a))),
+                snapshot.Artifacts.Where(a => Available(a.EquippedMonsterId, lookup.IsEffectivelyLocked(a))),
                 request.Focus,
                 request.Weights)
             : currentArtifacts;
@@ -145,10 +145,10 @@ internal sealed class OptimizeRunesQueryHandler(
     }
 
     private static RuneListItem ToItem(Rune rune, Dictionary<long, EquippedMonster> monsters, InventoryMarkLookup lookup) =>
-        new(EquipmentDetails.ToDetail(rune), rune.EquippedMonsterId is { } id ? monsters[id] : null, lookup.IsLocked(rune), lookup.TagsOf(rune));
+        new(EquipmentDetails.ToDetail(rune), rune.EquippedMonsterId is { } id ? monsters[id] : null, lookup.IsLocked(rune), lookup.TagsOf(rune), lookup.IsLockedByMonster(rune.EquippedMonsterId));
 
     private static ArtifactListItem ToItem(Artifact artifact, Dictionary<long, EquippedMonster> monsters, InventoryMarkLookup lookup) =>
-        new(EquipmentDetails.ToDetail(artifact), artifact.EquippedMonsterId is { } id ? monsters[id] : null, lookup.IsLocked(artifact), lookup.TagsOf(artifact));
+        new(EquipmentDetails.ToDetail(artifact), artifact.EquippedMonsterId is { } id ? monsters[id] : null, lookup.IsLocked(artifact), lookup.TagsOf(artifact), lookup.IsLockedByMonster(artifact.EquippedMonsterId));
 
     private static Error? Validate(OptimizeRunesRequest request)
     {

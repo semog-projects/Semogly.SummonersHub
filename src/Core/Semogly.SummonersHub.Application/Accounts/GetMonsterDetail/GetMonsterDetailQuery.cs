@@ -25,13 +25,15 @@ public sealed record MonsterDetailResponse(
     IReadOnlyList<MonsterSkill> Skills,
     IReadOnlyList<RuneDetail> Runes,
     IReadOnlyList<ArtifactDetail> Artifacts,
-    decimal? AverageRuneEfficiency);
+    decimal? AverageRuneEfficiency,
+    bool Locked = false);
 
 internal sealed class GetMonsterDetailQueryHandler(
     IAccountSnapshotRepository repository,
     IWizardAccountRepository wizardAccounts,
     IUserContext userContext,
-    IMonsterCatalog catalog) : IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse>
+    IMonsterCatalog catalog,
+    IInventoryMarkRepository marks) : IQueryHandler<GetMonsterDetailQuery, MonsterDetailResponse>
 {
     public async Task<Result<MonsterDetailResponse>> HandleAsync(GetMonsterDetailQuery query, CancellationToken cancellationToken)
     {
@@ -47,7 +49,8 @@ internal sealed class GetMonsterDetailQueryHandler(
             return AccountErrors.MonsterNotFound(query.MonsterId);
         }
 
-        return MonsterDetailBuilder.Build(result.Value, monster, catalog);
+        var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
+        return MonsterDetailBuilder.Build(result.Value, monster, catalog) with { Locked = lookup.IsMonsterLocked(monster.GameId) };
     }
 }
 

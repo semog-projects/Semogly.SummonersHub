@@ -17,12 +17,24 @@ import { cn } from '@/lib/utils'
 import { ELEMENT_TEXT_CLASSES, RARITY_TEXT_CLASSES } from '../overview/elementStyles'
 import type { ArtifactDetail, MonsterDetail } from '../types'
 import { efficiencyClass } from '../runes/efficiency'
+import { MonsterLockButton } from '../marks/MonsterLockButton'
 import { RuneCard } from '../runes/RuneCard'
 import { MonsterIcon } from './MonsterIcon'
 import { STAT_COLUMNS } from './statColumns'
 
-/** @param readOnly Esconde as ações da conta (otimizar, calcular dano), como na build compartilhada. */
-export function MonsterDetailView({ monster, readOnly = false }: { monster: MonsterDetail; readOnly?: boolean }) {
+/**
+ * @param readOnly Esconde as ações da conta (bloquear, otimizar, calcular dano), como na build compartilhada.
+ * @param wizardId Invocador do monstro, para as ações da conta.
+ */
+export function MonsterDetailView({
+  monster,
+  readOnly = false,
+  wizardId,
+}: {
+  monster: MonsterDetail
+  readOnly?: boolean
+  wizardId?: number
+}) {
   const { data: definitions } = useMonsterDefinitions([monster.masterId])
   const runesBySlot = new Map(monster.runes.map((rune) => [rune.slot, rune]))
 
@@ -58,6 +70,9 @@ export function MonsterDetailView({ monster, readOnly = false }: { monster: Mons
           ))}
           {!readOnly && (
             <>
+              {wizardId !== undefined && (
+                <MonsterLockButton wizardId={wizardId} monsterId={monster.monsterId} locked={monster.locked ?? false} withLabel />
+              )}
               <Link to="otimizar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
                 <Sparkles aria-hidden /> Otimizar runas
               </Link>

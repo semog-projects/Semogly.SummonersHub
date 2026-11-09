@@ -26,13 +26,15 @@ public sealed record MonsterListItem(
     IReadOnlyList<RuneSet> ActiveSets,
     int Runes,
     int Artifacts,
-    decimal? AverageRuneEfficiency);
+    decimal? AverageRuneEfficiency,
+    bool Locked = false);
 
 internal sealed class ListMonstersQueryHandler(
     IAccountSnapshotRepository repository,
     IWizardAccountRepository wizardAccounts,
     IUserContext userContext,
-    IMonsterCatalog catalog) : IQueryHandler<ListMonstersQuery, IReadOnlyList<MonsterListItem>>
+    IMonsterCatalog catalog,
+    IInventoryMarkRepository marks) : IQueryHandler<ListMonstersQuery, IReadOnlyList<MonsterListItem>>
 {
     public async Task<Result<IReadOnlyList<MonsterListItem>>> HandleAsync(ListMonstersQuery query, CancellationToken cancellationToken)
     {
@@ -43,6 +45,7 @@ internal sealed class ListMonstersQueryHandler(
         }
 
         var equipment = new EquipmentIndex(result.Value);
+        var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
 
         return result.Value.Monsters
             .Select(monster =>
@@ -62,7 +65,8 @@ internal sealed class ListMonstersQueryHandler(
                     stats.ActiveSets,
                     equipment.RunesOf(monster.GameId).Count(),
                     equipment.ArtifactsOf(monster.GameId).Count(),
-                    equipment.AverageRuneEfficiencyOf(monster.GameId));
+                    equipment.AverageRuneEfficiencyOf(monster.GameId),
+                    lookup.IsMonsterLocked(monster.GameId));
             })
             .OrderByDescending(m => m.Stars)
             .ThenByDescending(m => m.Level)

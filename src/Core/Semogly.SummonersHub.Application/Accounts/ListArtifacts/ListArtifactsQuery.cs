@@ -12,7 +12,8 @@ public sealed record ListArtifactsQuery(long WizardId) : IQuery<IReadOnlyList<Ar
 /// <param name="EquippedOn">Nulo quando o artefato está no inventário.</param>
 /// <param name="Locked">Bloqueado pelo usuário: o otimizador não o tira de quem o usa.</param>
 /// <param name="Tags">Tags do usuário.</param>
-public sealed record ArtifactListItem(ArtifactDetail Artifact, EquippedMonster? EquippedOn, bool Locked, IReadOnlyList<string> Tags);
+/// <param name="LockedByMonster">Equipado num monstro bloqueado (conta como bloqueado para o otimizador).</param>
+public sealed record ArtifactListItem(ArtifactDetail Artifact, EquippedMonster? EquippedOn, bool Locked, IReadOnlyList<string> Tags, bool LockedByMonster = false);
 
 internal sealed class ListArtifactsQueryHandler(
     IAccountSnapshotRepository repository,
@@ -41,7 +42,8 @@ internal sealed class ListArtifactsQueryHandler(
                 EquipmentDetails.ToDetail(artifact),
                 artifact.EquippedMonsterId is { } id ? monsters[id] : null,
                 lookup.IsLocked(artifact),
-                lookup.TagsOf(artifact)))
+                lookup.TagsOf(artifact),
+                lookup.IsLockedByMonster(artifact.EquippedMonsterId)))
             .ToList();
     }
 }

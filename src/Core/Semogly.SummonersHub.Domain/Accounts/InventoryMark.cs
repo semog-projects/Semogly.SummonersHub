@@ -6,6 +6,9 @@ public enum InventoryItemKind
 {
     Rune = 1,
     Artifact = 2,
+
+    /// <summary>Monstro bloqueado: as runas e artefatos equipados nele contam como bloqueados.</summary>
+    Monster = 3,
 }
 
 /// <summary>
@@ -40,7 +43,7 @@ public sealed class InventoryMark
 
     public InventoryItemKind Kind { get; private set; }
 
-    /// <summary>Id da runa (<c>rune_id</c>) ou do artefato (<c>rid</c>) no jogo.</summary>
+    /// <summary>Id da runa (<c>rune_id</c>), do artefato (<c>rid</c>) ou do monstro (<c>unit_id</c>) no jogo.</summary>
     public long ItemId { get; private set; }
 
     /// <summary>Item reservado: o otimizador não o tira de quem já o usa.</summary>

@@ -10,10 +10,12 @@ interface Props {
   itemId: number
   locked: boolean
   tags: string[]
+  /** Equipado num monstro bloqueado. */
+  lockedByMonster?: boolean
 }
 
 /** Cadeado (alterna o bloqueio) e as tags do item, na linha da tabela. */
-export function MarkCell({ wizardId, kind, itemId, locked, tags }: Props) {
+export function MarkCell({ wizardId, kind, itemId, locked, tags, lockedByMonster = false }: Props) {
   const update = useUpdateMarks(wizardId)
   const item = kind === 'Rune' ? 'runa' : 'artefato'
   const Icon = locked ? Lock : LockOpen
@@ -34,6 +36,11 @@ export function MarkCell({ wizardId, kind, itemId, locked, tags }: Props) {
       >
         <Icon className="size-4" aria-hidden />
       </button>
+      {lockedByMonster && !locked && (
+        <span className="text-[10px] text-amber-400" title="Equipado num monstro bloqueado">
+          pelo monstro
+        </span>
+      )}
       {tags.map((tag) => (
         <Badge key={tag} variant="outline" className="text-[10px]">
           {tag}
