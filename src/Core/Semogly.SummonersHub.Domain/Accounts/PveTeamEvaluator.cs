@@ -82,6 +82,7 @@ public static class PveTeamEvaluator
         PveStat.CriticalDamage => stats.CriticalDamage,
         PveStat.Resistance => stats.Resistance,
         PveStat.Accuracy => stats.Accuracy,
+        PveStat.EffectiveHp => stats.EffectiveHp,
         _ => throw new ArgumentOutOfRangeException(nameof(stat), stat, null),
     };
 }

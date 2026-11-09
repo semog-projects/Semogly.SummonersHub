@@ -129,6 +129,74 @@ public class RuneOptimizerTests
         Assert.All(builds[0].Runes, r => Assert.Equal(8, r.Substats[0].Value));
     }
 
+    [Theory]
+    [InlineData(PveStat.Speed, true)]
+    [InlineData(PveStat.Hp, false)]
+    public void Weights_ShouldDecideBetweenFocusStats(PveStat heavier, bool expectSpeedRune)
+    {
+        // Slot 6: VEL +20 (20% da base 100) ou HP +30% (30% da base): com pesos iguais o HP ganha
+        Rune[] pool =
+        [
+            .. Enumerable.Range(1, 5).Select(slot => NewRune(slot, RuneSet.Swift, speed: 0)),
+            NewRune(6, RuneSet.Violent, speed: 20),
+            NewRune(6, RuneSet.Violent, speed: 0, hpPercent: 30),
+        ];
+        var request = Request([RuneSet.Swift], [PveStat.Speed, PveStat.Hp]) with
+        {
+            Weights = new Dictionary<PveStat, decimal> { [heavier] = 5 },
+        };
+
+        var slot6 = RuneOptimizer.Optimize(Monster, [], pool, request)[0].Runes.Single(r => r.Slot == 6);
+
+        Assert.Equal(expectSpeedRune, slot6.Substats.Any(s => s.Stat == RuneStat.Speed));
+    }
+
+    [Fact]
+    public void Maximums_ShouldDiscardBuildsAboveTheCap()
+    {
+        var pool = Enumerable.Range(1, 6)
+            .SelectMany(slot => new[] { NewRune(slot, RuneSet.Swift, speed: 5), NewRune(slot, RuneSet.Swift, speed: 10) })
+            .ToArray();
+        var request = Request([RuneSet.Swift], [PveStat.Speed]) with { Maximums = [new StatCap(PveStat.Speed, 160)] };
+
+        var builds = RuneOptimizer.Optimize(Monster, [], pool, request);
+
+        // 100 + 25 do Swift + subs: o teto de 160 permite no máximo 35 de VEL nas subs
+        Assert.NotEmpty(builds);
+        Assert.All(builds, b => Assert.True(b.Stats.Total.Speed <= 160));
+        Assert.Equal(160, builds[0].Stats.Total.Speed);
+    }
+
+    [Fact]
+    public void EffectiveHp_ShouldWorkAsFocusAndMinimum()
+    {
+        // Slot 6: DEF +40% ou VEL +20; com foco em HP efetivo, a de DEF ganha
+        Rune[] pool =
+        [
+            .. Enumerable.Range(1, 5).Select(slot => NewRune(slot, RuneSet.Swift, speed: 10)),
+            NewRune(6, RuneSet.Violent, speed: 20),
+            NewRune(6, RuneSet.Violent, speed: 0, main: RuneStat.DefensePercent, mainValue: 40),
+        ];
+
+        var tank = RuneOptimizer.Optimize(Monster, [], pool, Request([RuneSet.Swift], [PveStat.EffectiveHp]))[0];
+        Assert.Equal(RuneStat.DefensePercent, tank.Runes.Single(r => r.Slot == 6).MainStat.Stat);
+
+        // Pedindo o HP efetivo da build com DEF, a de VEL deixa de servir mesmo com foco em VEL
+        var withMinimum = RuneOptimizer.Optimize(
+            Monster, [], pool,
+            Request([RuneSet.Swift], [PveStat.Speed]) with { Minimums = [new StatRequirement(PveStat.EffectiveHp, tank.Stats.Total.EffectiveHp)] })[0];
+        Assert.Equal(tank.Stats.Total.EffectiveHp, withMinimum.Stats.Total.EffectiveHp);
+    }
+
+    [Fact]
+    public void Score_ShouldApplyWeights()
+    {
+        var total = new StatValues(10000, 700, 600, 200, 50, 100, 15, 0);
+
+        Assert.Equal(200m, RuneOptimizer.Score(total, Monster.BaseStats, [PveStat.Speed]));
+        Assert.Equal(400m, RuneOptimizer.Score(total, Monster.BaseStats, [PveStat.Speed], new Dictionary<PveStat, decimal> { [PveStat.Speed] = 2 }));
+    }
+
     [Fact]
     public void LargeAccount_ShouldFinishQuickly()
     {

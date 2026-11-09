@@ -19,6 +19,8 @@ public sealed record OptimizeRunesQuery(long WizardId, long MonsterId, OptimizeR
 /// <param name="IncludeEquippedOnOthers">Também usa runas equipadas em outros monstros.</param>
 /// <param name="AssumeMaxLevel">Calcula cada runa em +15: principal no máximo e subs pelo ganho médio esperado.</param>
 /// <param name="OptimizeArtifacts">Troca os artefatos pelos compatíveis cujo principal mais ajuda o foco.</param>
+/// <param name="Maximums">Atributos totais máximos.</param>
+/// <param name="Weights">Peso de cada atributo de foco (0,1 a 10); os ausentes valem 1.</param>
 public sealed record OptimizeRunesRequest(
     IReadOnlyList<RuneSet> Sets,
     IReadOnlyDictionary<int, IReadOnlyList<int>>? MainStats,
@@ -26,7 +28,14 @@ public sealed record OptimizeRunesRequest(
     IReadOnlyList<StatRequirement>? Minimums,
     bool IncludeEquippedOnOthers,
     bool AssumeMaxLevel,
-    bool OptimizeArtifacts = false);
+    bool OptimizeArtifacts = false,
+    IReadOnlyList<StatCap>? Maximums = null,
+    IReadOnlyDictionary<PveStat, decimal>? Weights = null)
+{
+    public const decimal MinWeight = 0.1m;
+
+    public const decimal MaxWeight = 10;
+}
 
 /// <param name="Current">Build atual do monstro, para comparação.</param>
 public sealed record OptimizeRunesResponse(OptimizedBuildResult Current, IReadOnlyList<OptimizedBuildResult> Builds);
@@ -74,7 +83,9 @@ internal sealed class OptimizeRunesQueryHandler(
                 .ToDictionary(e => e.Key, e => (IReadOnlyList<RuneStat>)[.. e.Value.Select(code => (RuneStat)code)]),
             request.Focus,
             request.Minimums ?? [],
-            request.AssumeMaxLevel);
+            request.AssumeMaxLevel,
+            Maximums: request.Maximums,
+            Weights: request.Weights);
 
         bool Available(long? equippedMonsterId) =>
             equippedMonsterId is null || equippedMonsterId == monster.GameId || request.IncludeEquippedOnOthers;
@@ -87,7 +98,8 @@ internal sealed class OptimizeRunesQueryHandler(
                 monster,
                 catalog.Find(monster.MasterId)?.Archetype,
                 snapshot.Artifacts.Where(a => Available(a.EquippedMonsterId)),
-                request.Focus)
+                request.Focus,
+                request.Weights)
             : currentArtifacts;
 
         // O cálculo só considera artefatos equipados no monstro: os escolhidos entram como cópias equipadas nele
@@ -102,7 +114,7 @@ internal sealed class OptimizeRunesQueryHandler(
         var currentStats = equipment.StatsOf(monster);
 
         var current = new OptimizedBuildResult(
-            RuneOptimizer.Score(currentStats.Total, monster.BaseStats, request.Focus),
+            RuneOptimizer.Score(currentStats.Total, monster.BaseStats, request.Focus, request.Weights),
             currentStats.Total,
             currentStats.ActiveSets,
             [.. equipment.RunesOf(monster.GameId).OrderBy(r => r.Slot).Select(r => ToItem(r, monsters))],
@@ -139,6 +151,19 @@ internal sealed class OptimizeRunesQueryHandler(
         if (request.Sets.Sum(s => s.RequiredPieces()) > 6)
         {
             return AccountErrors.InvalidOptimization("Os sets pedidos precisam de mais de 6 runas.");
+        }
+
+        if (request.Weights is { } weights
+            && weights.Any(w => !request.Focus.Contains(w.Key) || w.Value < OptimizeRunesRequest.MinWeight || w.Value > OptimizeRunesRequest.MaxWeight))
+        {
+            return AccountErrors.InvalidOptimization(
+                $"Os pesos devem ser de atributos do foco, entre {OptimizeRunesRequest.MinWeight} e {OptimizeRunesRequest.MaxWeight}.");
+        }
+
+        if (request.Maximums is { } maximums
+            && maximums.Any(max => (request.Minimums ?? []).Any(min => min.Stat == max.Stat && min.Min > max.Max)))
+        {
+            return AccountErrors.InvalidOptimization("O máximo de um atributo não pode ser menor que o mínimo.");
         }
 
         if (request.MainStats is { } mainStats
