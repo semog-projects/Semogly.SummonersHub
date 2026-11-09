@@ -25,6 +25,8 @@ public sealed class SummonersHubDbContext(DbContextOptions<SummonersHubDbContext
 
     public DbSet<SharedBuild> SharedBuilds => Set<SharedBuild>();
 
+    public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)

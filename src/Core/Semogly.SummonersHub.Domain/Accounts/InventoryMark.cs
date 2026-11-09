@@ -107,6 +107,9 @@ public interface IInventoryMarkRepository
     /// <summary>Marcações do invocador, de um tipo de item.</summary>
     Task<List<InventoryMark>> ListAsync(long wizardId, InventoryItemKind kind, CancellationToken cancellationToken);
 
+    /// <summary>Todas as marcações dos invocadores informados.</summary>
+    Task<List<InventoryMark>> ListByWizardsAsync(IReadOnlyCollection<long> wizardIds, CancellationToken cancellationToken);
+
     void Add(InventoryMark mark);
 
     void Remove(InventoryMark mark);

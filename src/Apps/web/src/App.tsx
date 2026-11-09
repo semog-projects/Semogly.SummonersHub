@@ -3,6 +3,7 @@ import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { useCurrentUser } from '@/features/auth/useAuth'
 import { UserMenu } from '@/features/auth/UserMenu'
+import { ThemeController } from '@/features/settings/ThemeController'
 import { cn } from '@/lib/utils'
 import { AccountLayout } from '@/pages/AccountLayout'
 import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
@@ -20,11 +21,13 @@ import { PveTeamsPage } from '@/pages/PveTeamsPage'
 import { RuneListPage } from '@/pages/RuneListPage'
 import { SharedBuildPage } from '@/pages/SharedBuildPage'
 import { RuneOptimizerPage } from '@/pages/RuneOptimizerPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 import { SpeedTunePage } from '@/pages/SpeedTunePage'
 
 export function App() {
   return (
     <div className="min-h-svh bg-background text-foreground">
+      <ThemeController />
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-6">
@@ -57,6 +60,7 @@ export function App() {
             <Route path="speed-tune" element={<SpeedTunePage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />
+          <Route path="/configuracoes" element={<Protected><SettingsPage /></Protected>} />
         </Routes>
       </main>
     </div>
@@ -83,6 +87,9 @@ function MainNav() {
       </NavLink>
       <NavLink to="/importar" className={linkClass}>
         Importar
+      </NavLink>
+      <NavLink to="/configuracoes" className={linkClass}>
+        Configurações
       </NavLink>
     </nav>
   )

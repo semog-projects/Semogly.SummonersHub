@@ -29,6 +29,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IInventoryMarkRepository, InventoryMarkRepository>();
         builder.Services.AddScoped<IOptimizerPresetRepository, OptimizerPresetRepository>();
         builder.Services.AddScoped<ISharedBuildRepository, SharedBuildRepository>();
+        builder.Services.AddScoped<IUserPreferencesRepository, UserPreferencesRepository>();
         builder.Services.AddScoped<IAccountReadService, AccountReadService>();
         builder.Services.AddScoped<IAccountReadServiceForShares, AccountReadService>();
         builder.Services.AddSingleton<IMonsterCatalog, EmbeddedMonsterCatalog>();
