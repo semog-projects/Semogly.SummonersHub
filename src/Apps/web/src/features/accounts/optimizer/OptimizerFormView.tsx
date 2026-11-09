@@ -5,9 +5,12 @@ import { cn } from '@/lib/utils'
 import { Chip, SelectFilter } from '../shared/filterControls'
 import { controlClass } from '../shared/filterStyles'
 import {
+  conflictingLimits,
   MAIN_STATS_BY_SLOT,
   mainStatLabel,
   MAX_FOCUS,
+  MAX_WEIGHT,
+  MIN_WEIGHT,
   OPTIMIZER_SETS,
   OPTIMIZER_STATS,
   requiredPieces,
@@ -26,7 +29,8 @@ interface Props {
 export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) {
   const update = (patch: Partial<OptimizerForm>) => onChange({ ...form, ...patch })
   const pieces = requiredPieces(form.sets)
-  const invalid = pieces > 6 || form.focus.length === 0
+  const conflicts = conflictingLimits(form)
+  const invalid = pieces > 6 || form.focus.length === 0 || conflicts.length > 0
 
   function toggleFocus(stat: OptimizerForm['focus'][number]) {
     const focus = form.focus.includes(stat) ? form.focus.filter((s) => s !== stat) : [...form.focus, stat]
@@ -79,7 +83,7 @@ export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) 
 
           <fieldset className="space-y-2">
             <legend className="text-sm font-medium">
-              Foco <span className="font-normal text-muted-foreground">(até {MAX_FOCUS}, mesmo peso)</span>
+              Foco <span className="font-normal text-muted-foreground">(até {MAX_FOCUS}; peso de {MIN_WEIGHT} a {MAX_WEIGHT})</span>
             </legend>
             <div role="group" aria-label="Foco" className="flex flex-wrap gap-1">
               {OPTIMIZER_STATS.map(({ stat, label }) => (
@@ -88,16 +92,36 @@ export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) 
                 </Chip>
               ))}
             </div>
+            {form.focus.length > 0 && (
+              <div className="flex flex-wrap gap-3">
+                {OPTIMIZER_STATS.filter(({ stat }) => form.focus.includes(stat)).map(({ stat, label }) => (
+                  <label key={stat} className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Peso {label}</span>
+                    <input
+                      type="number"
+                      min={MIN_WEIGHT}
+                      max={MAX_WEIGHT}
+                      step="any"
+                      placeholder="1"
+                      aria-label={`Peso de ${label}`}
+                      value={form.weights[stat] ?? ''}
+                      onChange={(event) => update({ weights: { ...form.weights, [stat]: event.target.value } })}
+                      className={cn(controlClass, 'w-16')}
+                    />
+                  </label>
+                ))}
+              </div>
+            )}
           </fieldset>
 
           <fieldset className="space-y-2">
             <legend className="text-sm font-medium">
-              Mínimos <span className="font-normal text-muted-foreground">(atributos totais)</span>
+              Mínimos e máximos <span className="font-normal text-muted-foreground">(atributos totais)</span>
             </legend>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
               {OPTIMIZER_STATS.map(({ stat, label, percent }) => (
-                <label key={stat} className="flex items-center gap-2 text-sm">
-                  <span className="w-20 shrink-0 text-muted-foreground">
+                <div key={stat} className="flex items-center gap-2 text-sm">
+                  <span className={cn('w-20 shrink-0 text-muted-foreground', conflicts.includes(stat) && 'text-destructive')}>
                     {label}
                     {percent && ' %'}
                   </span>
@@ -105,14 +129,30 @@ export function OptimizerFormView({ form, onChange, onSubmit, pending }: Props) 
                     type="number"
                     min={0}
                     inputMode="numeric"
+                    placeholder="mín."
                     aria-label={`Mínimo de ${label}`}
                     value={form.minimums[stat] ?? ''}
                     onChange={(event) => update({ minimums: { ...form.minimums, [stat]: event.target.value } })}
                     className={cn(controlClass, 'w-full min-w-0')}
                   />
-                </label>
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    placeholder="máx."
+                    aria-label={`Máximo de ${label}`}
+                    value={form.maximums[stat] ?? ''}
+                    onChange={(event) => update({ maximums: { ...form.maximums, [stat]: event.target.value } })}
+                    className={cn(controlClass, 'w-full min-w-0')}
+                  />
+                </div>
               ))}
             </div>
+            {conflicts.length > 0 && (
+              <p role="alert" className="text-xs text-destructive">
+                O máximo não pode ser menor que o mínimo.
+              </p>
+            )}
           </fieldset>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
