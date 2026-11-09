@@ -27,6 +27,7 @@ internal sealed class AccountSnapshotConfiguration : IEntityTypeConfiguration<Ac
         builder.HasMany(s => s.Runes).WithOne().HasForeignKey(SnapshotChild.ForeignKey).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(s => s.Artifacts).WithOne().HasForeignKey(SnapshotChild.ForeignKey).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(s => s.CraftItems).WithOne().HasForeignKey(SnapshotChild.ForeignKey).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(s => s.Builds).WithOne().HasForeignKey(SnapshotChild.ForeignKey).OnDelete(DeleteBehavior.Cascade);
     }
 }
 
@@ -78,6 +79,20 @@ internal sealed class ArtifactConfiguration : IEntityTypeConfiguration<Artifact>
 
         builder.OwnsOne(a => a.MainStat, main => main.Property(m => m.Value).HasPrecision(10, 2));
         builder.OwnsMany(a => a.Substats, substats => substats.ToJson());
+    }
+}
+
+/// <summary>Builds de RTA/Siege/Arena: só os ids dos itens, em colunas bigint[].</summary>
+internal sealed class AlternativeBuildConfiguration : IEntityTypeConfiguration<AlternativeBuild>
+{
+    public void Configure(EntityTypeBuilder<AlternativeBuild> builder)
+    {
+        builder.ToTable("AlternativeBuilds");
+        builder.HasKey(SnapshotChild.ForeignKey, nameof(AlternativeBuild.MonsterId), nameof(AlternativeBuild.Kind), nameof(AlternativeBuild.DeckId));
+        builder.Property(b => b.MonsterId).ValueGeneratedNever();
+        builder.Property(b => b.Kind).HasConversion<string>().HasMaxLength(10);
+        builder.Property(b => b.DeckId).ValueGeneratedNever();
+        builder.Ignore(b => b.Key);
     }
 }
 

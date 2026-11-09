@@ -28,7 +28,8 @@ public sealed record MonsterListItem(
     int Artifacts,
     decimal? AverageRuneEfficiency,
     bool Locked = false,
-    bool IsManual = false);
+    bool IsManual = false,
+    IReadOnlyList<BuildKind>? BuildKinds = null);
 
 internal sealed class ListMonstersQueryHandler(
     IAccountSnapshotRepository repository,
@@ -68,7 +69,8 @@ internal sealed class ListMonstersQueryHandler(
                     equipment.ArtifactsOf(monster.GameId).Count(),
                     equipment.AverageRuneEfficiencyOf(monster.GameId),
                     lookup.IsMonsterLocked(monster.GameId),
-                    ManualItem.IsManual(monster.GameId));
+                    ManualItem.IsManual(monster.GameId),
+                    [.. equipment.BuildsOf(monster.GameId).Select(b => b.Kind).Distinct()]);
             })
             .OrderByDescending(m => m.Stars)
             .ThenByDescending(m => m.Level)

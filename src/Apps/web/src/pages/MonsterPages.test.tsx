@@ -161,5 +161,40 @@ describe('MonsterDetailPage', () => {
     const artifact = screen.getByLabelText('Artefato de elemento água')
     expect(artifact).toHaveTextContent('ATK +100')
     expect(artifact).toHaveTextContent('Dano adicional de 31% da VEL')
+    expect(screen.queryByRole('group', { name: 'Build' })).not.toBeInTheDocument()
+  })
+
+  it('troca para a build de RTA pela URL', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.includes('game-data') || url.endsWith('/shares')) return new Response('[]', { status: 200 })
+      const build = new URL(url, 'http://localhost').searchParams.get('build')
+      const body: MonsterDetail = {
+        ...detail,
+        total: { ...detail.total, speed: build ? 180 : 151 },
+        builds: [{ key: 'rta', kind: 'Rta', number: 0 }, { key: 'siege-9', kind: 'Siege', number: 2 }],
+        selectedBuild: build,
+      }
+      return new Response(JSON.stringify(body), { status: 200 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={['/contas/1/monstros/11']}>
+          <Routes>
+            <Route path="/contas/:wizardId/monstros/:monsterId" element={<MonsterDetailPage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    const group = await screen.findByRole('group', { name: 'Build' })
+    expect(within(group).getByRole('button', { name: 'Normal' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(group).getByRole('button', { name: 'Siege · defesa 2' })).toBeInTheDocument()
+
+    fireEvent.click(within(group).getByRole('button', { name: 'RTA' }))
+
+    expect(await screen.findByRole('button', { name: 'RTA', pressed: true })).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/monsters/11?build=rta'), expect.anything())
   })
 })

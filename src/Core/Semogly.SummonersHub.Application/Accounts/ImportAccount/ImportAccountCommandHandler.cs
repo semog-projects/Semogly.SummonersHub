@@ -55,7 +55,8 @@ internal sealed class ImportAccountCommandHandler(
             command.Monsters.Select(ToMonster),
             command.Runes.Select(ToRune),
             command.Artifacts.Select(ToArtifact),
-            command.CraftItems.Select(c => new CraftItem(c.Id, (CraftItemType)c.CraftType, c.CraftTypeId, c.Amount)));
+            command.CraftItems.Select(c => new CraftItem(c.Id, (CraftItemType)c.CraftType, c.CraftTypeId, c.Amount)),
+            (command.Builds ?? []).Select(b => new AlternativeBuild(b.MonsterId, (BuildKind)b.Kind, b.DeckId, b.RuneIds, b.ArtifactIds)));
 
         repository.Add(snapshot);
         await unitOfWork.SaveChangesAsync(cancellationToken);

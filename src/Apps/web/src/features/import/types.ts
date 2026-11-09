@@ -11,6 +11,20 @@ export interface AccountImport {
   runes: Rune[]
   artifacts: Artifact[]
   craftItems: CraftItem[]
+  /** Builds de RTA e das defesas de Siege e Arena (só ids de itens já enviados acima). */
+  builds?: AlternativeBuild[]
+}
+
+/** 1 = RTA, 2 = defesa de Siege, 3 = defesa da Arena. */
+export type BuildKindCode = 1 | 2 | 3
+
+export interface AlternativeBuild {
+  monsterId: number
+  kind: BuildKindCode
+  /** Id do deck de Siege; 0 nos demais modos. */
+  deckId: number
+  runeIds: number[]
+  artifactIds: number[]
 }
 
 export interface Wizard {

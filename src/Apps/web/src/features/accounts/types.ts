@@ -87,6 +87,19 @@ export interface MonsterListItem {
   locked?: boolean
   /** Criado à mão (id negativo), fora do import. */
   isManual?: boolean
+  /** Modos em que o monstro tem build própria (RTA, defesa de Siege, defesa da Arena). */
+  buildKinds?: BuildKindName[]
+}
+
+export type BuildKindName = 'Rta' | 'Siege' | 'Arena'
+
+/** Build de RTA/Siege/Arena disponível no detalhe do monstro. */
+export interface MonsterBuildOption {
+  /** Valor de ?build= (rta, arena, siege-{deck}). */
+  key: string
+  kind: BuildKindName
+  /** Número da defesa de Siege na conta; 0 nos demais modos. */
+  number: number
 }
 
 /** Atributo com o código numérico do jogo (mesma tabela de rótulos do import). */
@@ -132,6 +145,9 @@ export interface MonsterDetail extends Omit<MonsterListItem, 'total' | 'runes' |
   skills: Array<{ skillId: number; level: number }>
   runes: RuneDetail[]
   artifacts: ArtifactDetail[]
+  builds?: MonsterBuildOption[]
+  /** Build exibida; nula = build normal. */
+  selectedBuild?: string | null
 }
 
 export interface RuneSetStats {
@@ -390,6 +406,8 @@ export interface OptimizeRunesRequest {
   teamSets: string[]
   /** Considera trocar uma sub de cada runa por uma gem lendária. */
   simulateGems: boolean
+  /** Build comparada e mantida nos artefatos (rta, arena, siege-{deck}); ausente = build normal. */
+  compareWith?: string | null
 }
 
 /** Gem simulada: na runa, a sub `from` vira `to` (códigos do jogo) com `value`. */

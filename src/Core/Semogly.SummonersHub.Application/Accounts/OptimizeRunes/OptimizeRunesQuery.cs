@@ -24,6 +24,7 @@ public sealed record OptimizeRunesQuery(long WizardId, long MonsterId, OptimizeR
 /// <param name="SimulateGrinds">Considera o grind lendário máximo em cada sub grindável.</param>
 /// <param name="TeamSets">Sets de equipe do time (Fight, Determination, Enhance, Accuracy, Tolerance), um por set completo.</param>
 /// <param name="SimulateGems">Considera trocar uma sub de cada runa por uma gem lendária.</param>
+/// <param name="CompareWith">Build usada na comparação e mantida nos artefatos (<c>rta</c>, <c>arena</c>, <c>siege-{deck}</c>); nula = build normal.</param>
 public sealed record OptimizeRunesRequest(
     IReadOnlyList<RuneSet> Sets,
     IReadOnlyDictionary<int, IReadOnlyList<int>>? MainStats,
@@ -36,7 +37,8 @@ public sealed record OptimizeRunesRequest(
     IReadOnlyDictionary<PveStat, decimal>? Weights = null,
     bool SimulateGrinds = false,
     IReadOnlyList<RuneSet>? TeamSets = null,
-    bool SimulateGems = false)
+    bool SimulateGems = false,
+    string? CompareWith = null)
 {
     /// <summary>Sets de equipe informados (o time tem no máximo 5 monstros com até 3 sets cada).</summary>
     public const int MaxTeamSets = 15;
@@ -92,6 +94,18 @@ internal sealed class OptimizeRunesQueryHandler(
         }
 
         var request = query.Request;
+        var equipment = new EquipmentIndex(snapshot);
+        var compared = equipment.FindBuild(monster.GameId, request.CompareWith);
+        if (request.CompareWith is not null && compared is null)
+        {
+            return AccountErrors.BuildNotFound(request.CompareWith);
+        }
+
+        var currentRunes = equipment.RunesOf(monster.GameId, compared);
+        var currentArtifacts = equipment.ArtifactsOf(monster.GameId, compared);
+        var currentRuneIds = currentRunes.Select(r => r.GameId).ToHashSet();
+        var currentArtifactIds = currentArtifacts.Select(a => a.GameId).ToHashSet();
+
         var optimizerRequest = new OptimizerRequest(
             request.Sets,
             (request.MainStats ?? new Dictionary<int, IReadOnlyList<int>>())
@@ -107,19 +121,18 @@ internal sealed class OptimizeRunesQueryHandler(
 
         var lookup = await InventoryMarkLookup.LoadAsync(marks, query.WizardId, cancellationToken);
 
-        // Itens bloqueados ficam com quem os usa: só entram se já estiverem no próprio monstro
+        // Itens bloqueados ficam com quem os usa: só entram se já estiverem no próprio monstro (ou na build comparada)
         bool Available(long? equippedMonsterId, bool locked) =>
             equippedMonsterId == monster.GameId
             || (!locked && (equippedMonsterId is null || request.IncludeEquippedOnOthers));
 
-        var pool = snapshot.Runes.Where(r => Available(r.EquippedMonsterId, lookup.IsEffectivelyLocked(r)));
+        var pool = snapshot.Runes.Where(r => currentRuneIds.Contains(r.GameId) || Available(r.EquippedMonsterId, lookup.IsEffectivelyLocked(r)));
 
-        var currentArtifacts = snapshot.Artifacts.Where(a => a.EquippedMonsterId == monster.GameId).ToList();
         var artifacts = request.OptimizeArtifacts
             ? RuneOptimizer.BestArtifacts(
                 monster,
                 catalog.Find(monster.MasterId)?.Archetype,
-                snapshot.Artifacts.Where(a => Available(a.EquippedMonsterId, lookup.IsEffectivelyLocked(a))),
+                snapshot.Artifacts.Where(a => currentArtifactIds.Contains(a.GameId) || Available(a.EquippedMonsterId, lookup.IsEffectivelyLocked(a))),
                 request.Focus,
                 request.Weights)
             : currentArtifacts;
@@ -132,14 +145,13 @@ internal sealed class OptimizeRunesQueryHandler(
         var builds = RuneOptimizer.Optimize(monster, equippedArtifacts, pool, optimizerRequest);
 
         var monsters = EquipmentDetails.MonstersById(snapshot, catalog);
-        var equipment = new EquipmentIndex(snapshot);
-        var currentStats = equipment.StatsOf(monster);
+        var currentStats = equipment.StatsOf(monster, compared);
 
         var current = new OptimizedBuildResult(
             RuneOptimizer.Score(currentStats.Total, monster.BaseStats, request.Focus, request.Weights),
             currentStats.Total,
             currentStats.ActiveSets,
-            [.. equipment.RunesOf(monster.GameId).OrderBy(r => r.Slot).Select(r => ToItem(r, monsters, lookup))],
+            [.. currentRunes.Select(r => ToItem(r, monsters, lookup))],
             [.. currentArtifacts.Select(a => ToItem(a, monsters, lookup))]);
 
         return new OptimizeRunesResponse(

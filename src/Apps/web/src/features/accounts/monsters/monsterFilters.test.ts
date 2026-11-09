@@ -23,7 +23,7 @@ const withSpeed = (speed: number) => ({ ...monster({ monsterId: 0 }).total, spee
 
 const monsters = [
   monster({ monsterId: 1, name: 'Lapis', element: 'Water', total: withSpeed(151), activeSets: ['Vampire', 'Revenge'] }),
-  monster({ monsterId: 2, name: 'Konamiya', element: 'Dark', total: withSpeed(214), activeSets: ['Swift', 'Will'] }),
+  monster({ monsterId: 2, name: 'Konamiya', element: 'Dark', total: withSpeed(214), activeSets: ['Swift', 'Will'], buildKinds: ['Rta', 'Siege'] }),
   monster({ monsterId: 3, name: 'Tyron', element: 'Water', total: withSpeed(195), activeSets: ['Violent', 'Focus'] }),
   monster({ monsterId: 4, name: 'Rainbowmon', archetype: 'Material', stars: 5, total: withSpeed(300) }),
   monster({ monsterId: 5, name: 'Gânimedes', element: 'Wind', stars: 5, total: withSpeed(195), activeSets: ['Swift'] }),
@@ -52,6 +52,11 @@ describe('filterAndSortMonsters', () => {
     expect(names(filterAndSortMonsters([...monsters], { ...DEFAULT_FILTERS, set: 'Swift' }))).toEqual(['Konamiya', 'Gânimedes'])
   })
 
+  it('filtra pelos monstros com build de RTA/Siege/Arena', () => {
+    expect(names(filterAndSortMonsters([...monsters], { ...DEFAULT_FILTERS, buildKind: 'Siege' }))).toEqual(['Konamiya'])
+    expect(names(filterAndSortMonsters([...monsters], { ...DEFAULT_FILTERS, buildKind: 'Arena' }))).toEqual([])
+  })
+
   it('busca pelo nome sem diferenciar maiúsculas nem acentos', () => {
     expect(names(filterAndSortMonsters([...monsters], { ...DEFAULT_FILTERS, search: 'GANI' }))).toEqual(['Gânimedes'])
   })
@@ -74,7 +79,7 @@ describe('filterAndSortMonsters', () => {
 
 describe('filtros na URL', () => {
   it('ida e volta preservam os filtros', () => {
-    const filters = { ...DEFAULT_FILTERS, search: 'lap', stars: 6, element: 'Water' as const, set: 'Violent', includeMaterials: true, sort: 'hp' as const, direction: 'asc' as const }
+    const filters = { ...DEFAULT_FILTERS, search: 'lap', stars: 6, element: 'Water' as const, set: 'Violent', includeMaterials: true, buildKind: 'Rta' as const, sort: 'hp' as const, direction: 'asc' as const }
 
     expect(filtersFromParams(filtersToParams(filters))).toEqual(filters)
   })
@@ -84,7 +89,7 @@ describe('filtros na URL', () => {
   })
 
   it('ignora valores inválidos', () => {
-    const filters = filtersFromParams(new URLSearchParams('estrelas=9&elemento=Agua&ordem=foo&dir=x'))
+    const filters = filtersFromParams(new URLSearchParams('estrelas=9&elemento=Agua&modo=PvP&ordem=foo&dir=x'))
 
     expect(filters).toEqual(DEFAULT_FILTERS)
   })
