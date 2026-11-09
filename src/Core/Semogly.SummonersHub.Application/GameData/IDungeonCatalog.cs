@@ -6,4 +6,7 @@ namespace Semogly.SummonersHub.Application.GameData;
 public interface IDungeonCatalog
 {
     DungeonStats? Find(Dungeon dungeon);
+
+    /// <summary>Todas as dungeons com dados, na ordem do enum.</summary>
+    IReadOnlyList<DungeonStats> All();
 }

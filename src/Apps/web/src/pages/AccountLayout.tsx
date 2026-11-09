@@ -38,6 +38,9 @@ export function AccountLayout() {
         <NavLink to={`/contas/${wizardId}/times`} className={tabClass}>
           Times PvE
         </NavLink>
+        <NavLink to={`/contas/${wizardId}/speed-tune`} className={tabClass}>
+          Speed tune
+        </NavLink>
         <NavLink to={`/contas/${wizardId}/historico`} className={tabClass}>
           Histórico
         </NavLink>
