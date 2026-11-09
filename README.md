@@ -101,8 +101,10 @@ dotnet ef migrations add <Nome> --project src/Core/Semogly.SummonersHub.Infrastr
 
 ## Dados do jogo
 
-O bestiário (nome, elemento, arquétipo, estrelas e ícone de cada monstro) fica em
-`src/Core/Semogly.SummonersHub.Infrastructure/GameData/monsters.json`, embarcado na API e carregado em memória.
+O bestiário (nome, elemento, arquétipo, estrelas, ícone, atributos 6★ nv. 40, skill de líder, bônus de despertar e
+onde obter cada monstro) fica em `src/Core/Semogly.SummonersHub.Infrastructure/GameData/monsters.json`, embarcado na
+API e carregado em memória. A página pública **Bestiário** (`/bestiario`) usa `GET /api/game-data/bestiary` (monstros
+obteníveis) e `GET /api/game-data/bestiary/{id}` (detalhe com skills e família).
 Ele é gerado a partir da [API do SWARFARM](https://swarfarm.com/api/v2/). Para atualizar depois de um patch do jogo:
 
 ```bash
@@ -111,8 +113,8 @@ dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync -- dungeons  # 
 ```
 
 A mesma ferramenta grava `GameData/dungeons.json`, com o andar mais alto de cada dungeon dos times PvE e a RES e a VEL
-do boss e dos demais inimigos, e `GameData/skills.json`, com as habilidades dos monstros (fórmula do
-multiplicador, golpes e bônus de dano dos skill-ups) usadas na calculadora de dano.
+do boss e dos demais inimigos, e `GameData/skills.json`, com as habilidades dos monstros (descrição, recarga, ícone,
+texto dos skill-ups, fórmula do multiplicador, golpes e bônus de dano) usadas no bestiário e na calculadora de dano.
 
 Sets, atributos de runa, efeitos de artefato e itens de craft são enums do domínio
 (`Domain/GameData`), com rótulos em pt-BR no front (`src/Apps/web/src/lib/game/labels.ts`).

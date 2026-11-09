@@ -10,6 +10,8 @@ import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
 import { DamageCalculatorPage } from '@/pages/DamageCalculatorPage'
 import { CraftSuggestionsPage } from '@/pages/CraftSuggestionsPage'
 import { ArtifactListPage } from '@/pages/ArtifactListPage'
+import { BestiaryMonsterPage } from '@/pages/BestiaryMonsterPage'
+import { BestiaryPage } from '@/pages/BestiaryPage'
 import { HistoryPage } from '@/pages/HistoryPage'
 import { HomePage } from '@/pages/HomePage'
 import { ImportPage } from '@/pages/ImportPage'
@@ -45,6 +47,9 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           {/* Build compartilhada: pública, sem login */}
           <Route path="/b/:token" element={<SharedBuildPage />} />
+          {/* Dado público do jogo: não exige login */}
+          <Route path="/bestiario" element={<BestiaryPage />} />
+          <Route path="/bestiario/:com2usId" element={<BestiaryMonsterPage />} />
           <Route index element={<Protected><HomePage /></Protected>} />
           <Route path="/contas/:wizardId" element={<Protected><AccountLayout /></Protected>}>
             <Route index element={<AccountOverviewPage />} />
@@ -86,6 +91,9 @@ function MainNav() {
       {/* "Painel" fica ativo em qualquer conta (/contas/...) */}
       <NavLink to="/" end className={({ isActive }) => linkClass({ isActive: isActive || pathname.startsWith('/contas/') })}>
         Painel
+      </NavLink>
+      <NavLink to="/bestiario" className={linkClass}>
+        Bestiário
       </NavLink>
       <NavLink to="/importar" className={linkClass}>
         Importar
