@@ -75,6 +75,7 @@ const response: OptimizeRunesResponse = {
           tags: [],
         },
       ],
+      gems: [{ runeId: 3, from: 8, to: 4, value: 13 }],
     },
   ],
 }
@@ -126,6 +127,7 @@ describe('RuneOptimizerPage', () => {
     fireEvent.change(screen.getByLabelText('Máximo de VEL'), { target: { value: '220' } })
     fireEvent.change(screen.getByLabelText('Peso de VEL'), { target: { value: '2' } })
     fireEvent.click(screen.getByLabelText(/Trocar artefatos/))
+    fireEvent.click(screen.getByLabelText(/Simular gems/))
     fireEvent.click(screen.getByRole('button', { name: 'Otimizar' }))
 
     const build = await screen.findByLabelText('Build 1')
@@ -139,6 +141,7 @@ describe('RuneOptimizerPage', () => {
       maximums: [{ stat: 'Speed', max: 220 }],
       weights: { Speed: 2 },
       optimizeArtifacts: true,
+      simulateGems: true,
     })
 
     expect(build).toHaveTextContent('180(+30)')
@@ -146,6 +149,7 @@ describe('RuneOptimizerPage', () => {
     const runes = within(build).getByRole('list', { name: 'Runas da build' })
     expect(runes).toHaveTextContent('Já equipada')
     expect(runes).toHaveTextContent('Do inventário')
+    expect(runes).toHaveTextContent('Gem: VEL → ATK +13%')
     expect(within(runes).getByRole('link', { name: 'Tyron' })).toHaveAttribute('href', '/contas/1/monstros/12')
     expect(within(build).getByRole('list', { name: 'Artefatos da build' })).toHaveTextContent('Elemento Água ATK +100 · do inventário')
   })
