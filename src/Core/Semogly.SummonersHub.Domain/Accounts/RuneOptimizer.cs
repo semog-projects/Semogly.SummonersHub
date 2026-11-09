@@ -24,7 +24,8 @@ public static class RuneOptimizer
 
     private const int Slots = 6;
 
-    private static readonly PveStat[] AllStats = Enum.GetValues<PveStat>();
+    /// <summary>Atributos somáveis, guardados no vetor de contribuições (o HP efetivo é derivado de HP e DEF).</summary>
+    private static readonly PveStat[] VectorStats = [.. Enum.GetValues<PveStat>().Where(s => s != PveStat.EffectiveHp)];
 
     public static IReadOnlyList<OptimizedBuild> Optimize(
         Monster monster,
@@ -55,8 +56,9 @@ public static class RuneOptimizer
             beam = [.. beam
                 .SelectMany(partial => slotCandidates.Select(candidate => partial.With(candidate)))
                 .Where(p => SetsStillPossible(p, required, remainingSlots)
-                    && MinimumsStillPossible(p, constant, remainingMax, request.Minimums))
-                .OrderByDescending(p => Score(Add(constant, p.Vector), @base, request.Focus))
+                    && MinimumsStillPossible(p, constant, remainingMax, request.Minimums)
+                    && MaximumsStillPossible(p, constant, request.Maximums))
+                .OrderByDescending(p => Score(Add(constant, p.Vector), @base, request))
                 .Take(BeamWidth)];
 
             if (beam.Count == 0)
@@ -73,11 +75,15 @@ public static class RuneOptimizer
     }
 
     /// <summary>
-    /// Pontuação de uma build: soma dos atributos de foco relativos à base do monstro (HP, ATK, DEF e VEL) ou a
-    /// 100 pontos (atributos percentuais). Ex.: VEL total 200 com base 100 vale 200.
+    /// Pontuação de uma build: soma ponderada dos atributos de foco relativos à base do monstro (HP, ATK, DEF,
+    /// VEL e HP efetivo) ou a 100 pontos (atributos percentuais). Ex.: VEL total 200 com base 100 e peso 1 vale 200.
     /// </summary>
-    public static decimal Score(StatValues total, BaseStats @base, IEnumerable<PveStat> focus) =>
-        Math.Round(focus.Sum(stat => (decimal)PveTeamEvaluator.ValueOf(total, stat) / Scale(@base, stat) * 100), 2);
+    public static decimal Score(StatValues total, BaseStats @base, IReadOnlyList<PveStat> focus, IReadOnlyDictionary<PveStat, decimal>? weights = null) =>
+        Math.Round(focus.Sum(stat => Weight(weights, stat) * PveTeamEvaluator.ValueOf(total, stat) / Scale(@base, stat) * 100), 2);
+
+    /// <summary>Peso do atributo no foco; sem peso informado, vale 1.</summary>
+    public static decimal Weight(IReadOnlyDictionary<PveStat, decimal>? weights, PveStat stat) =>
+        weights is not null && weights.TryGetValue(stat, out var weight) ? weight : 1;
 
     /// <summary>
     /// Melhor artefato de cada tipo para o foco: o de elemento precisa ser do elemento do monstro e o de
@@ -88,7 +94,8 @@ public static class RuneOptimizer
         Monster monster,
         Archetype? archetype,
         IEnumerable<Artifact> pool,
-        IReadOnlyList<PveStat> focus)
+        IReadOnlyList<PveStat> focus,
+        IReadOnlyDictionary<PveStat, decimal>? weights = null)
     {
         var candidates = pool.ToList();
         var chosen = new List<Artifact>();
@@ -97,7 +104,7 @@ public static class RuneOptimizer
         {
             var best = candidates
                 .Where(a => a.Type == type && (type == ArtifactType.Element ? a.Element == monster.Element : a.Archetype == archetype))
-                .OrderByDescending(a => ArtifactScore(a, monster.BaseStats, focus))
+                .OrderByDescending(a => ArtifactScore(a, monster.BaseStats, focus, weights))
                 .ThenByDescending(a => a.EquippedMonsterId == monster.GameId)
                 .ThenByDescending(a => a.Level)
                 .ThenBy(a => a.GameId)
@@ -112,7 +119,7 @@ public static class RuneOptimizer
         return chosen;
     }
 
-    private static decimal ArtifactScore(Artifact artifact, BaseStats @base, IEnumerable<PveStat> focus)
+    private static decimal ArtifactScore(Artifact artifact, BaseStats @base, IReadOnlyList<PveStat> focus, IReadOnlyDictionary<PveStat, decimal>? weights)
     {
         var stat = artifact.MainStat.Effect switch
         {
@@ -122,11 +129,37 @@ public static class RuneOptimizer
             _ => (PveStat?)null,
         };
 
-        return stat is { } s && focus.Contains(s) ? artifact.MainStat.Value / Scale(@base, s) : 0;
+        if (stat is not { } s)
+        {
+            return 0;
+        }
+
+        // O principal soma em HP, ATK ou DEF; com HP efetivo no foco, HP e DEF também contam
+        var direct = focus.Contains(s) ? Weight(weights, s) * artifact.MainStat.Value / Scale(@base, s) : 0;
+        var viaEffectiveHp = focus.Contains(PveStat.EffectiveHp) && s is PveStat.Hp or PveStat.Defense
+            ? Weight(weights, PveStat.EffectiveHp) * artifact.MainStat.Value / Scale(@base, s)
+            : 0;
+        return direct + viaEffectiveHp;
     }
 
-    private static decimal Score(decimal[] vector, BaseStats @base, IEnumerable<PveStat> focus) =>
-        focus.Sum(stat => vector[(int)stat] / Scale(@base, stat));
+    /// <summary>Pontuação aproximada de totais parciais (sem os bônus de sets formados fora dos pedidos).</summary>
+    private static decimal Score(decimal[] totals, BaseStats @base, OptimizerRequest request) =>
+        request.Focus.Sum(stat => Weight(request.Weights, stat) * ValueOf(totals, stat) / Scale(@base, stat));
+
+    /// <summary>
+    /// Quanto uma runa sozinha soma no atributo, relativo à base: serve para escolher os candidatos de cada slot.
+    /// No HP efetivo, que não é somável, usa a soma das contribuições relativas de HP e DEF.
+    /// </summary>
+    private static decimal Marginal(decimal[] vector, BaseStats @base, PveStat stat) => stat == PveStat.EffectiveHp
+        ? (vector[(int)PveStat.Hp] / Scale(@base, PveStat.Hp)) + (vector[(int)PveStat.Defense] / Scale(@base, PveStat.Defense))
+        : vector[(int)stat] / Scale(@base, stat);
+
+    /// <summary>Valor do atributo em totais aproximados (decimais); o HP efetivo é derivado de HP e DEF.</summary>
+    private static decimal ValueOf(decimal[] totals, PveStat stat) => stat == PveStat.EffectiveHp
+        ? EffectiveHp(totals[(int)PveStat.Hp], totals[(int)PveStat.Defense])
+        : totals[(int)stat];
+
+    private static decimal EffectiveHp(decimal hp, decimal defense) => hp * (1140 + (3.5m * defense)) / 1000;
 
     private static decimal Scale(BaseStats @base, PveStat stat) => stat switch
     {
@@ -134,18 +167,23 @@ public static class RuneOptimizer
         PveStat.Attack => Math.Max(1, @base.Attack),
         PveStat.Defense => Math.Max(1, @base.Defense),
         PveStat.Speed => Math.Max(1, @base.Speed),
+        PveStat.EffectiveHp => Math.Max(1, EffectiveHp(@base.Hp, @base.Defense)),
         _ => 100,
     };
 
     private static OptimizedBuild? Evaluate(Monster monster, IReadOnlyCollection<Artifact> artifacts, Partial partial, OptimizerRequest request)
     {
         var stats = MonsterStatsCalculator.Calculate(monster, partial.Runes.Select(c => c.Effective), artifacts);
-        if (request.Minimums.Any(m => PveTeamEvaluator.ValueOf(stats.Total, m.Stat) < m.Min))
+        if (request.Minimums.Any(m => PveTeamEvaluator.ValueOf(stats.Total, m.Stat) < m.Min)
+            || (request.Maximums ?? []).Any(m => PveTeamEvaluator.ValueOf(stats.Total, m.Stat) > m.Max))
         {
             return null;
         }
 
-        return new OptimizedBuild([.. partial.Runes.Select(c => c.Original)], stats, Score(stats.Total, monster.BaseStats, request.Focus));
+        return new OptimizedBuild(
+            [.. partial.Runes.Select(c => c.Original)],
+            stats,
+            Score(stats.Total, monster.BaseStats, request.Focus, request.Weights));
     }
 
     private static Dictionary<int, List<Candidate>> Candidates(
@@ -163,8 +201,11 @@ public static class RuneOptimizer
             .Select(r => Candidate.From(r, monster, request.AssumeMaxLevel))
             .ToList();
 
-        var criteria = new List<Func<Candidate, decimal>> { c => Score(c.Vector, monster.BaseStats, request.Focus) };
-        criteria.AddRange(request.Minimums.Select(m => (Func<Candidate, decimal>)(c => c.Vector[(int)m.Stat])));
+        var criteria = new List<Func<Candidate, decimal>>
+        {
+            c => request.Focus.Sum(stat => Weight(request.Weights, stat) * Marginal(c.Vector, monster.BaseStats, stat)),
+        };
+        criteria.AddRange(request.Minimums.Select(m => (Func<Candidate, decimal>)(c => Marginal(c.Vector, monster.BaseStats, m.Stat))));
 
         return Enumerable.Range(1, Slots).ToDictionary(
             slot => slot,
@@ -180,10 +221,10 @@ public static class RuneOptimizer
     /// <summary>Maior contribuição possível de cada atributo nos slots depois de <paramref name="slot"/>.</summary>
     private static decimal[] RemainingMax(Dictionary<int, List<Candidate>> candidates, int slot)
     {
-        var max = new decimal[AllStats.Length];
+        var max = new decimal[VectorStats.Length];
         for (var next = slot + 1; next <= Slots; next++)
         {
-            foreach (var stat in AllStats)
+            foreach (var stat in VectorStats)
             {
                 max[(int)stat] += candidates[next].Count == 0 ? 0 : candidates[next].Max(c => c.Vector[(int)stat]);
             }
@@ -195,13 +236,34 @@ public static class RuneOptimizer
     private static bool SetsStillPossible(Partial partial, Dictionary<RuneSet, int> required, int remainingSlots) =>
         required.Sum(r => Math.Max(0, r.Value - partial.SetCounts.GetValueOrDefault(r.Key))) <= remainingSlots;
 
-    private static bool MinimumsStillPossible(Partial partial, decimal[] constant, decimal[] remainingMax, IReadOnlyList<StatRequirement> minimums) =>
-        minimums.All(m => constant[(int)m.Stat] + partial.Vector[(int)m.Stat] + remainingMax[(int)m.Stat] >= m.Min);
+    /// <summary>Com o máximo possível nos slots restantes ainda dá para atingir os mínimos? (O HP efetivo só cresce com HP e DEF.)</summary>
+    private static bool MinimumsStillPossible(Partial partial, decimal[] constant, decimal[] remainingMax, IReadOnlyList<StatRequirement> minimums)
+    {
+        if (minimums.Count == 0)
+        {
+            return true;
+        }
+
+        var optimistic = Add(Add(constant, partial.Vector), remainingMax);
+        return minimums.All(m => ValueOf(optimistic, m.Stat) >= m.Min);
+    }
+
+    /// <summary>Nenhuma runa reduz atributo: se a parcial já passou do máximo, a build completa também passa.</summary>
+    private static bool MaximumsStillPossible(Partial partial, decimal[] constant, IReadOnlyList<StatCap>? maximums)
+    {
+        if (maximums is null || maximums.Count == 0)
+        {
+            return true;
+        }
+
+        var current = Add(constant, partial.Vector);
+        return maximums.All(m => ValueOf(current, m.Stat) <= m.Max);
+    }
 
     /// <summary>Base + artefatos + bônus dos sets obrigatórios (que toda build completa terá).</summary>
     private static decimal[] ConstantVector(BaseStats b, IEnumerable<Artifact> artifacts, IEnumerable<RuneSet> requiredSets)
     {
-        var vector = new decimal[AllStats.Length];
+        var vector = new decimal[VectorStats.Length];
         vector[(int)PveStat.Hp] = b.Hp;
         vector[(int)PveStat.Attack] = b.Attack;
         vector[(int)PveStat.Defense] = b.Defense;
@@ -278,7 +340,7 @@ public static class RuneOptimizer
                     rune.GameId, rune.Slot, rune.Stars, rune.IsAncient, rune.Set, rune.Level,
                     rune.Rarity, rune.OriginalRarity, rune.MainStat, rune.InnateStat, rune.Substats, monster.GameId);
 
-            var vector = new decimal[AllStats.Length];
+            var vector = new decimal[VectorStats.Length];
             AddStat(vector, monster.BaseStats, effective.MainStat.Stat, effective.MainStat.Value);
             if (effective.InnateStat is { } innate)
             {
@@ -296,7 +358,7 @@ public static class RuneOptimizer
 
     private sealed record Partial(IReadOnlyList<Candidate> Runes, decimal[] Vector, IReadOnlyDictionary<RuneSet, int> SetCounts)
     {
-        public static readonly Partial Empty = new([], new decimal[AllStats.Length], new Dictionary<RuneSet, int>());
+        public static readonly Partial Empty = new([], new decimal[VectorStats.Length], new Dictionary<RuneSet, int>());
 
         public Partial With(Candidate candidate)
         {
@@ -309,16 +371,23 @@ public static class RuneOptimizer
 
 /// <param name="RequiredSets">Sets que a build precisa completar; repetir o set pede mais de um (ex.: Energy 3x).</param>
 /// <param name="MainStatsBySlot">Principais aceitos por slot (normalmente 2, 4 e 6); slot ausente ou vazio aceita qualquer um.</param>
-/// <param name="Focus">Até <see cref="RuneOptimizer.MaxFocusStats"/> atributos a maximizar, com o mesmo peso.</param>
+/// <param name="Focus">Até <see cref="RuneOptimizer.MaxFocusStats"/> atributos a maximizar.</param>
 /// <param name="Minimums">Atributos totais mínimos.</param>
 /// <param name="AssumeMaxLevel">Calcula cada runa como se estivesse em +15 (ver <see cref="RuneProjection"/>).</param>
+/// <param name="Maximums">Atributos totais máximos (ex.: VEL até 200 para não passar outro monstro do time).</param>
+/// <param name="Weights">Peso de cada atributo de foco; os ausentes valem 1.</param>
 public sealed record OptimizerRequest(
     IReadOnlyList<RuneSet> RequiredSets,
     IReadOnlyDictionary<int, IReadOnlyList<RuneStat>> MainStatsBySlot,
     IReadOnlyList<PveStat> Focus,
     IReadOnlyList<StatRequirement> Minimums,
     bool AssumeMaxLevel,
-    int MaxResults = 10);
+    int MaxResults = 10,
+    IReadOnlyList<StatCap>? Maximums = null,
+    IReadOnlyDictionary<PveStat, decimal>? Weights = null);
+
+/// <summary>Atributo total máximo.</summary>
+public sealed record StatCap(PveStat Stat, int Max);
 
 /// <param name="Runes">Uma runa por slot, na ordem dos slots.</param>
 public sealed record OptimizedBuild(IReadOnlyList<Rune> Runes, MonsterStats Stats, decimal Score);

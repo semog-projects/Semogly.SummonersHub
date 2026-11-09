@@ -19,6 +19,8 @@ public sealed class SummonersHubDbContext(DbContextOptions<SummonersHubDbContext
 
     public DbSet<WizardAccount> WizardAccounts => Set<WizardAccount>();
 
+    public DbSet<InventoryMark> InventoryMarks => Set<InventoryMark>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)

@@ -14,6 +14,7 @@ using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
 using Semogly.SummonersHub.Application.Accounts.OptimizeRunes;
+using Semogly.SummonersHub.Application.Accounts.UpdateInventoryMarks;
 using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
 using Semogly.SummonersHub.Domain.GameData;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
 
         services.AddScoped<ICommandHandler<ImportAccountCommand, ImportAccountResponse>, ImportAccountCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateInventoryMarksCommand>, UpdateInventoryMarksCommandHandler>();
         services.AddScoped<IQueryHandler<GetAccountSummaryQuery, AccountSummaryResponse>, GetAccountSummaryQueryHandler>();
         services.AddScoped<IQueryHandler<GetAccountOverviewQuery, AccountOverviewResponse>, GetAccountOverviewQueryHandler>();
         services.AddScoped<IQueryHandler<ListAccountsQuery, IReadOnlyList<AccountSummaryResponse>>, ListAccountsQueryHandler>();

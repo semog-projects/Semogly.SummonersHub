@@ -15,6 +15,7 @@ using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
 using Semogly.SummonersHub.Application.Accounts.ListMonsters;
 using Semogly.SummonersHub.Application.Accounts.ListRunes;
 using Semogly.SummonersHub.Application.Accounts.OptimizeRunes;
+using Semogly.SummonersHub.Application.Accounts.UpdateInventoryMarks;
 using Semogly.SummonersHub.Application.Accounts.ListSnapshots;
 
 namespace Semogly.SummonersHub.Api.Endpoints;
@@ -89,6 +90,10 @@ internal static class AccountsEndpoints
         api.MapGet("/accounts/{wizardId:long}/monsters/{monsterId:long}/skills", GetMonsterSkills)
             .WithName("GetMonsterSkills")
             .WithSummary("Habilidades do monstro com fórmula de dano, golpes e bônus dos skill-ups, mais os atributos totais");
+
+        api.MapPatch("/accounts/{wizardId:long}/inventory-marks", UpdateInventoryMarks)
+            .WithName("UpdateInventoryMarks")
+            .WithSummary("Bloqueia/desbloqueia e adiciona/remove tags de runas ou artefatos (um ou vários de uma vez)");
 
         return app;
     }
@@ -212,6 +217,18 @@ internal static class AccountsEndpoints
     {
         var result = await handler.HandleAsync(new GetMonsterSkillsQuery(wizardId, monsterId), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<NoContent, ProblemHttpResult>> UpdateInventoryMarks(
+        long wizardId,
+        UpdateInventoryMarksRequest request,
+        ICommandHandler<UpdateInventoryMarksCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(
+            new UpdateInventoryMarksCommand(wizardId, request.Kind, request.ItemIds, request.Locked, request.AddTags, request.RemoveTags),
+            cancellationToken);
+        return result.IsSuccess ? TypedResults.NoContent() : result.Error.ToProblem();
     }
 
     private static async Task<Results<Ok<MonsterDetailResponse>, ProblemHttpResult>> GetMonsterDetail(

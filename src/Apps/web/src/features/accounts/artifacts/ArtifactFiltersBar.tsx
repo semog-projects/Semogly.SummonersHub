@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { ARTIFACT_MAIN_STAT_LABELS } from '@/lib/game/labels'
+import { MarkFilterControls } from '../marks/MarkFilterControls'
 import { SelectFilter } from '../shared/filterControls'
 import {
   ARTIFACT_ARCHETYPE_OPTIONS,
@@ -25,10 +26,12 @@ const LOCATION_OPTIONS: Array<{ value: ArtifactLocation; label: string }> = [
 
 interface Props {
   filters: ArtifactFilters
+  /** Tags existentes nos artefatos. */
+  tags: string[]
   onChange: (filters: ArtifactFilters) => void
 }
 
-export function ArtifactFiltersBar({ filters, onChange }: Props) {
+export function ArtifactFiltersBar({ filters, tags, onChange }: Props) {
   const update = (patch: Partial<ArtifactFilters>) => onChange({ ...filters, ...patch })
 
   function changeSub(subEffect: number | null) {
@@ -94,6 +97,8 @@ export function ArtifactFiltersBar({ filters, onChange }: Props) {
         options={LOCATION_OPTIONS}
         onChange={(location) => update({ location })}
       />
+
+      <MarkFilterControls filters={filters} tags={tags} onChange={update} />
 
       <Button variant="ghost" size="sm" onClick={() => onChange(DEFAULT_ARTIFACT_FILTERS)}>
         Limpar filtros

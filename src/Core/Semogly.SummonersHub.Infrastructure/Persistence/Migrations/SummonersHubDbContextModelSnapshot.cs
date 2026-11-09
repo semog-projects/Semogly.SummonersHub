@@ -274,6 +274,35 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                     b.ToTable("CraftItems", (string)null);
                 });
 
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.InventoryMark", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("ItemId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
+                    b.PrimitiveCollection<string[]>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<long>("WizardId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WizardId", "Kind", "ItemId")
+                        .IsUnique();
+
+                    b.ToTable("InventoryMarks", (string)null);
+                });
+
             modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.Monster", b =>
                 {
                     b.Property<Guid>("SnapshotId")
@@ -553,6 +582,16 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                     b.HasOne("Semogly.SummonersHub.Domain.Accounts.AccountSnapshot", null)
                         .WithMany("CraftItems")
                         .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.InventoryMark", b =>
+                {
+                    b.HasOne("Semogly.SummonersHub.Domain.Accounts.WizardAccount", null)
+                        .WithMany()
+                        .HasForeignKey("WizardId")
+                        .HasPrincipalKey("WizardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -1,4 +1,5 @@
 import { RUNE_STATS } from '@/lib/game/labels'
+import { markFiltersFromParams, markFiltersToParams, matchesMarks, type MarkFilters } from '../marks/markFilters'
 import type { SortDirection } from '../shared/sorting'
 import type { RuneListItem } from '../types'
 import { runeSpeed } from './efficiency'
@@ -16,7 +17,7 @@ export type RuneSortKey = 'efficiency' | 'maxEfficiency' | 'level' | 'speed'
 
 export type RuneLocation = 'equipped' | 'inventory'
 
-export interface RuneFilters {
+export interface RuneFilters extends MarkFilters {
   set: string | null
   slot: number | null
   /** Código do atributo principal. */
@@ -34,6 +35,8 @@ export const DEFAULT_RUNE_FILTERS: RuneFilters = {
   mainStat: null,
   subStat: null,
   location: null,
+  lock: null,
+  tag: null,
   sort: 'efficiency',
   direction: 'desc',
 }
@@ -54,6 +57,7 @@ export function runeFiltersFromParams(params: URLSearchParams): RuneFilters {
     mainStat: statParam(params.get('principal')),
     subStat: statParam(params.get('sub')),
     location: location ?? null,
+    ...markFiltersFromParams(params),
     sort: sort && SORT_KEYS.includes(sort) ? sort : DEFAULT_RUNE_FILTERS.sort,
     direction: params.get('dir') === 'asc' ? 'asc' : 'desc',
   }
@@ -66,13 +70,16 @@ export function runeFiltersToParams(filters: RuneFilters): URLSearchParams {
   if (filters.mainStat) params.set('principal', String(filters.mainStat))
   if (filters.subStat) params.set('sub', String(filters.subStat))
   if (filters.location) params.set('local', LOCATION_PARAMS[filters.location])
+  markFiltersToParams(filters, params)
   if (filters.sort !== DEFAULT_RUNE_FILTERS.sort) params.set('ordem', filters.sort)
   if (filters.direction !== DEFAULT_RUNE_FILTERS.direction) params.set('dir', filters.direction)
   return params
 }
 
 export function filterAndSortRunes(runes: RuneListItem[], filters: RuneFilters): RuneListItem[] {
-  const filtered = runes.filter(({ rune, equippedOn }) => {
+  const filtered = runes.filter((item) => {
+    const { rune, equippedOn } = item
+    if (!matchesMarks(item, filters)) return false
     if (filters.set !== null && rune.set !== filters.set) return false
     if (filters.slot !== null && rune.slot !== filters.slot) return false
     if (filters.mainStat !== null && rune.mainStat.type !== filters.mainStat) return false

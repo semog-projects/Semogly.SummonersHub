@@ -21,6 +21,9 @@ public enum PveStat
     CriticalDamage,
     Resistance,
     Accuracy,
+
+    /// <summary>HP efetivo (<see cref="Accounts.StatValues.EffectiveHp"/>): calculado do HP e da DEF totais.</summary>
+    EffectiveHp,
 }
 
 /// <summary>
