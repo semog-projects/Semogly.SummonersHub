@@ -439,6 +439,24 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                     b.ToTable("SharedBuilds", (string)null);
                 });
 
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.UserPreferences", b =>
+                {
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Theme")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("OwnerId");
+
+                    b.ToTable("UserPreferences", (string)null);
+                });
+
             modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.WizardAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -850,6 +868,15 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                     b.HasOne("Semogly.SummonersHub.Domain.Accounts.AccountSnapshot", null)
                         .WithMany()
                         .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.UserPreferences", b =>
+                {
+                    b.HasOne("Semogly.SummonersHub.Infrastructure.Identity.ApplicationUser", null)
+                        .WithOne()
+                        .HasForeignKey("Semogly.SummonersHub.Domain.Accounts.UserPreferences", "OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

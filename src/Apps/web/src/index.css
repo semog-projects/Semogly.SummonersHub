@@ -83,6 +83,22 @@
     --sidebar-ring: oklch(0.708 0 0);
 }
 
+/*
+ * Tema claro: os destaques de texto do app usam os tons 300/400, pensados para o fundo escuro. No claro eles
+ * viram os tons 700 da paleta do Tailwind, legíveis sobre o branco, sem mexer nos componentes.
+ */
+:root:not(.dark) {
+    --color-amber-300: oklch(0.555 0.163 48.998);
+    --color-amber-400: oklch(0.555 0.163 48.998);
+    --color-emerald-400: oklch(0.508 0.118 165.612);
+    --color-red-400: oklch(0.505 0.213 27.518);
+    --color-orange-400: oklch(0.553 0.195 38.402);
+    --color-sky-400: oklch(0.5 0.134 242.749);
+    --color-fuchsia-400: oklch(0.518 0.253 323.949);
+    --color-violet-400: oklch(0.491 0.27 292.581);
+    --color-zinc-400: oklch(0.552 0.016 285.938);
+}
+
 .dark {
     /* Controles nativos (lista do select, checkbox, scrollbar) no tema escuro */
     color-scheme: dark;

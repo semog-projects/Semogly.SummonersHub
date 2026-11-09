@@ -8,5 +8,8 @@ internal sealed class WizardAccountRepository(SummonersHubDbContext db) : IWizar
     public Task<WizardAccount?> FindByWizardIdAsync(long wizardGameId, CancellationToken cancellationToken) =>
         db.WizardAccounts.FirstOrDefaultAsync(w => w.WizardId == wizardGameId, cancellationToken);
 
+    public Task<List<long>> ListWizardIdsAsync(Guid ownerId, CancellationToken cancellationToken) =>
+        db.WizardAccounts.Where(w => w.OwnerId == ownerId).Select(w => w.WizardId).ToListAsync(cancellationToken);
+
     public void Add(WizardAccount account) => db.WizardAccounts.Add(account);
 }
