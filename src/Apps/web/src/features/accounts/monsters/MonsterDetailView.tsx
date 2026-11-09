@@ -21,7 +21,8 @@ import { RuneCard } from '../runes/RuneCard'
 import { MonsterIcon } from './MonsterIcon'
 import { STAT_COLUMNS } from './statColumns'
 
-export function MonsterDetailView({ monster }: { monster: MonsterDetail }) {
+/** @param readOnly Esconde as ações da conta (otimizar, calcular dano), como na build compartilhada. */
+export function MonsterDetailView({ monster, readOnly = false }: { monster: MonsterDetail; readOnly?: boolean }) {
   const { data: definitions } = useMonsterDefinitions([monster.masterId])
   const runesBySlot = new Map(monster.runes.map((rune) => [rune.slot, rune]))
 
@@ -55,12 +56,16 @@ export function MonsterDetailView({ monster }: { monster: MonsterDetail }) {
           {monster.activeSets.map((set, i) => (
             <Badge key={`${set}-${i}`}>{set}</Badge>
           ))}
-          <Link to="otimizar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-            <Sparkles aria-hidden /> Otimizar runas
-          </Link>
-          <Link to="dano" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-            <Swords aria-hidden /> Calcular dano
-          </Link>
+          {!readOnly && (
+            <>
+              <Link to="otimizar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+                <Sparkles aria-hidden /> Otimizar runas
+              </Link>
+              <Link to="dano" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+                <Swords aria-hidden /> Calcular dano
+              </Link>
+            </>
+          )}
         </div>
       </div>
 

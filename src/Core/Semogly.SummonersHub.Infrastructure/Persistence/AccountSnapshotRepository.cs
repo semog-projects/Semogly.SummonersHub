@@ -17,6 +17,9 @@ internal sealed class AccountSnapshotRepository(SummonersHubDbContext db) : IAcc
     public Task<AccountSnapshot?> GetByVersionAsync(long wizardGameId, int version, CancellationToken cancellationToken) =>
         WithChildren().FirstOrDefaultAsync(s => s.WizardId == wizardGameId && s.Version == version, cancellationToken);
 
+    public Task<AccountSnapshot?> GetByIdAsync(Guid snapshotId, CancellationToken cancellationToken) =>
+        WithChildren().FirstOrDefaultAsync(s => s.Id == snapshotId, cancellationToken);
+
     public async Task<int> GetLatestVersionAsync(long wizardGameId, CancellationToken cancellationToken) =>
         await db.AccountSnapshots
             .Where(s => s.WizardId == wizardGameId)

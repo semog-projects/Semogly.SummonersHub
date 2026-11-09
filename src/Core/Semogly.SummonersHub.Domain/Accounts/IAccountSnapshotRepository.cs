@@ -14,5 +14,8 @@ public interface IAccountSnapshotRepository
     /// <summary>Snapshot completo de uma versão do invocador.</summary>
     Task<AccountSnapshot?> GetByVersionAsync(long wizardGameId, int version, CancellationToken cancellationToken);
 
+    /// <summary>Snapshot completo pelo id.</summary>
+    Task<AccountSnapshot?> GetByIdAsync(Guid snapshotId, CancellationToken cancellationToken);
+
     void Add(AccountSnapshot snapshot);
 }

@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router'
 import { MonsterDetailView } from '@/features/accounts/monsters/MonsterDetailView'
+import { ShareBuildPanel } from '@/features/accounts/share/ShareBuildPanel'
 import { useMonsterDetail } from '@/features/accounts/useAccounts'
 import { QueryStatus } from './QueryStatus'
 
@@ -23,7 +24,12 @@ export function MonsterDetailPage() {
       </button>
 
       <QueryStatus query={query} notFound="Monstro não encontrado no último import." loading="Carregando monstro…">
-        {(monster) => <MonsterDetailView monster={monster} />}
+        {(monster) => (
+          <div className="space-y-6">
+            <MonsterDetailView monster={monster} />
+            <ShareBuildPanel wizardId={Number(params.wizardId)} monsterId={monster.monsterId} />
+          </div>
+        )}
       </QueryStatus>
     </div>
   )

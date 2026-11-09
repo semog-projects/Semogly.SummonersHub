@@ -401,6 +401,44 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                     b.ToTable("Runes", (string)null);
                 });
 
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.SharedBuild", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("MonsterId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(22)
+                        .HasColumnType("character(22)")
+                        .IsFixedLength();
+
+                    b.Property<long>("WizardId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SnapshotId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("OwnerId", "WizardId", "MonsterId");
+
+                    b.ToTable("SharedBuilds", (string)null);
+                });
+
             modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.WizardAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -799,6 +837,21 @@ namespace Semogly.SummonersHub.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Substats");
+                });
+
+            modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.SharedBuild", b =>
+                {
+                    b.HasOne("Semogly.SummonersHub.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Semogly.SummonersHub.Domain.Accounts.AccountSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Semogly.SummonersHub.Domain.Accounts.WizardAccount", b =>
