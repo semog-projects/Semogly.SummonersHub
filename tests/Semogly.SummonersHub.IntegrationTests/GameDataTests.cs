@@ -26,11 +26,20 @@ public sealed class GameDataTests(ApiFixture fixture)
     }
 
     [Fact]
-    public async Task Bestiary_ShouldListOnlyObtainableMonstersWithoutLogin()
+    public async Task Bestiary_ShouldRequireLogin()
     {
         using var anonymous = fixture.CreateClient();
 
-        var monsters = await anonymous.GetFromJsonAsync<List<JsonObject>>("/api/game-data/bestiary", ApiJson.Options, Ct);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.GetAsync("/api/game-data/bestiary", Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.GetAsync("/api/game-data/bestiary/19811", Ct)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Bestiary_ShouldListOnlyObtainableMonsters()
+    {
+        using var client = await fixture.CreateAuthenticatedClientAsync(Ct);
+
+        var monsters = await client.GetFromJsonAsync<List<JsonObject>>("/api/game-data/bestiary", ApiJson.Options, Ct);
 
         Assert.NotNull(monsters);
         Assert.True(monsters.Count > 1_500);
@@ -42,9 +51,9 @@ public sealed class GameDataTests(ApiFixture fixture)
     [Fact]
     public async Task BestiaryMonster_ShouldReturnStatsSkillsLeaderAndFamily()
     {
-        using var anonymous = fixture.CreateClient();
+        using var client = await fixture.CreateAuthenticatedClientAsync(Ct);
 
-        var lapis = await anonymous.GetFromJsonAsync<JsonObject>("/api/game-data/bestiary/19811", ApiJson.Options, Ct);
+        var lapis = await client.GetFromJsonAsync<JsonObject>("/api/game-data/bestiary/19811", ApiJson.Options, Ct);
 
         Assert.NotNull(lapis);
         Assert.Equal("Lapis", lapis["monster"]!["name"]!.GetValue<string>());
@@ -68,9 +77,9 @@ public sealed class GameDataTests(ApiFixture fixture)
     [InlineData(1)] // id inexistente
     public async Task BestiaryMonster_ShouldReturn404ForUnknownOrUnobtainable(int com2usId)
     {
-        using var anonymous = fixture.CreateClient();
+        using var client = await fixture.CreateAuthenticatedClientAsync(Ct);
 
-        var response = await anonymous.GetAsync($"/api/game-data/bestiary/{com2usId}", Ct);
+        var response = await client.GetAsync($"/api/game-data/bestiary/{com2usId}", Ct);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

@@ -103,7 +103,7 @@ dotnet ef migrations add <Nome> --project src/Core/Semogly.SummonersHub.Infrastr
 
 O bestiário (nome, elemento, arquétipo, estrelas, ícone, atributos 6★ nv. 40, skill de líder, bônus de despertar e
 onde obter cada monstro) fica em `src/Core/Semogly.SummonersHub.Infrastructure/GameData/monsters.json`, embarcado na
-API e carregado em memória. A página pública **Bestiário** (`/bestiario`) usa `GET /api/game-data/bestiary` (monstros
+API e carregado em memória. A página **Bestiário** (`/bestiario`, exige login) usa `GET /api/game-data/bestiary` (monstros
 obteníveis) e `GET /api/game-data/bestiary/{id}` (detalhe com skills e família).
 Ele é gerado a partir da [API do SWARFARM](https://swarfarm.com/api/v2/). Para atualizar depois de um patch do jogo:
 
