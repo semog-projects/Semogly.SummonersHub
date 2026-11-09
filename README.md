@@ -124,7 +124,7 @@ Message Batches API do Claude (`claude-opus-5-5`, com glossário de termos do jo
 ANTHROPIC_API_KEY=... dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync -- translate
 ```
 
-É incremental: só descrições novas ou alteradas desde a última tradução vão para o lote, então rode depois de
+A tradução atual (todas as skills de monstros obteníveis) foi feita com o mesmo glossário. É incremental: só descrições novas ou alteradas desde a última tradução vão para o lote, então rode depois de
 sincronizar as skills. Sem tradução, o bestiário mostra o texto em inglês. Os textos de skill-up ("Damage +10%")
 são traduzidos por regra no front (`features/bestiary/skillUps.ts`).
 

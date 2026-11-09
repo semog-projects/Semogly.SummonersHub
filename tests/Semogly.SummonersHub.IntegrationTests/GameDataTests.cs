@@ -55,6 +55,9 @@ public sealed class GameDataTests(ApiFixture fixture)
         var skills = lapis["skills"]!.AsArray();
         Assert.Equal([1, 2, 3], skills.Select(s => s!["slot"]!.GetValue<int>()));
         Assert.All(skills, skill => Assert.False(string.IsNullOrWhiteSpace(skill!["description"]?.GetValue<string>())));
+        // Descrição em pt-BR, com o original em inglês ao lado
+        Assert.StartsWith("Dispara 4 balas mágicas", skills[1]!["description"]!.GetValue<string>(), StringComparison.Ordinal);
+        Assert.StartsWith("Shoots 4 magic bullets", skills[1]!["originalDescription"]!.GetValue<string>(), StringComparison.Ordinal);
         Assert.Contains(skills, skill => skill!["iconUrl"]!.GetValue<string>().StartsWith("https://swarfarm.com/", StringComparison.Ordinal));
 
         // Os 4 outros elementos desperto + 5 não despertos; o NPC fica de fora
