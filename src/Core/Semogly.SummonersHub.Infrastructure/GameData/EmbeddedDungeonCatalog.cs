@@ -22,7 +22,7 @@ internal sealed class EmbeddedDungeonCatalog : IDungeonCatalog
 
     public DungeonStats? Find(Dungeon dungeon) => _dungeons.Value.GetValueOrDefault(dungeon);
 
-    internal IReadOnlyCollection<DungeonStats> All() => _dungeons.Value.Values;
+    public IReadOnlyList<DungeonStats> All() => [.. _dungeons.Value.Values.OrderBy(d => d.Dungeon)];
 
     private static Dictionary<Dungeon, DungeonStats> Load()
     {

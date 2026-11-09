@@ -19,6 +19,7 @@ import { MonsterListPage } from '@/pages/MonsterListPage'
 import { PveTeamsPage } from '@/pages/PveTeamsPage'
 import { RuneListPage } from '@/pages/RuneListPage'
 import { RuneOptimizerPage } from '@/pages/RuneOptimizerPage'
+import { SpeedTunePage } from '@/pages/SpeedTunePage'
 
 export function App() {
   return (
@@ -50,6 +51,7 @@ export function App() {
             <Route path="gems-grinds" element={<CraftSuggestionsPage />} />
             <Route path="historico" element={<HistoryPage />} />
             <Route path="times" element={<PveTeamsPage />} />
+            <Route path="speed-tune" element={<SpeedTunePage />} />
           </Route>
           <Route path="/importar" element={<Protected><ImportPage /></Protected>} />
         </Routes>

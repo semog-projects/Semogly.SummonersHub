@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Semogly.SummonersHub.Api.ErrorHandling;
 using Semogly.SummonersHub.Application.Abstractions.Messaging;
+using Semogly.SummonersHub.Application.GameData;
 using Semogly.SummonersHub.Application.GameData.GetMonsters;
 using Semogly.SummonersHub.Domain.GameData;
 
@@ -19,6 +20,10 @@ internal static class GameDataEndpoints
             .WithName("GetMonsters")
             .WithSummary("Monstros do bestiário pelos ids do jogo (unit_master_id)")
             .WithDescription($"Exemplo: /api/game-data/monsters?ids=19811&ids=21911. Até {GetMonstersQuery.MaxIds} ids; ids desconhecidos são ignorados.");
+
+        group.MapGet("/dungeons", (IDungeonCatalog dungeons) => TypedResults.Ok(dungeons.All()))
+            .WithName("GetDungeons")
+            .WithSummary("Andar mais alto de cada dungeon dos times PvE: RES e VEL do boss e dos demais inimigos (SWARFARM)");
 
         return app;
     }
