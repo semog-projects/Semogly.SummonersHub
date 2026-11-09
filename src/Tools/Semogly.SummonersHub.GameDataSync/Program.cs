@@ -3,12 +3,12 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-// Uso: dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync [all|monsters|dungeons]
-// Sobrescreve os JSONs embarcados na Infrastructure (GameData/monsters.json e GameData/dungeons.json).
+// Uso: dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync [all|monsters|dungeons|skills]
+// Sobrescreve os JSONs embarcados na Infrastructure (GameData/monsters.json, dungeons.json e skills.json).
 var target = args.Length > 0 ? args[0].ToLowerInvariant() : "all";
-if (target is not ("all" or "monsters" or "dungeons"))
+if (target is not ("all" or "monsters" or "dungeons" or "skills"))
 {
-    Console.Error.WriteLine("Uso: GameDataSync [all|monsters|dungeons]");
+    Console.Error.WriteLine("Uso: GameDataSync [all|monsters|dungeons|skills]");
     return 1;
 }
 
@@ -31,6 +31,11 @@ if (target is "all" or "monsters")
 if (target is "all" or "dungeons")
 {
     await SyncDungeonsAsync();
+}
+
+if (target is "all" or "skills")
+{
+    await SyncSkillsAsync();
 }
 
 return 0;
@@ -115,6 +120,38 @@ async Task SyncDungeonsAsync()
     await WriteAsync("dungeons.json", entries);
 }
 
+// Habilidades: fórmula do multiplicador (bruta, para o front avaliar), golpes e bônus de dano de cada skill-up
+async Task SyncSkillsAsync()
+{
+    var skills = new List<SkillEntry>();
+    var url = "skills/?page_size=100";
+
+    while (url is not null)
+    {
+        var page = await http.GetFromJsonAsync<SwarfarmPage<SwarfarmSkill>>(url)
+            ?? throw new InvalidOperationException($"Resposta vazia do SWARFARM em {url}");
+
+        skills.AddRange(page.Results.Select(s => new SkillEntry(
+            s.Com2usId,
+            s.Name,
+            s.Slot,
+            s.Hits,
+            s.Passive,
+            s.Aoe,
+            s.MaxLevel,
+            string.IsNullOrEmpty(s.MultiplierFormula) ? null : s.MultiplierFormula,
+            string.IsNullOrEmpty(s.MultiplierFormula) ? null : s.MultiplierFormulaRaw,
+            // Só os upgrades de dano; os demais (efeito, recarga...) valem 0 na posição
+            [.. s.Upgrades.Select(u => u.Effect == "Damage +{0}%" ? u.Amount : 0)])));
+
+        Console.WriteLine($"{skills.Count}/{page.Count} habilidades");
+        url = page.Next;
+        await PauseAsync();
+    }
+
+    await WriteAsync("skills.json", skills.DistinctBy(s => s.Id).OrderBy(s => s.Id).ToList());
+}
+
 async Task WriteAsync<T>(string fileName, T content)
 {
     var path = Path.Combine(gameDataDirectory, fileName);
@@ -170,6 +207,34 @@ internal sealed record SwarfarmLevel(int Id, int Floor, IReadOnlyList<SwarfarmWa
 internal sealed record SwarfarmWave(IReadOnlyList<SwarfarmEnemy> Enemies);
 
 internal sealed record SwarfarmEnemy(int Speed, int Resist, int Hp);
+
+internal sealed record SwarfarmSkill(
+    [property: JsonPropertyName("com2us_id")] int Com2usId,
+    string Name,
+    int Slot,
+    int Hits,
+    bool Passive,
+    bool Aoe,
+    [property: JsonPropertyName("max_level")] int MaxLevel,
+    [property: JsonPropertyName("multiplier_formula")] string? MultiplierFormula,
+    [property: JsonPropertyName("multiplier_formula_raw")] string? MultiplierFormulaRaw,
+    IReadOnlyList<SwarfarmSkillUpgrade> Upgrades);
+
+internal sealed record SwarfarmSkillUpgrade(string Effect, int Amount);
+
+/// <param name="Formula">Fórmula bruta do SWARFARM (JSON em texto): grupos avaliados da esquerda para a direita.</param>
+/// <param name="DamageUpgrades">Bônus de dano (%) de cada skill-up, na ordem; 0 nos upgrades que não são de dano.</param>
+internal sealed record SkillEntry(
+    int Id,
+    string Name,
+    int Slot,
+    int Hits,
+    bool Passive,
+    bool Aoe,
+    int MaxLevel,
+    string? FormulaText,
+    string? Formula,
+    IReadOnlyList<int> DamageUpgrades);
 
 /// <param name="BossResistance">Maior RES da última onda (boss).</param>
 /// <param name="MaxResistance">Maior RES entre todos os inimigos do andar.</param>

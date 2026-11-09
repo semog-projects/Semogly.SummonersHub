@@ -361,3 +361,31 @@ export interface OptimizeRunesResponse {
   current: OptimizedBuild
   builds: OptimizedBuild[]
 }
+
+export interface MonsterSkillDetail {
+  skillId: number
+  /** Nulo quando a habilidade não está no catálogo. */
+  name: string | null
+  slot: number
+  level: number
+  maxLevel: number
+  hits: number
+  passive: boolean
+  aoe: boolean
+  formulaText: string | null
+  /** Fórmula bruta do SWARFARM (JSON em texto); nula sem dano. */
+  formula: string | null
+  /** Bônus de dano (%) dos skill-ups até o nível atual. */
+  damageBonus: number
+}
+
+/** GET /api/accounts/{wizardId}/monsters/{monsterId}/skills */
+export interface MonsterSkills {
+  monsterId: number
+  masterId: number
+  name: string | null
+  element: ElementName
+  level: number
+  total: StatValues
+  skills: MonsterSkillDetail[]
+}
