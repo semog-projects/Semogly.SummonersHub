@@ -8,6 +8,7 @@ import type {
   InventoryStats,
   MonsterDetail,
   MonsterListItem,
+  MonsterSkills,
   PveTeamCheck,
   RuneListItem,
   SnapshotComparison,
@@ -102,5 +103,14 @@ export function useCraftSuggestions(wizardId: number, includeInventory: boolean)
     queryFn: ({ signal }) =>
       getJson<CraftSuggestionGroup[]>(`/accounts/${wizardId}/craft-suggestions?equippedOnly=${!includeInventory}`, signal),
     enabled: Number.isSafeInteger(wizardId) && wizardId > 0,
+  })
+}
+
+/** Habilidades do monstro com as fórmulas, para a calculadora de dano. */
+export function useMonsterSkills(wizardId: number, monsterId: number) {
+  return useQuery({
+    queryKey: ['accounts', wizardId, 'monsters', monsterId, 'skills'],
+    queryFn: ({ signal }) => getJson<MonsterSkills>(`/accounts/${wizardId}/monsters/${monsterId}/skills`, signal),
+    enabled: Number.isSafeInteger(wizardId) && Number.isSafeInteger(monsterId),
   })
 }

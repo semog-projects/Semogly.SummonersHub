@@ -8,6 +8,7 @@ using Semogly.SummonersHub.Application.Accounts.GetAccountSummary;
 using Semogly.SummonersHub.Application.Accounts.GetCraftSuggestions;
 using Semogly.SummonersHub.Application.Accounts.GetInventoryStats;
 using Semogly.SummonersHub.Application.Accounts.GetMonsterDetail;
+using Semogly.SummonersHub.Application.Accounts.GetMonsterSkills;
 using Semogly.SummonersHub.Application.Accounts.ImportAccount;
 using Semogly.SummonersHub.Application.Accounts.ListAccounts;
 using Semogly.SummonersHub.Application.Accounts.ListArtifacts;
@@ -85,6 +86,10 @@ internal static class AccountsEndpoints
         api.MapPost("/accounts/{wizardId:long}/monsters/{monsterId:long}/optimize", OptimizeRunes)
             .WithName("OptimizeRunes")
             .WithSummary("Melhores builds de runas para o monstro (sets, principais, foco e mínimos), comparadas com a atual");
+
+        api.MapGet("/accounts/{wizardId:long}/monsters/{monsterId:long}/skills", GetMonsterSkills)
+            .WithName("GetMonsterSkills")
+            .WithSummary("Habilidades do monstro com fórmula de dano, golpes e bônus dos skill-ups, mais os atributos totais");
 
         api.MapPatch("/accounts/{wizardId:long}/inventory-marks", UpdateInventoryMarks)
             .WithName("UpdateInventoryMarks")
@@ -201,6 +206,16 @@ internal static class AccountsEndpoints
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new OptimizeRunesQuery(wizardId, monsterId, request), cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
+    }
+
+    private static async Task<Results<Ok<MonsterSkillsResponse>, ProblemHttpResult>> GetMonsterSkills(
+        long wizardId,
+        long monsterId,
+        IQueryHandler<GetMonsterSkillsQuery, MonsterSkillsResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new GetMonsterSkillsQuery(wizardId, monsterId), cancellationToken);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
     }
 

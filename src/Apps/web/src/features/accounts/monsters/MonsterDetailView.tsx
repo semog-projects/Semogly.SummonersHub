@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Swords } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -57,6 +57,9 @@ export function MonsterDetailView({ monster }: { monster: MonsterDetail }) {
           ))}
           <Link to="otimizar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
             <Sparkles aria-hidden /> Otimizar runas
+          </Link>
+          <Link to="dano" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+            <Swords aria-hidden /> Calcular dano
           </Link>
         </div>
       </div>

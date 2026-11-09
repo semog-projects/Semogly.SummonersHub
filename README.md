@@ -84,11 +84,12 @@ Ele é gerado a partir da [API do SWARFARM](https://swarfarm.com/api/v2/). Para 
 
 ```bash
 dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync            # tudo
-dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync -- dungeons  # só monsters ou dungeons
+dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync -- dungeons  # só monsters, dungeons ou skills
 ```
 
 A mesma ferramenta grava `GameData/dungeons.json`, com o andar mais alto de cada dungeon dos times PvE e a RES e a VEL
-do boss e dos demais inimigos.
+do boss e dos demais inimigos, e `GameData/skills.json`, com as habilidades dos monstros (fórmula do
+multiplicador, golpes e bônus de dano dos skill-ups) usadas na calculadora de dano.
 
 Sets, atributos de runa, efeitos de artefato e itens de craft são enums do domínio
 (`Domain/GameData`), com rótulos em pt-BR no front (`src/Apps/web/src/lib/game/labels.ts`).

@@ -30,6 +30,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IMonsterCatalog, EmbeddedMonsterCatalog>();
         builder.Services.AddSingleton<IPveTeamCatalog, EmbeddedPveTeamCatalog>();
         builder.Services.AddSingleton<IDungeonCatalog, EmbeddedDungeonCatalog>();
+        builder.Services.AddSingleton<ISkillCatalog, EmbeddedSkillCatalog>();
 
         return builder;
     }

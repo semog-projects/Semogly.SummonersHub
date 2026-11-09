@@ -6,6 +6,7 @@ import { UserMenu } from '@/features/auth/UserMenu'
 import { cn } from '@/lib/utils'
 import { AccountLayout } from '@/pages/AccountLayout'
 import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
+import { DamageCalculatorPage } from '@/pages/DamageCalculatorPage'
 import { CraftSuggestionsPage } from '@/pages/CraftSuggestionsPage'
 import { ArtifactListPage } from '@/pages/ArtifactListPage'
 import { HistoryPage } from '@/pages/HistoryPage'
@@ -42,6 +43,7 @@ export function App() {
             <Route path="monstros" element={<MonsterListPage />} />
             <Route path="monstros/:monsterId" element={<MonsterDetailPage />} />
             <Route path="monstros/:monsterId/otimizar" element={<RuneOptimizerPage />} />
+            <Route path="monstros/:monsterId/dano" element={<DamageCalculatorPage />} />
             <Route path="runas" element={<RuneListPage />} />
             <Route path="artefatos" element={<ArtifactListPage />} />
             <Route path="inventario" element={<InventoryPage />} />
