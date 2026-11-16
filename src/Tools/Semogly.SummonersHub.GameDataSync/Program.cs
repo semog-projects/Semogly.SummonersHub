@@ -3,16 +3,29 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-// Uso: dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync [all|monsters|dungeons|skills]
+// Uso: dotnet run --project src/Tools/Semogly.SummonersHub.GameDataSync [all|monsters|dungeons|skills|translate]
 // Sobrescreve os JSONs embarcados na Infrastructure (GameData/monsters.json, dungeons.json e skills.json).
+// "translate" traduz as descrições novas das skills para pt-BR (Claude, exige ANTHROPIC_API_KEY); não entra em "all".
 var target = args.Length > 0 ? args[0].ToLowerInvariant() : "all";
-if (target is not ("all" or "monsters" or "dungeons" or "skills"))
+if (target is not ("all" or "monsters" or "dungeons" or "skills" or "translate"))
 {
-    Console.Error.WriteLine("Uso: GameDataSync [all|monsters|dungeons|skills]");
+    Console.Error.WriteLine("Uso: GameDataSync [all|monsters|dungeons|skills|translate]");
     return 1;
 }
 
 var gameDataDirectory = Path.Combine(FindRepositoryRoot(), "src", "Core", "Semogly.SummonersHub.Infrastructure", "GameData");
+
+var jsonOptionsForTranslation = new JsonSerializerOptions
+{
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    PropertyNameCaseInsensitive = true,
+    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+};
+
+if (target == "translate")
+{
+    return await SkillTranslator.RunAsync(gameDataDirectory, jsonOptionsForTranslation);
+}
 
 using var http = new HttpClient { BaseAddress = new Uri("https://swarfarm.com/api/v2/") };
 http.DefaultRequestHeaders.UserAgent.ParseAdd("Semogly.SummonersHub-GameDataSync/1.0");
@@ -70,7 +83,12 @@ async Task SyncMonstersAsync()
                 .Where(skillMap.ContainsKey)
                 .Select(id => skillMap[id])
                 .OrderBy(s => s.Slot)
-                .Select(s => s.Com2usId)])));
+                .Select(s => s.Com2usId)],
+            m.LeaderSkill is { } leader
+                ? new LeaderSkillEntry(leader.Attribute, leader.Amount, leader.Area, string.IsNullOrEmpty(leader.Element) ? null : leader.Element)
+                : null,
+            string.IsNullOrWhiteSpace(m.AwakenBonus) ? null : m.AwakenBonus.Trim(),
+            [.. (m.Source ?? []).Select(source => source.Name).Distinct()])));
 
         Console.WriteLine($"{monsters.Count}/{page.Count} monstros");
         url = page.Next;
@@ -174,7 +192,11 @@ async Task SyncSkillsAsync()
             string.IsNullOrEmpty(s.MultiplierFormula) ? null : s.MultiplierFormula,
             string.IsNullOrEmpty(s.MultiplierFormula) ? null : s.MultiplierFormulaRaw,
             // Só os upgrades de dano; os demais (efeito, recarga...) valem 0 na posição
-            [.. s.Upgrades.Select(u => u.Effect == "Damage +{0}%" ? u.Amount : 0)])));
+            [.. s.Upgrades.Select(u => u.Effect == "Damage +{0}%" ? u.Amount : 0)],
+            string.IsNullOrWhiteSpace(s.Description) ? null : s.Description.Trim(),
+            s.Cooltime,
+            string.IsNullOrEmpty(s.IconFilename) ? null : s.IconFilename,
+            s.LevelProgressDescription ?? [])));
 
         Console.WriteLine($"{skills.Count}/{page.Count} habilidades");
         url = page.Next;
@@ -227,7 +249,14 @@ internal sealed record SwarfarmMonster(
     int? Accuracy,
     [property: JsonPropertyName("crit_rate")] int? CritRate,
     [property: JsonPropertyName("crit_damage")] int? CritDamage,
-    IReadOnlyList<int>? Skills);
+    IReadOnlyList<int>? Skills,
+    [property: JsonPropertyName("leader_skill")] SwarfarmLeaderSkill? LeaderSkill,
+    [property: JsonPropertyName("awaken_bonus")] string? AwakenBonus,
+    IReadOnlyList<SwarfarmSource>? Source);
+
+internal sealed record SwarfarmLeaderSkill(string Attribute, int Amount, string Area, string? Element);
+
+internal sealed record SwarfarmSource(string Name);
 
 /// <param name="MaxLevelStats">Atributos base em 6★ nível 40 (sem runas); nulo quando o SWARFARM não informa.</param>
 /// <param name="SkillIds">Habilidades (id do jogo), na ordem do slot.</param>
@@ -243,7 +272,15 @@ internal sealed record MonsterEntry(
     bool IsHomunculus,
     bool Obtainable,
     MonsterStatsEntry? MaxLevelStats,
-    IReadOnlyList<int> SkillIds);
+    IReadOnlyList<int> SkillIds,
+    LeaderSkillEntry? LeaderSkill,
+    string? AwakenBonus,
+    IReadOnlyList<string> Sources);
+
+/// <param name="Attribute">Atributo bonificado, como no SWARFARM (ex.: "Attack Power", "Attack Speed").</param>
+/// <param name="Area">Onde vale: General, Element, Arena, Guild, Dungeon, Raid...</param>
+/// <param name="Element">Elemento exigido quando <paramref name="Area"/> é Element.</param>
+internal sealed record LeaderSkillEntry(string Attribute, int Amount, string Area, string? Element);
 
 internal sealed record MonsterStatsEntry(
     int Hp,
@@ -274,7 +311,11 @@ internal sealed record SwarfarmSkill(
     [property: JsonPropertyName("max_level")] int MaxLevel,
     [property: JsonPropertyName("multiplier_formula")] string? MultiplierFormula,
     [property: JsonPropertyName("multiplier_formula_raw")] string? MultiplierFormulaRaw,
-    IReadOnlyList<SwarfarmSkillUpgrade> Upgrades);
+    IReadOnlyList<SwarfarmSkillUpgrade> Upgrades,
+    string? Description,
+    int? Cooltime,
+    [property: JsonPropertyName("icon_filename")] string? IconFilename,
+    [property: JsonPropertyName("level_progress_description")] IReadOnlyList<string>? LevelProgressDescription);
 
 internal sealed record SwarfarmSkillUpgrade(string Effect, int Amount);
 
@@ -290,7 +331,11 @@ internal sealed record SkillEntry(
     int MaxLevel,
     string? FormulaText,
     string? Formula,
-    IReadOnlyList<int> DamageUpgrades);
+    IReadOnlyList<int> DamageUpgrades,
+    string? Description,
+    int? Cooldown,
+    string? IconFilename,
+    IReadOnlyList<string> LevelProgress);
 
 /// <param name="BossResistance">Maior RES da última onda (boss).</param>
 /// <param name="MaxResistance">Maior RES entre todos os inimigos do andar.</param>

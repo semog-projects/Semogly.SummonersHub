@@ -10,6 +10,8 @@ import { AccountOverviewPage } from '@/pages/AccountOverviewPage'
 import { DamageCalculatorPage } from '@/pages/DamageCalculatorPage'
 import { CraftSuggestionsPage } from '@/pages/CraftSuggestionsPage'
 import { ArtifactListPage } from '@/pages/ArtifactListPage'
+import { BestiaryMonsterPage } from '@/pages/BestiaryMonsterPage'
+import { BestiaryPage } from '@/pages/BestiaryPage'
 import { HistoryPage } from '@/pages/HistoryPage'
 import { HomePage } from '@/pages/HomePage'
 import { ImportPage } from '@/pages/ImportPage'
@@ -45,6 +47,9 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           {/* Build compartilhada: pública, sem login */}
           <Route path="/b/:token" element={<SharedBuildPage />} />
+          {/* Dado público do jogo: não exige login */}
+          <Route path="/bestiario" element={<BestiaryPage />} />
+          <Route path="/bestiario/:com2usId" element={<BestiaryMonsterPage />} />
           <Route index element={<Protected><HomePage /></Protected>} />
           <Route path="/contas/:wizardId" element={<Protected><AccountLayout /></Protected>}>
             <Route index element={<AccountOverviewPage />} />
@@ -76,7 +81,6 @@ function Protected({ children }: { children: ReactNode }) {
 function MainNav() {
   const { pathname } = useLocation()
   const { data: user } = useCurrentUser()
-  if (!user) return null
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn('text-sm text-muted-foreground transition-colors hover:text-foreground', isActive && 'text-foreground')
@@ -84,15 +88,25 @@ function MainNav() {
   return (
     <nav aria-label="Principal" className="flex items-center gap-4">
       {/* "Painel" fica ativo em qualquer conta (/contas/...) */}
-      <NavLink to="/" end className={({ isActive }) => linkClass({ isActive: isActive || pathname.startsWith('/contas/') })}>
-        Painel
+      {user && (
+        <NavLink to="/" end className={({ isActive }) => linkClass({ isActive: isActive || pathname.startsWith('/contas/') })}>
+          Painel
+        </NavLink>
+      )}
+      {/* Público: aparece também sem login */}
+      <NavLink to="/bestiario" className={linkClass}>
+        Bestiário
       </NavLink>
-      <NavLink to="/importar" className={linkClass}>
-        Importar
-      </NavLink>
-      <NavLink to="/configuracoes" className={linkClass}>
-        Configurações
-      </NavLink>
+      {user && (
+        <>
+          <NavLink to="/importar" className={linkClass}>
+            Importar
+          </NavLink>
+          <NavLink to="/configuracoes" className={linkClass}>
+            Configurações
+          </NavLink>
+        </>
+      )}
     </nav>
   )
 }

@@ -6,4 +6,8 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Anthropic" />
+  </ItemGroup>
+
 </Project>

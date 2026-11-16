@@ -25,6 +25,15 @@ public class SkillCatalogTests
         Assert.Equal([10, 0, 10, 15], skill.DamageUpgrades);
     }
 
+    [Fact]
+    public void Find_ShouldBringTheDescriptionAndItsTranslation()
+    {
+        var skill = Catalog.Find(10606)!;
+
+        Assert.StartsWith("Shoots 4 magic bullets", skill.Description, StringComparison.Ordinal);
+        Assert.StartsWith("Dispara 4 balas mágicas", skill.DescriptionPt, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(1, 0)]
     [InlineData(2, 10)]
