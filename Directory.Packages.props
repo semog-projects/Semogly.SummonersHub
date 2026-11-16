@@ -2,7 +2,7 @@
   <!-- Central Package Management: versões de pacotes definidas em um único lugar -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AspireVersion>13.6.4</AspireVersion>
+    <AspireVersion>13.6.5</AspireVersion>
   </PropertyGroup>
   <ItemGroup Label="Aspire Hosting">
     <PackageVersion Include="Anthropic" Version="13.6.0" />
