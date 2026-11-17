@@ -67,3 +67,14 @@ jobs:
       # tsc -b + vite build: também valida os tipos
       - name: Build
         run: npm run build
+
+  docker:
+    name: Imagem da API (Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      # Mesma imagem que a Vercel monta para o service "api" (vercel.json): valida o Dockerfile e o .dockerignore
+      - name: Build
+        run: docker build -f src/Services/Semogly.SummonersHub.Api/Dockerfile -t summonershub-api .
