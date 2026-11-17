@@ -20,6 +20,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { ManualItemsPage } from '@/pages/ManualItemsPage'
 import { MonsterDetailPage } from '@/pages/MonsterDetailPage'
 import { MonsterListPage } from '@/pages/MonsterListPage'
+import { PrivacyPage } from '@/pages/PrivacyPage'
 import { PveTeamsPage } from '@/pages/PveTeamsPage'
 import { RuneListPage } from '@/pages/RuneListPage'
 import { SharedBuildPage } from '@/pages/SharedBuildPage'
@@ -50,6 +51,8 @@ export function App() {
           {/* Dado público do jogo: não exige login */}
           <Route path="/bestiario" element={<BestiaryPage />} />
           <Route path="/bestiario/:com2usId" element={<BestiaryMonsterPage />} />
+          {/* Pública: link exigido pelo Google na tela de consentimento OAuth */}
+          <Route path="/privacidade" element={<PrivacyPage />} />
           <Route index element={<Protected><HomePage /></Protected>} />
           <Route path="/contas/:wizardId" element={<Protected><AccountLayout /></Protected>}>
             <Route index element={<AccountOverviewPage />} />
@@ -70,6 +73,14 @@ export function App() {
           <Route path="/configuracoes" element={<Protected><SettingsPage /></Protected>} />
         </Routes>
       </main>
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 text-xs text-muted-foreground">
+          <span>SummonersHub · projeto de fã, sem vínculo com a Com2uS</span>
+          <Link to="/privacidade" className="transition-colors hover:text-foreground">
+            Privacidade
+          </Link>
+        </div>
+      </footer>
     </div>
   )
 }
