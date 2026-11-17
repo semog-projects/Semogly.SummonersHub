@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Semogly.SummonersHub.Application.Abstractions;
@@ -18,6 +19,8 @@ public static class DependencyInjection
 
     public static IHostApplicationBuilder AddInfrastructure(this IHostApplicationBuilder builder)
     {
+        UseDatabaseUrlWhenNoConnectionString(builder.Configuration);
+
         // Registra o DbContext com pooling, retry, health check e telemetria
         builder.AddNpgsqlDbContext<SummonersHubDbContext>(DatabaseConnectionName);
 
@@ -39,5 +42,26 @@ public static class DependencyInjection
         builder.Services.AddSingleton<ISkillCatalog, EmbeddedSkillCatalog>();
 
         return builder;
+    }
+
+    /// <summary>
+    /// Fora do Aspire (ex.: Vercel + Neon) o banco chega como URL em <c>DATABASE_URL</c>: vira a connection string
+    /// esperada pelo Npgsql. Uma connection string configurada explicitamente sempre tem prioridade.
+    /// </summary>
+    private static void UseDatabaseUrlWhenNoConnectionString(IConfigurationManager configuration)
+    {
+        if (!string.IsNullOrWhiteSpace(configuration.GetConnectionString(DatabaseConnectionName)))
+        {
+            return;
+        }
+
+        var url = DatabaseUrl.EnvironmentVariables
+            .Select(name => configuration[name])
+            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+
+        if (url is not null)
+        {
+            configuration[$"ConnectionStrings:{DatabaseConnectionName}"] = DatabaseUrl.ToConnectionString(url);
+        }
     }
 }

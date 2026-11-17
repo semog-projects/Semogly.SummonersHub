@@ -11,6 +11,12 @@ using Semogly.SummonersHub.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Hospedagem em container (Vercel): a plataforma informa a porta em PORT e o tráfego chega de fora do loopback
+if (builder.Configuration["PORT"] is { Length: > 0 } port)
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 builder.AddServiceDefaults();
 builder.AddInfrastructure();
 builder.Services.AddApplication();
@@ -30,10 +36,19 @@ builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 builder.Services.AddValidation();
 builder.Services.AddOpenApi();
 
-// Origem real do navegador vinda do proxy do Vite (só proxies em loopback são aceitos por padrão):
-// o redirect URI do Google fica na origem do front
+// Origem real do navegador vinda do proxy (Vite em dev, Vercel em produção): o redirect URI do Google fica
+// na origem do front. Por padrão só proxies em loopback são aceitos; atrás da Vercel
+// (ReverseProxy:TrustForwardedHeaders) o container só recebe tráfego dela, então qualquer origem é aceita
+var trustForwardedHeaders = builder.Configuration.GetValue<bool>("ReverseProxy:TrustForwardedHeaders");
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost);
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    if (trustForwardedHeaders)
+    {
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+    }
+});
 
 var app = builder.Build();
 
@@ -45,6 +60,10 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+}
+
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
     await app.ApplyMigrationsAsync();
 }
 

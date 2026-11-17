@@ -1,0 +1,17 @@
+# Contexto do build da imagem da API (Dockerfile em src/Services/Semogly.SummonersHub.Api)
+.git
+.github
+.vs
+.vscode
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/TestResults
+TestResults
+tests
+src/Apps
+src/Tools
+src/Aspire/Semogly.SummonersHub.AppHost
+**/*.user
+**/appsettings.Development.json

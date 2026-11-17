@@ -152,8 +152,43 @@ cd src/Apps/web && npm test -- --run      # testes do front
 ### CI
 
 O workflow `.github/workflows/ci.yml` roda a cada PR (inclusive os abertos sobre outros branches) e a cada push na
-`main`, com dois jobs em paralelo:
+`main`, com três jobs em paralelo:
 
 - **API**: restore, build em Release (avisos como erro, inclusive vulnerabilidades de pacotes) e todos os testes
   .NET. Os de integração sobem o PostgreSQL com Testcontainers no Docker do runner.
 - **Web**: `npm ci`, lint (oxlint), testes (Vitest) e build de produção (`tsc -b` + `vite build`).
+- **Imagem da API**: `docker build` com o mesmo Dockerfile usado no deploy.
+
+## Deploy (Vercel)
+
+Front e API ficam num único projeto da Vercel, com [Vercel Services](https://vercel.com/docs/services) (`vercel.json`):
+
+- `web`: o front (Vite) em `src/Apps/web`, servido como site estático, com fallback para `index.html` nas rotas do SPA.
+- `api`: a API em container, montada pelo `src/Services/Semogly.SummonersHub.Api/Dockerfile` (contexto: raiz do
+  repositório). Recebe tudo que chega em `/api/*`, com o caminho original.
+
+Tudo fica na mesma origem, então o cookie de login funciona sem CORS. A imagem já traz as configurações de produção:
+
+| Variável | Valor | Por quê |
+|---|---|---|
+| `PORT` | `80` | A Vercel encaminha o tráfego para essa porta; a API escuta em `PORT` |
+| `ReverseProxy__TrustForwardedHeaders` | `true` | Aceita os `X-Forwarded-*` do proxy da Vercel: o redirect do Google sai com o domínio público |
+| `Database__MigrateOnStartup` | `true` | Aplica as migrations ao subir (o EF Core serializa instâncias concorrentes com lock) |
+
+Variáveis do projeto na Vercel:
+
+- **Banco**: `DATABASE_URL` / `DATABASE_URL_UNPOOLED`, criadas pela integração do **Neon** (Marketplace da Vercel).
+  A API converte a URL para a connection string do Npgsql e prefere a conexão direta (sem pooler). Uma
+  `ConnectionStrings__summonershub-db` explícita tem prioridade.
+- **Google** (opcional): `Authentication__Google__ClientId` e `Authentication__Google__ClientSecret`. No Google
+  Cloud Console, adicione `https://<domínio>/api/auth/signin-google` aos URIs de redirecionamento autorizados.
+
+Limites a considerar: corpo de requisição de até ~4,5 MB (o import envia o JSON já sanitizado pelo front) e o
+container desliga quando fica sem uso, então a primeira requisição depois disso é mais lenta.
+
+Imagem local:
+
+```bash
+docker build -f src/Services/Semogly.SummonersHub.Api/Dockerfile -t summonershub-api .
+docker run -p 8080:80 -e DATABASE_URL="postgresql://usuario:senha@host/banco" summonershub-api
+```
